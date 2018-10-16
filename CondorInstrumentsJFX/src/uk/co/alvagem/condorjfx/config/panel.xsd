@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<xs:complexType name="Panel">
+		<xs:annotation>
+			<xs:documentation>A single instrument panel definition</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="instrument" type="Instrument" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string"/>
+	</xs:complexType>
+	
+	<xs:complexType name="Instrument">
+		<xs:annotation>
+			<xs:documentation>A single instrument on a panel</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="param" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="name" type="xs:string"/>
+							<xs:attribute name="type" type="xs:string"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="className" type="xs:string"/>
+		<xs:attribute name="x" type="xs:integer"/>
+		<xs:attribute name="y" type="xs:integer"/>
+	</xs:complexType>
+
+	<xs:complexType name="PanelConfiguration">
+		<xs:sequence>
+			<xs:element name="panel" type="Panel" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:element name="panelConfiguration" type="PanelConfiguration">
+		<xs:annotation>
+			<xs:documentation>Configuration for one or more instrument panels for CondorInstruments</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	
+</xs:schema>

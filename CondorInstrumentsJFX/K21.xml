@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<panelConfiguration>
+    <panel name="K21">
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21ASIWinter" x="34" y="28">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21VarioWinter" x="488" y="114">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21VarioElectric" x="903" y="22">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21Flarm" x="400" y="20">
+            <param name="width" type="int">170</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21Altimeter" x="898" y="616">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21GMeter" x="796" y="383">
+            <param name="width" type="int">250</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21TurnAndSlip" x="479" y="647">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21RadioMicronair" x="8" y="609">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21Compass" x="244" y="363">
+            <param name="width" type="int">300</param>
+        </instrument>
+    </panel>
+</panelConfiguration>

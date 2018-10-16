@@ -1,0 +1,9 @@
+
+#Built file
+CIJFX.jar
+
+# Generated bin folder
+bin/**
+
+# Any other intermediate class files.
+*.class
