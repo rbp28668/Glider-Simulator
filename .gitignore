@@ -1,3 +1,6 @@
+# Gitignore file for generated object files etc.
+
+## JAVA Stuff
 
 #Built file
 CIJFX.jar
@@ -7,3 +10,68 @@ bin/**
 
 # Any other intermediate class files.
 *.class
+
+## C++ Stuff
+
+# Output files fromm build.
+*.exe
+*.obj
+*.res
+*.idb
+
+ipch/*
+
+# Compiler logs
+*.tlog
+
+#incremental linker files
+*.iobj
+*.ipdb
+
+#Intellisense database and lock file, inc old versions
+*.VC.db
+*.VC.VC.opendb
+*.ncb
+
+#Class wizard file
+*.clw
+
+# Workspace options file
+*.opt
+
+# Build log
+*.plg
+
+# last resource editor state
+*.aps  
+
+# build helper
+*.ipch  
+
+# build helper
+*.lastbuildstate  
+
+# build result. Can be 3rd party
+*.lib  
+
+# build log
+*.log  
+
+# build helper. Can be written yourself.
+#*.manifest  
+
+# build helper 
+*.pch  
+
+# build result
+*.pdb  
+
+# build helper
+*.res  
+
+# intellisense dbase
+*.sdf  
+
+# solution user options
+*.suo  
+*.tlog  # build log
