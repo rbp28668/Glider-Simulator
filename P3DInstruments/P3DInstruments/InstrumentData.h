@@ -1,6 +1,7 @@
 #pragma once
 #include "../P3DCommon/SimObjectData.h"
 #include "MechanicalVario.h"
+#include "ElectronicVario.h"
 
 class CondorUDP;
 
@@ -35,6 +36,7 @@ class InstrumentData :
 	CondorUDP* pInstruments;
 
 	MechanicalVario mechanicalVario;
+	ElectronicVario electronicVario;
 
 public:
 

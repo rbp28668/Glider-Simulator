@@ -22,6 +22,7 @@
     <ProjectGuid>{863D5727-3E2E-4158-B8A3-6C943CA31C61}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>P3DCommon</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -83,8 +84,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>F:\Lockheed Martin\Prepar3D v4 SDK 4.1.7.22841\inc\SimConnect;$(IncludePath)</IncludePath>
-    <LibraryPath>F:\Lockheed Martin\Prepar3D v4 SDK 4.1.7.22841\lib\SimConnect;$(LibraryPath)</LibraryPath>
+    <IncludePath>F:\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\inc\SimConnect;$(IncludePath)</IncludePath>
+    <LibraryPath>F:\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\lib\SimConnect;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -151,6 +152,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IndexedList.h" />
+    <ClInclude Include="Network.h" />
     <ClInclude Include="P3DCommon.h" />
     <ClInclude Include="Prepar3D.h" />
     <ClInclude Include="Resource.h" />
@@ -164,6 +166,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IndexedList.cpp" />
+    <ClCompile Include="Network.cpp" />
     <ClCompile Include="P3DCommon.cpp" />
     <ClCompile Include="Prepar3D.cpp" />
     <ClCompile Include="SimObjectData.cpp" />

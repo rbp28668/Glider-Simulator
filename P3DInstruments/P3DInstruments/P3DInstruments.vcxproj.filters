@@ -51,6 +51,12 @@
     <ClInclude Include="MechanicalVario.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ElectronicVario.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\P3DCommon\Network.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -84,6 +90,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MechanicalVario.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ElectronicVario.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\P3DCommon\Network.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

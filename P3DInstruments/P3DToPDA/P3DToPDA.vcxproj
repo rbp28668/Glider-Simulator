@@ -22,6 +22,7 @@
     <ProjectGuid>{4BE072F3-B050-4C3C-86DC-812AB4582802}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>P3DToPDA</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -83,8 +84,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>F:\Lockheed Martin\Prepar3D v4 SDK 4.1.7.22841\inc\SimConnect;$(IncludePath)</IncludePath>
-    <LibraryPath>F:\Lockheed Martin\Prepar3D v4 SDK 4.1.7.22841\lib\SimConnect;$(LibraryPath)</LibraryPath>
+    <IncludePath>F:\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\inc\SimConnect;$(IncludePath)</IncludePath>
+    <LibraryPath>F:\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\lib\SimConnect;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -148,6 +149,7 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\P3DCommon\Network.h" />
     <ClInclude Include="..\P3DCommon\TCPClient.h" />
     <ClInclude Include="..\P3DCommon\UDPClient.h" />
     <ClInclude Include="..\P3DInstruments\Prepar3D.h" />
@@ -165,6 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\P3DCommon\IndexedList.cpp" />
+    <ClCompile Include="..\P3DCommon\Network.cpp" />
     <ClCompile Include="..\P3DCommon\Prepar3D.cpp" />
     <ClCompile Include="..\P3DCommon\SimObjectData.cpp" />
     <ClCompile Include="..\P3DCommon\SimObjectDataRequest.cpp" />

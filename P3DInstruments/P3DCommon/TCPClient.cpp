@@ -4,6 +4,8 @@
 #include <assert.h>
 #include "TCPClient.h"
 
+#pragma comment(lib, "Ws2_32.lib")
+
 
 // Connect to the endpoint.  Assumes that winsock initialised.
 // Returns true if there is a valid connection.
@@ -39,24 +41,20 @@ bool TCPClient::connect() {
 TCPClient::TCPClient(const char* host, int port)
 	: socket(INVALID_SOCKET)
 {
-	int iResult = ::WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (iResult != 0) {
-        std::cerr << "WSAStartup failed: " << iResult << std::endl;
-    } else {
-	   //setup address structure
-		memset((char *) &name, 0, sizeof(name));
-		name.sin_family = AF_INET;
-		name.sin_port = ::htons(port);  // convert to network byte order
-		//name.sin_addr.S_un.S_addr = ::inet_addr(host);
-		::inet_pton(AF_INET, host, &(name.sin_addr)); // presentation to network
+	//setup address structure
+	memset((char *) &name, 0, sizeof(name));
+	name.sin_family = AF_INET;
+	name.sin_port = ::htons(port);  // convert to network byte order
+	//name.sin_addr.S_un.S_addr = ::inet_addr(host);
+	::inet_pton(AF_INET, host, &(name.sin_addr)); // presentation to network
 
-		// and make the connection.
-		connect();
-	}
+	// and make the connection.
+	connect();
+}
 
      
  
-}
+
 
 
 TCPClient::~TCPClient(void) {	
@@ -64,8 +62,6 @@ TCPClient::~TCPClient(void) {
 		::shutdown(socket, SD_SEND);
 		::closesocket(socket);
 	}
-
-    ::WSACleanup();
 }
 
 // Attempts to send a message.  Returns the error code, 0 if successfull.
@@ -73,7 +69,7 @@ TCPClient::~TCPClient(void) {
 int TCPClient::trySend(const std::string& msg) {
 	assert(socket != INVALID_SOCKET);
 	int err = 0;
-	if (::send(socket, msg.data(), msg.length() , 0) == SOCKET_ERROR)   {
+	if (::send(socket, msg.data(), (int)msg.length() , 0) == SOCKET_ERROR)   {
 		err = ::WSAGetLastError();
 		std::cerr << "send() failed with error code : " << err << std::endl;
 

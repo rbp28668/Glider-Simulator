@@ -7,7 +7,7 @@
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
+    <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -24,34 +24,22 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\P3DInstruments\Prepar3D.h">
+    <ClInclude Include="..\P3DCommon\Prepar3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\P3DInstruments\SimObjectData.h">
+    <ClInclude Include="..\P3DCommon\IndexedList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\P3DInstruments\SimObjectDataRequest.h">
+    <ClInclude Include="..\P3DCommon\P3DCommon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\P3DInstruments\SimObjectDataRequestList.h">
+    <ClInclude Include="..\P3DCommon\SimObjectData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LocationData.h">
+    <ClInclude Include="..\P3DCommon\SimObjectDataRequest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NMEAData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SerialLink.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Transport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UDPTransport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TCPTransport.h">
+    <ClInclude Include="..\P3DCommon\SimObjectDataRequestList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\P3DCommon\TCPClient.h">
@@ -63,18 +51,33 @@
     <ClInclude Include="..\P3DCommon\Network.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MessageThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Thread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="P3DEventCommand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EventMessageHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AIObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="P3DToPDA.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LocationData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\P3DCommon\Prepar3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\P3DCommon\IndexedList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\P3DCommon\P3DCommon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\P3DCommon\SimObjectData.cpp">
@@ -86,32 +89,35 @@
     <ClCompile Include="..\P3DCommon\SimObjectDataRequestList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\P3DCommon\IndexedList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NMEAData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SerialLink.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Transport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UDPTransport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TCPTransport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\P3DCommon\TCPClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\P3DCommon\UDPClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MessageThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Thread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\P3DCommon\Network.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="P3DEventCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EventMessageHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="P3DControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AIObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

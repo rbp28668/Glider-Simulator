@@ -10,6 +10,9 @@ public:
 	double airspeed; //=24.96994972229, m-s
 	double altitude; //=4477.5869140625, feet (? doc says m)
 	double vario; // =-3.08353328704834, m/s
+	double evario; // electronic variometer reading	m / s
+	double nettovario; // netto variometer value	m / s
+	double integrator; // integrator value	m / s
 	double compass; // =82.3176193237305, degrees
 	double slipball; // =-8.19163033156656E-5, radians
 	double turnrate; // =0.0453215204179287, radians per sec

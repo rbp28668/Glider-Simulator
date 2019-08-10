@@ -11,6 +11,9 @@ CondorUDP::CondorUDP(const char* host, int port)
 	, airspeed(0)
 	, altitude(0)
 	, vario(0)
+	, evario(0)
+	, nettovario(0)
+	, integrator(0)
 	, compass(0)
 	, slipball(0)
 	, turnrate(0)
@@ -21,7 +24,7 @@ CondorUDP::CondorUDP(const char* host, int port)
 	, gforce(1.0)
 
 {
-	::strncpy_s(radiofrequency, sizeof(radiofrequency), "131.275", _TRUNCATE);
+	::strncpy_s(radiofrequency, sizeof(radiofrequency), "131.280", _TRUNCATE);
 }
 
 
@@ -40,6 +43,9 @@ void CondorUDP::send() {
 	os << "airspeed=" << airspeed << cr;
 	os << "altitude=" << altitude << cr;
 	os << "vario=" << vario << cr;
+	os << "evario=" << evario << cr;
+	os << "nettovario=" << nettovario<< cr;
+	os << "integrator=" << integrator << cr;
 	os << "compass=" << compass << cr;
 	os << "slipball=" << slipball << cr;
 	os << "turnrate=" << turnrate << cr;

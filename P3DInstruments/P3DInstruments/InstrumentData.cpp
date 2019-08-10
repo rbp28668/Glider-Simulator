@@ -100,7 +100,8 @@ void InstrumentData::onData(void *pData) {
 
 		DWORD now = ::GetTickCount();
 		pInstruments->vario = mechanicalVario.update(data.altitudeMetres, data.tasMetresPerSec, now);
-		 
+		pInstruments->evario = electronicVario.update(data.altitudeMetres, data.tasMetresPerSec, now);
+
 
 		pInstruments->send();
 	}

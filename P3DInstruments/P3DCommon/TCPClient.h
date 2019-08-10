@@ -2,11 +2,12 @@
 
 #include<winsock2.h>
 #include<string>
+#include"Network.h"
 
 class TCPClient
 {
 	// Socket related
-    WSADATA wsaData;
+	WSASession session;
 	SOCKET socket;
 	SOCKADDR_IN name;
 

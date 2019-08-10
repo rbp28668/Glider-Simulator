@@ -3,15 +3,11 @@
 #include <Ws2tcpip.h>
 #include "UDPClient.h"
 
+#pragma comment(lib, "Ws2_32.lib")
+
 
 UDPClient::UDPClient(const char* host, int port)
 {
-	int iResult = ::WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (iResult != 0) {
-        std::cerr << "WSAStartup failed: " << iResult << std::endl;
-        //exit(1);
-    }
-
 	   //create socket
     if ( (socketHandle = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == SOCKET_ERROR)  {
         std::cerr << "socket() failed with error code :" << ::WSAGetLastError() << std::endl;
@@ -31,11 +27,10 @@ UDPClient::UDPClient(const char* host, int port)
 UDPClient::~UDPClient(void)
 {
     ::closesocket(socketHandle);
-    ::WSACleanup();
 }
 
 void UDPClient::send(const std::string& msg) {
-		if (::sendto(socketHandle, msg.data(), msg.length() , 0 , (struct sockaddr *) &si, slen) == SOCKET_ERROR)   {
+		if (::sendto(socketHandle, msg.data(), (int)msg.length() , 0 , (struct sockaddr *) &si, slen) == SOCKET_ERROR)   {
         std::cerr << "sendto() failed with error code : " << ::WSAGetLastError() << std::endl;
     }
 }
