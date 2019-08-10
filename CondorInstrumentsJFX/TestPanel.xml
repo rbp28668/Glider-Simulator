@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<panelConfiguration>
+    <panel name="K21">
+         <instrument className="uk.co.alvagem.condorjfx.genericInstruments.StripVario" x="5" y="10">
+            <param name="width" type="int">70</param>
+            <param name="height" type="int">600</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21ASIWinter" x="34" y="28">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21VarioWinter" x="488" y="114">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21VarioElectric" x="903" y="22">
+            <param name="width" type="int">350</param>
+        </instrument>
+         <instrument className="uk.co.alvagem.condorjfx.k21.K21Altimeter" x="898" y="616">
+            <param name="width" type="int">350</param>
+        </instrument>
+         <instrument className="uk.co.alvagem.condorjfx.k21.K21TurnAndSlip" x="479" y="647">
+            <param name="width" type="int">350</param>
+            <param name="slipCalib" type="double">0.1</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.PushPanelButton" x="60" y="60">
+        	<param name="text" type="string">Control Panel</param>
+        	<param name="panelName" type="string">Control</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.SelectPanelButton" x="60" y="120">
+        	<param name="text" type="string">IFR Panel</param>
+        	<param name="panelName" type="string">IFR</param>
+        </instrument>
+        
+        
+     </panel>
+    
+    <panel name="Control">
+        <instrument className="uk.co.alvagem.condorjfx.control.PopPanelButton" x="60" y="60">
+        	<param name="text" type="string">Return </param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.SlewControl" x="400" y="60">
+        	<param name="host" type="string">192.168.0.237</param>
+        	<param name="port" type="int">3000</param>
+        </instrument>
+    
+        <!--  See https://www.prepar3d.com/SDKv4/sdk/references/variables/event_ids.html for 
+        possible event IDs.  P3D plugin implements a subset -->
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="60" y="120">
+        	<param name="text" type="string">Request Tow Plane</param>
+        	<param name="cmd" type="string">cmd:TOW_PLANE_REQUEST</param>
+        	<param name="host" type="string">192.168.0.237</param>
+        	<param name="port" type="int">3000</param>
+        	<param name="fontSize" type="double">20</param>
+        </instrument>
+  
+         <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="60" y="180">
+        	<param name="text" type="string">Toggle Pause</param>
+        	<param name="cmd" type="string">cmd:PAUSE_TOGGLE</param>
+        	<param name="host" type="string">192.168.0.237</param>
+        	<param name="port" type="int">3000</param>
+        	<param name="fontSize" type="double">20</param>
+        </instrument>
+ 
+          <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="60" y="240">
+        	<param name="text" type="string">Pause ON</param>
+        	<param name="cmd" type="string">cmd:PAUSE_ON</param>
+        	<param name="host" type="string">192.168.0.237</param>
+        	<param name="port" type="int">3000</param>
+        	<param name="fontSize" type="double">20</param>
+        </instrument>
+  
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="60" y="300">
+        	<param name="text" type="string">Pause OFF</param>
+        	<param name="cmd" type="string">cmd:PAUSE_OFF</param>
+        	<param name="host" type="string">192.168.0.237</param>
+        	<param name="port" type="int">3000</param>
+        	<param name="fontSize" type="double">20</param>
+        </instrument>
+        
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="60" y="360">
+        	<param name="text" type="string">Sim Reset</param>
+        	<param name="cmd" type="string">cmd:SIM_RESET</param>
+        	<param name="host" type="string">192.168.0.237</param>
+        	<param name="port" type="int">3000</param>
+        	<param name="fontSize" type="double">20</param>
+        </instrument>
+        
+               <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="60" y="420">
+        	<param name="text" type="string">Situation Reset</param>
+        	<param name="cmd" type="string">cmd:SITUATION_RESET</param>
+        	<param name="host" type="string">192.168.0.237</param>
+        	<param name="port" type="int">3000</param>
+        	<param name="fontSize" type="double">20</param>
+        </instrument>
+               <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="60" y="480">
+        	<param name="text" type="string">Exit Sim</param>
+        	<param name="cmd" type="string">cmd:EXIT</param>
+        	<param name="host" type="string">192.168.0.237</param>
+        	<param name="port" type="int">3000</param>
+        	<param name="fontSize" type="double">20</param>
+        </instrument>
+        
+        
+    
+    </panel>
+    
+    <panel name="IFR">
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21ASIWinter" x="34" y="28">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.genericInstruments.Horizon" x="34" y="28">
+            <param name="width" type="int">600</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21VarioWinter" x="488" y="114">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21VarioElectric" x="903" y="22">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21Altimeter" x="898" y="616">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21GMeter" x="796" y="383">
+            <param name="width" type="int">250</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21TurnAndSlip" x="479" y="647">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21Compass" x="244" y="363">
+            <param name="width" type="int">300</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.SelectPanelButton" x="60" y="80">
+        	<param name="text" type="string">VFR Panel</param>
+        	<param name="panelName" type="string">K21</param>
+        </instrument>
+        
+    </panel>
+    
+     
+    
+</panelConfiguration>

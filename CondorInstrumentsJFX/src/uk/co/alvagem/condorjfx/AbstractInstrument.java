@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -164,5 +165,20 @@ public class AbstractInstrument implements Instrument {
 	    		(int)(Math.round(scale * source.getHeight(null))), java.awt.Image.SCALE_SMOOTH);
 		return scaled;
 	}
+	
+	/**
+	 * Concatentates arrays of strings to extend parameter lists.
+	 * @param original
+	 * @param additional
+	 * @return
+	 */
+	protected String[] appendArray(String[] original, String[] additional) {
+		String[] complete = Arrays.copyOf(original, original.length + additional.length);
+		for(int i=0; i<additional.length;++i) {
+			complete[i + original.length] = additional[i];
+		}
+		return complete;
+	}
+
 
 }

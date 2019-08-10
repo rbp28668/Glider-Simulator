@@ -35,7 +35,7 @@ public class Instruments {
 
 	private List<InstrumentLocation> instruments = new LinkedList<InstrumentLocation>();
 	
-	public void add(Instrument instrument, int x, int y) {
+	public void add(Instrument instrument, int x, int y) throws Exception {
 		if(instrument == null) {
 			throw new NullPointerException("Cannot add a null instrument");
 		}
