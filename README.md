@@ -6,3 +6,6 @@ This uses Java JFX to draw virtual glider instruments on a screen.  The instrume
 
 ## CondorInstrumentsController
 This allows control messages to be sent to CondorInstrumentsJFX to change panel.  Typically used to switch between VFR and cloud flying panels.
+
+## P3DInstruments
+This allows P3D to generate Condor style instrument data packets and to send NMEA (GPS) data from P3D.

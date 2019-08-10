@@ -20,7 +20,7 @@ public interface Instrument {
 
 	public void updated();
 	
-	public Node getInstrumentNode();
+	public Node getInstrumentNode() throws Exception;
 	
 	public String[] getConfigFields();
 

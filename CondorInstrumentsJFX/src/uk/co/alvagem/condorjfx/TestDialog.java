@@ -43,11 +43,9 @@ public class TestDialog extends Stage {
 	private static final long serialVersionUID = 1L;
 	
 	private ValuesPanel values;
-	private Panel panel;
 	private int port;
 	
-	public TestDialog(Stage owner, int port, Panel panel) {
-		this.panel = panel;
+	public TestDialog(Stage owner, int port) {
 		this.port = port;
 		
 		initOwner(owner);
@@ -87,8 +85,7 @@ public class TestDialog extends Stage {
             
             if(file != null){
 				Configurator config = new Configurator();
-				Panel[] panels = new Panel[1];
-				panels[0] = panel;
+				Panel[] panels = Main.getApp().getPanels();
 				try {
 					config.savePanels(file.getAbsolutePath(), panels);
 				} catch (Exception e) {

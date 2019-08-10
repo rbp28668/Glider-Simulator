@@ -57,7 +57,8 @@ public class K21TurnAndSlip extends AbstractInstrument implements Instrument {
 	
 	private double turnrate = 0; // turn rate in rad/sec
 	private double slipball = 0; // slipball deflection in rad.
-
+	private double slipCalib = 0.5; // default calibration value
+	
 	// Calibration factor to convert turn rate of radians per sec into needle angle.
 	// 0.53 radians deflection corresponds to a rate 3 turn (9 degrees per sec) on the dial
 	// so want to change 9 degrees per sec to 0.53
@@ -66,11 +67,17 @@ public class K21TurnAndSlip extends AbstractInstrument implements Instrument {
 	private final static Color BALL_BACK_COLOUR = Color.rgb(0x3a, 0x61, 0x8a);
 	
 	// background rect behind slip ball window 267,926 -> 1090, 1201
+	
+	public K21TurnAndSlip(int width) throws IOException{
+		this(width,0.5);
+	}
+	
 	/**
 	 * 
 	 */
-	public K21TurnAndSlip(int width) throws IOException{
+	public K21TurnAndSlip(int width, double slipCalib) throws IOException{
 		super(width);
+		this.slipCalib = slipCalib;
 		
 	    scale = (double)width / (double)WIDTH;
 		
@@ -87,8 +94,6 @@ public class K21TurnAndSlip extends AbstractInstrument implements Instrument {
 	    needleRotate = new Rotate(0,pcx,pcy);
 	    // Aim to put the ball in the middle for a start.
 	    ballTranslate = new Translate(  ((267+1090)/2 - ball.getWidth()/2) , (30+(926+1201)/2 - ball.getHeight()/2));
-	    
-
 	}
 
 	/* (non-Javadoc)
@@ -103,7 +108,7 @@ public class K21TurnAndSlip extends AbstractInstrument implements Instrument {
 		}
 		val = readings.get("slipball");
 		if(val != null) {
-			slipball = Double.parseDouble(val);
+			slipball = slipCalib * Double.parseDouble(val);
 		}
 		updated();
 	}

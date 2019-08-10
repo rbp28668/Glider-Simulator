@@ -19,7 +19,7 @@ public class InstrumentLocation {
 	 * @param x
 	 * @param y
 	 */
-	public InstrumentLocation(Instrument instrument, int x, int y) {
+	public InstrumentLocation(Instrument instrument, int x, int y) throws Exception{
 		super();
 		this.instrument = instrument;
 		
