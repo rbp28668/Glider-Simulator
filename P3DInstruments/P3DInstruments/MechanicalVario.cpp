@@ -12,6 +12,8 @@ MechanicalVario::MechanicalVario(void)
 	: tLast(0)
 	, pcLast(0)
 	, lastResult(0)
+	, damping(0.2) // arbitrary, smallish damping factor
+	, acc(0)
 {
 }
 
@@ -108,5 +110,8 @@ MechanicalVario::~MechanicalVario(void)
 		pcLast = Pc;
 		
 		lastResult = -dm / ts; // dist and time to vertical speed. -ve as increasing pressure is down.
-		return lastResult;
+
+		double df = damping / ts;
+		acc = (acc * df + lastResult) / (df + 1); // add a bit of smoothing.
+		return acc; // was lastResult;
 	}

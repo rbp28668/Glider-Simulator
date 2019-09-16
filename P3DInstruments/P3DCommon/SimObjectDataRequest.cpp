@@ -30,7 +30,7 @@ SimObjectDataRequest::~SimObjectDataRequest(void)
 		HRESULT hr = ::SimConnect_RequestDataOnSimObject(pSim->getHandle(),  requestId,  pData->getId(),  SIMCONNECT_OBJECT_ID_USER,
 			SIMCONNECT_PERIOD_NEVER, 0, 0, 0, 0 );
 		if(FAILED(hr)) {
-			std::cerr << "Failed ot unregister data request " << requestId << std::endl;
+			std::cerr << "Failed to unregister data request " << requestId << std::endl;
 		}
 	}
 

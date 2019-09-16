@@ -11,7 +11,8 @@ class MechanicalVario
 	DWORD tLast;  // last tick this was calculated.
 	double pcLast; // previous capacity pressure
 	double lastResult; // result of previous pass.
-
+	double damping;  // recursive damping factor
+	double acc; // accumulator for recursive damping
 	double pressure(double height);
 	double temp(double height);
 	double density(double height);

@@ -110,7 +110,7 @@
 	// Calculates the checksum for the core string.
 	unsigned int NMEAData::checksum(const std::string& in) const {
 
-		int len = in.length();
+		int len = (int)in.length();
 		unsigned int cs = 0;
 		for(int i=0; i<len; ++i) {
 			unsigned char ch = in.at(i);

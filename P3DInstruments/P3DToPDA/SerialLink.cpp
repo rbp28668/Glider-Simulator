@@ -97,7 +97,7 @@ void SerialLink::send(std::string& str) {
     osWrite.hEvent = hEvent;
 
    const char * lpBuf = str.c_str();
-   dwToWrite = str.length();
+   dwToWrite = (DWORD)str.length();
 
     // Issue write
    if (!WriteFile(hComm, lpBuf, dwToWrite, &dwWritten, &osWrite)) {

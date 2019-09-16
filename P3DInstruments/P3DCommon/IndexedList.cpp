@@ -34,7 +34,7 @@ size_t IndexedList::add(void* pItem){
 void IndexedList::remove(int idx){
 	assert(idx >= 0);
 	assert(idx < items.size());
-	assert(items[i] != 0);
+	assert(items[idx] != 0);
 	items[idx] = 0;
 }
 

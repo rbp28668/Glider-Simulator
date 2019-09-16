@@ -18,6 +18,7 @@ bin/**
 *.obj
 *.res
 *.idb
+*.ilk
 
 ipch/*
 

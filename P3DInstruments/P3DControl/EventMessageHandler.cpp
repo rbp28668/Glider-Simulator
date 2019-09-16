@@ -10,7 +10,7 @@ EventMessageHandler::EventMessageHandler(Prepar3D * p3d)
 	: name("cmd")
 	, commands(p3d)
 {
-	assert(p3d != null);
+	assert(p3d != 0);
 	this->p3d = p3d;
 }
 

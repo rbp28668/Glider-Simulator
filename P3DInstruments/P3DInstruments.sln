@@ -16,6 +16,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "P3DCommon", "P3DCommon\P3DCommon.vcxproj", "{863D5727-3E2E-4158-B8A3-6C943CA31C61}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "P3DControl", "P3DControl\P3DControl.vcxproj", "{DFACFE04-6EDC-4F2D-BA36-F5364AC8287B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{863D5727-3E2E-4158-B8A3-6C943CA31C61} = {863D5727-3E2E-4158-B8A3-6C943CA31C61}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,7 +30,7 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{BA9C1AA0-5FC6-4292-A82E-E8783977E68F}.Debug|Win32.ActiveCfg = Debug|Win32
 		{BA9C1AA0-5FC6-4292-A82E-E8783977E68F}.Debug|Win32.Build.0 = Debug|Win32
-		{BA9C1AA0-5FC6-4292-A82E-E8783977E68F}.Debug|x64.ActiveCfg = x86Debug|x64
+		{BA9C1AA0-5FC6-4292-A82E-E8783977E68F}.Debug|x64.ActiveCfg = Debug|x64
 		{BA9C1AA0-5FC6-4292-A82E-E8783977E68F}.Debug|x64.Build.0 = Debug|x64
 		{BA9C1AA0-5FC6-4292-A82E-E8783977E68F}.Release|Win32.ActiveCfg = Release|Win32
 		{BA9C1AA0-5FC6-4292-A82E-E8783977E68F}.Release|Win32.Build.0 = Release|Win32

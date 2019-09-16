@@ -5,6 +5,7 @@ class ElectronicVario
 	double previous;
 	double damping;
 	double acc;
+	double teFactor;
 
 public:
 	ElectronicVario();

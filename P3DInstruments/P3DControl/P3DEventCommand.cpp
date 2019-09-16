@@ -7,7 +7,7 @@
 
 P3DEventCommand::P3DEventCommand(Prepar3D * p3d)
 {
-	assert(p3d != null);
+	assert(p3d != 0);
 	this->p3d = p3d;
 	setupEvents();
 }
