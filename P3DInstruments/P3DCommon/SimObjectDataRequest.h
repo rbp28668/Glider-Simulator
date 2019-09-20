@@ -2,6 +2,7 @@
 #include "Prepar3D.h"
 #include "SimObjectData.h"
 
+// Manage a data request from P3D.
 class SimObjectDataRequest
 {
 

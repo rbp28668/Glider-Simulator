@@ -1,6 +1,7 @@
 #pragma once
 #include "Prepar3D.h"
 
+// Manage a data definition used to communicate data to/from P3D.
 class SimObjectData
 {
 public:

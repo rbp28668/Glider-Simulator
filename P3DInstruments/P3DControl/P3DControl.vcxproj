@@ -22,33 +22,33 @@
     <ProjectGuid>{DFACFE04-6EDC-4F2D-BA36-F5364AC8287B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ConsoleApplication1</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>P3DControl</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -162,9 +162,22 @@
     <ClInclude Include="..\P3DCommon\TCPClient.h" />
     <ClInclude Include="..\P3DCommon\UDPClient.h" />
     <ClInclude Include="AIObject.h" />
+    <ClInclude Include="APIParameters.h" />
+    <ClInclude Include="APIThread.h" />
+    <ClInclude Include="CommandInterpreter.h" />
     <ClInclude Include="EventMessageHandler.h" />
+    <ClInclude Include="http.h" />
+    <ClInclude Include="HTTPException.h" />
+    <ClInclude Include="HTTPRequest.h" />
+    <ClInclude Include="HTTPRequestQueue.h" />
+    <ClInclude Include="HTTPResponse.h" />
+    <ClInclude Include="HTTPService.h" />
+    <ClInclude Include="HTTPURL.h" />
+    <ClInclude Include="JSONWriter.h" />
     <ClInclude Include="MessageThread.h" />
     <ClInclude Include="P3DEventCommand.h" />
+    <ClInclude Include="QuitHandler.h" />
+    <ClInclude Include="RESTAPI.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Thread.h" />
@@ -180,10 +193,22 @@
     <ClCompile Include="..\P3DCommon\TCPClient.cpp" />
     <ClCompile Include="..\P3DCommon\UDPClient.cpp" />
     <ClCompile Include="AIObject.cpp" />
+    <ClCompile Include="APIParameters.cpp" />
+    <ClCompile Include="APIThread.cpp" />
+    <ClCompile Include="CommandInterpreter.cpp" />
+    <ClCompile Include="HTTPException.cpp" />
+    <ClCompile Include="HTTPRequest.cpp" />
+    <ClCompile Include="HTTPRequestQueue.cpp" />
+    <ClCompile Include="HTTPResponse.cpp" />
+    <ClCompile Include="HTTPService.cpp" />
+    <ClCompile Include="HTTPURL.cpp" />
+    <ClCompile Include="JSONWriter.cpp" />
     <ClCompile Include="P3DControl.cpp" />
     <ClCompile Include="EventMessageHandler.cpp" />
     <ClCompile Include="MessageThread.cpp" />
     <ClCompile Include="P3DEventCommand.cpp" />
+    <ClCompile Include="QuitHandler.cpp" />
+    <ClCompile Include="RESTAPI.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

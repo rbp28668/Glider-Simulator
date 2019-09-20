@@ -12,7 +12,8 @@
 #include "../P3DCommon/SimObjectDataRequest.h"
 #include "MessageThread.h"
 #include "EventMessageHandler.h"
-
+#include "HTTPService.h"
+#include "APIThread.h"
 
 int main(int argc, char* argv[])
 {
@@ -45,18 +46,26 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	HTTPService httpService;
+
+
 	Prepar3D sim("P3DControl");
 	sim.setVerbose(verbose);
 
-	MessageThread messageReceiver(port); // listen on port for UDP messages
-	EventMessageHandler messageHandler(&sim);
-	messageReceiver.add(&messageHandler);
+	CommandInterpreter interpreter(&sim);
+
+	// Start receiver for UDP messages
+	MessageThread messageReceiver(&interpreter, port); // listen on port for UDP messages
 	messageReceiver.start();
+
+	// Start receiver for REST API
+	APIThread api(&interpreter);
+	api.start();
 
 	sim.DispatchLoop();
 	
+	api.stop();
 	messageReceiver.stop();
-	messageReceiver.remove(&messageHandler);
 
 	return 0;
 }

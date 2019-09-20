@@ -2,6 +2,8 @@
 #include <assert.h>
 #include<iostream>
 #include "EventMessageHandler.h"
+#include "APIParameters.h"
+#include "JSONWriter.h"
 
 
 
@@ -23,9 +25,23 @@ const std::string & EventMessageHandler::getName()
 	return name;
 }
 
-void EventMessageHandler::run(const std::string & params)
+void EventMessageHandler::run(const std::string& cmd, const APIParameters& params, std::string& output)
 {
-	if (commands.dispatchEvent(params)) {
-		std::cout << "Unable to run P3D command " << params.c_str() << std::endl;
+	DWORD dwData = params.getDWORD("value",0);
+	
+	// Force upper case for lookup.
+	std::string asUpper(cmd);
+	for (std::string::iterator i = asUpper.begin(); i != asUpper.end(); ++i) {
+		*i = ::toupper(*i);
+	}
+
+	bool failed = commands.dispatchEvent(asUpper, dwData);
+
+	JSONWriter json(output);
+	if (failed) {
+		json.add("status", "FAILED")
+			.add("reason", "Unable to run P3D command " + asUpper);
+	} else {
+		json.add("status", "OK");
 	}
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include <map>
 #include "../P3DCommon/Prepar3D.h"
+
+// Call basic P3D commands via client events.
 class P3DEventCommand
 {
 public:
@@ -79,8 +81,8 @@ public:
 
 	P3DEventCommand(Prepar3D* p3d);
 	~P3DEventCommand();
-	bool dispatchEvent(EventID event);
-	bool dispatchEvent(const std::string& eventName);
+	bool dispatchEvent(EventID event, DWORD  dwData);
+	bool dispatchEvent(const std::string& eventName, DWORD  dwData);
 
 
 };

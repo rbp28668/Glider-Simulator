@@ -3,6 +3,7 @@
 
 class SimObjectDataRequest;
 
+// List of P3D data requests.
 class SimObjectDataRequestList :
 	public IndexedList
 {

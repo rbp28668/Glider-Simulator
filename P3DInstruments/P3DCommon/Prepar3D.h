@@ -7,6 +7,7 @@
 
 class SimObjectDataRequest;
 
+// Encapsulate the core P3D interface.
 class Prepar3D
 {
 	bool connected;		// true if successfully connected.

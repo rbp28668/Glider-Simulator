@@ -4,6 +4,7 @@
 #include<string>
 #include"Network.h"
 
+// Client for TCP
 class TCPClient
 {
 	// Socket related
