@@ -11,7 +11,7 @@ APIParameters::APIParameters(const std::string& queryString)
 	std::string::const_iterator it = queryString.begin(); 
 	
 	// skip over any ? at the start of the string
-	if (*it == '?') {
+	if (it != queryString.end() && *it == '?') {
 		++it;
 	}
 	
@@ -36,6 +36,18 @@ APIParameters::APIParameters(const std::string& queryString)
 				name.clear();
 				value.clear();
 				state = 0;
+			}
+			else if (*it == '%') { // URL encoded value.
+				char buff[3];
+				++it; // skip %
+				if (it == queryString.end()) break;
+				buff[0] = *it; // first hex digit
+				++it;
+				if (it == queryString.end()) break;
+				buff[1] = *it; // second hex digit
+				buff[2] = 0;
+				char ch = (char)std::stoi(buff,0,16);
+				value.push_back(ch);
 			}
 			else {
 				value.push_back(*it);

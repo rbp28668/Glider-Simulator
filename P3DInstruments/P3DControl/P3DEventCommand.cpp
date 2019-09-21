@@ -4,7 +4,7 @@
 #include "P3DEventCommand.h"
 
 
-
+// See http://www.prepar3d.com/SDKv4/sdk/references/variables/event_ids.html for list of event IDs
 
 P3DEventCommand::P3DEventCommand(Prepar3D * p3d)
 {

@@ -3,6 +3,7 @@
 
 #include "CommandInterpreter.h"
 #include "EventMessageHandler.h"
+#include "ScenarioMessageHandler.h"
 #include "QuitHandler.h"
 #include "JSONWriter.h"
 #include "APIParameters.h"
@@ -11,6 +12,7 @@ CommandInterpreter::CommandInterpreter(Prepar3D* pSim)
 	: pSim(pSim)
 {
 	add(new EventMessageHandler(pSim));
+	add(new ScenarioMessageHandler(pSim));
 
 }
 

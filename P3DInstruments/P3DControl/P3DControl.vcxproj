@@ -166,6 +166,7 @@
     <ClInclude Include="APIThread.h" />
     <ClInclude Include="CommandInterpreter.h" />
     <ClInclude Include="EventMessageHandler.h" />
+    <ClInclude Include="Folder.h" />
     <ClInclude Include="http.h" />
     <ClInclude Include="HTTPException.h" />
     <ClInclude Include="HTTPRequest.h" />
@@ -178,9 +179,11 @@
     <ClInclude Include="P3DEventCommand.h" />
     <ClInclude Include="QuitHandler.h" />
     <ClInclude Include="RESTAPI.h" />
+    <ClInclude Include="ScenarioMessageHandler.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Thread.h" />
+    <ClInclude Include="WideConverter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\P3DCommon\IndexedList.cpp" />
@@ -196,6 +199,7 @@
     <ClCompile Include="APIParameters.cpp" />
     <ClCompile Include="APIThread.cpp" />
     <ClCompile Include="CommandInterpreter.cpp" />
+    <ClCompile Include="Folder.cpp" />
     <ClCompile Include="HTTPException.cpp" />
     <ClCompile Include="HTTPRequest.cpp" />
     <ClCompile Include="HTTPRequestQueue.cpp" />
@@ -209,6 +213,7 @@
     <ClCompile Include="P3DEventCommand.cpp" />
     <ClCompile Include="QuitHandler.cpp" />
     <ClCompile Include="RESTAPI.cpp" />
+    <ClCompile Include="ScenarioMessageHandler.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -216,6 +221,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="WideConverter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />

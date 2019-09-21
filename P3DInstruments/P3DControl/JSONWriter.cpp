@@ -169,5 +169,8 @@ JSONWriter& JSONWriter::end()
 	case ARRAY: out.append("]"); break;
 	}
 	state.pop();
+	if (!state.empty()) {
+		state.top().hasContent = true; // as parent now has an object or array
+	}
 	return *this;
 }
