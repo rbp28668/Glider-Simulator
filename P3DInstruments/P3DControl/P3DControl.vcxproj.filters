@@ -138,6 +138,12 @@
     <ClInclude Include="..\jsoncpp\json_tool.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Failures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FailuresMessageHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -261,6 +267,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\jsoncpp\json_writer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Failures.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FailuresMessageHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

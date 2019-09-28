@@ -7,6 +7,7 @@
 #include "RecordMessageHandler.h"
 #include "ThermalMessageHandler.h"
 #include "PositionMessageHandler.h"
+#include "FailuresMessageHandler.h"
 #include "QuitHandler.h"
 #include "JSONWriter.h"
 #include "APIParameters.h"
@@ -19,6 +20,7 @@ CommandInterpreter::CommandInterpreter(Prepar3D* pSim)
 	add(new RecordMessageHandler(pSim));
 	add(new ThermalMessageHandler(pSim));
 	add(new PositionMessageHandler(pSim));
+	add(new FailuresMessageHandler(pSim));
 }
 
 CommandInterpreter::~CommandInterpreter()
