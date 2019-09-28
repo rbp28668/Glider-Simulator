@@ -132,10 +132,14 @@ JSONWriter& JSONWriter::object(const std::string& name)
 	if (state.top().hasContent) {
 		out.append(",");
 	}
-	out.append("\"");
-	out.append(name);
-	out.append("\":{");
-
+	if (name.empty()) {
+		out.append("{");
+	}
+	else {
+		out.append("\"");
+		out.append(name);
+		out.append("\":{");
+	}
 	State current;
 	current.hasContent = false;
 	current.type = OBJECT;

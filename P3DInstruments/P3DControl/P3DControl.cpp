@@ -10,6 +10,7 @@
 #include "../P3DCommon/Prepar3D.h"
 #include "../P3DCommon/SimObjectData.h"
 #include "../P3DCommon/SimObjectDataRequest.h"
+#include "Simulator.h"
 #include "MessageThread.h"
 #include "EventMessageHandler.h"
 #include "HTTPService.h"
@@ -49,8 +50,7 @@ int main(int argc, char* argv[])
 	HTTPService httpService;
 
 
-	Prepar3D sim("P3DControl");
-	sim.setVerbose(verbose);
+	Simulator sim("P3DControl",verbose);
 
 	CommandInterpreter interpreter(&sim);
 

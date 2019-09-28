@@ -4,16 +4,13 @@
 #include "MessageThread.h"
 
 QuitHandler::QuitHandler(MessageThread* pmt)
-	: name("quit")
+	: MessageHandler(0, "quit")
 {
 	assert(pmt != 0);
 	this->pmt = pmt;
 }
 
-const std::string& QuitHandler::getName() {
-	return name;
-}
 
-void QuitHandler::run(const std::string& params) {
+void QuitHandler::run(const std::string& cmd, const APIParameters& params, std::string& output) {
 	pmt->stop();
 }

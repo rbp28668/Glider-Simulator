@@ -30,7 +30,7 @@ public:
 	JSONWriter& add(const std::string& name, float value);
 	JSONWriter& add(const std::string& name, double value);
 	JSONWriter& add(const std::string& name, bool value);
-	JSONWriter& object(const std::string& name);
+	JSONWriter& object(const std::string& name = "");
 	JSONWriter& array(const std::string& name);
 	JSONWriter& end();
 

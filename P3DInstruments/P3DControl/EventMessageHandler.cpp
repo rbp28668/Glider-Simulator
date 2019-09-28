@@ -9,7 +9,7 @@
 
 
 EventMessageHandler::EventMessageHandler(Prepar3D * p3d)
-	: name("cmd")
+	: MessageHandler(p3d, "cmd")
 	, commands(p3d)
 {
 	assert(p3d != 0);
@@ -20,10 +20,6 @@ EventMessageHandler::~EventMessageHandler()
 {
 }
 
-const std::string & EventMessageHandler::getName()
-{
-	return name;
-}
 
 void EventMessageHandler::run(const std::string& cmd, const APIParameters& params, std::string& output)
 {

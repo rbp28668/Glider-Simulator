@@ -91,6 +91,7 @@ void LocationData::onData(void *pData) {
 LocationData::LocationData(Prepar3D* pSim)
 	: SimObjectData(pSim)
 	, pNMEA(0)
+	, pTransport(0)
 {
 	createDefinition();
 }

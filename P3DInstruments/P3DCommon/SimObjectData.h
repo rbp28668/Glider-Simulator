@@ -32,6 +32,7 @@ public:
 
 	void createDefinition();
 	void handle(SIMCONNECT_RECV_SIMOBJECT_DATA *pObjData);
+	void send(void* pObjData, size_t dataSize, SIMCONNECT_OBJECT_ID objectID = SIMCONNECT_OBJECT_ID_USER);
 
 };
 

@@ -6,34 +6,14 @@
 #include "Folder.h"
 #include "JSONWriter.h"
 
-void ScenarioMessageHandler::reportSuccess(std::string& output)
-{
-	JSONWriter json(output);
-	json.add("status", "OK");
-}
-
-void ScenarioMessageHandler::reportFailure(const char* pszReason, unsigned long code, std::string& output)
-{
-	JSONWriter json(output);
-	json.add("status", "FAILED");
-	std::ostringstream os;
-	os << pszReason << " (" << code << ")";
-	json.add("reason", os.str());
-}
 
 ScenarioMessageHandler::ScenarioMessageHandler(Prepar3D* p3d)
-	: p3d(p3d)
-	, name("scenario")
+	: MessageHandler(p3d, "scenario")
 {
 }
 
 ScenarioMessageHandler::~ScenarioMessageHandler()
 {
-}
-
-const std::string& ScenarioMessageHandler::getName()
-{
-	return name;
 }
 
 void ScenarioMessageHandler::run(const std::string& cmd, const APIParameters& params, std::string& output)
@@ -59,6 +39,9 @@ void ScenarioMessageHandler::run(const std::string& cmd, const APIParameters& pa
 	else if (cmd == "list") {
 		std::string filter = params.getString("filter");
 		listScenarios(filter, output);
+	}
+	else {
+		reportFailure("Scenario command not recognised", 0, output);
 	}
 }
 
@@ -92,7 +75,7 @@ void ScenarioMessageHandler::listScenarios(const std::string& filter, std::strin
 	try {
 		// E:\Users\rbp28668\Documents\Prepar3D v4 Files
 		DocumentDirectory documents;
-		Directory p3dFolder = documents.sub("Prepar3D v4 Files");
+		Directory p3dFolder = documents.sub(Prepar3D::DOCUMENTS);
 		files = p3dFolder.files(files, filter + "*.fxml");
 	}
 	catch (FileException& fx) {
@@ -108,7 +91,7 @@ void ScenarioMessageHandler::listScenarios(const std::string& filter, std::strin
 	json.add("status", "OK");
 	json.array("entries");
 	for (File::ListT::iterator it = files.begin(); it != files.end(); ++it) {
-		json.object("scenario");
+		json.object();
 		json.add("filename", it->name());
 		json.add("title", it->name());
 		json.add("description", "");

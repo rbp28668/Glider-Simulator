@@ -23,7 +23,7 @@ public:
 
 	const std::string& name() const { return path; }
 	operator const std::string&() const { return path; }
-	operator const char*() const { return path.c_str(); }
+	explicit operator const char*() const { return path.c_str(); }
 };
 
 class Directory
@@ -38,6 +38,9 @@ public:
 	Directory(const std::string& path) : path(path) {}
 	Directory(const char* path) : path(path) {}
 	Directory sub(const char* name);
+	Directory sub(const std::string& name) { return sub(name.c_str()); }
+	File file(const char* name); 
+	File file(const std::string& name) { return file(name.c_str()); }
 	File::ListT& files( File::ListT& fileList, const std::string& filter = "" );
 	Directory::ListT& folders(Directory::ListT& folderList, const std::string& filter = "");
 };

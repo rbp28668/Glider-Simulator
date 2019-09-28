@@ -29,7 +29,7 @@ public:
 	void setInterval(DWORD interval) { this->interval = interval; }
     void setLimit(DWORD limit) { this->limit = limit; }
 
-	SimObjectDataRequest(Prepar3D* pSim, SimObjectData* pData);
+	SimObjectDataRequest(Prepar3D* pSim, SimObjectData* pData, SIMCONNECT_PERIOD period = SIMCONNECT_PERIOD_VISUAL_FRAME);
 	virtual ~SimObjectDataRequest(void);
 
 	void createRequest(void);

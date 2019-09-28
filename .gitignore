@@ -19,6 +19,7 @@ bin/**
 *.res
 *.idb
 *.ilk
+*.enc
 
 ipch/*
 

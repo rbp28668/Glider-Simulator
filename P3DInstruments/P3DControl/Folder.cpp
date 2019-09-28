@@ -28,6 +28,11 @@ Directory Directory::sub(const char* name)
 	return Directory(path + separator + name);
 }
 
+File Directory::file(const char* name)
+{
+	return File(path + separator + name);
+}
+
 File::ListT& Directory::files(File::ListT& fileList, const std::string& filter)
 {
 	WIN32_FIND_DATAA ffd;

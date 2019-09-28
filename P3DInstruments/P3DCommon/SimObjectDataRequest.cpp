@@ -4,11 +4,12 @@
 #include "SimObjectDataRequest.h"
 
 
-// Create default request for Sim Frame rate notifications
-SimObjectDataRequest::SimObjectDataRequest(Prepar3D* pTargetSim, SimObjectData* pData)
+// Create default request for data notifications.  Note that the handling of data is delegated to the SimObjectData
+// when data is received from SimConnect via the dispatch loop.
+SimObjectDataRequest::SimObjectDataRequest(Prepar3D* pTargetSim, SimObjectData* pData, SIMCONNECT_PERIOD period)
 	: pSim(pTargetSim)
 	, pData(pData)
-	, period(SIMCONNECT_PERIOD_SIM_FRAME)
+	, period(period)
 	, origin(0)
 	, interval(0)
 	, limit(0)
@@ -32,6 +33,7 @@ SimObjectDataRequest::~SimObjectDataRequest(void)
 		if(FAILED(hr)) {
 			std::cerr << "Failed to unregister data request " << requestId << std::endl;
 		}
+
 	}
 
     pSim->unregisterDataRequest(this);
@@ -46,6 +48,7 @@ void SimObjectDataRequest::createRequest( void) {
   if(SUCCEEDED(hr)) {
 	  if(pSim->isVerbose()) {
 		  std::cout << "Requested data for ID " << requestId << " with data ID " << pData->getId() << std::endl;
+		  pSim->showLastRequest("Requested data on sim object ");
 	  }
   } else {
 	  std::cerr << "Unable to create data request " << requestId << " for data ID " << pData->getId() << std::endl;
