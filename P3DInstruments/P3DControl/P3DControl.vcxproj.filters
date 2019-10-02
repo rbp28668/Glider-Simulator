@@ -33,21 +33,6 @@
     <ClInclude Include="..\P3DCommon\P3DCommon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\P3DCommon\SimObjectData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\P3DCommon\SimObjectDataRequest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\P3DCommon\SimObjectDataRequestList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\P3DCommon\TCPClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\P3DCommon\UDPClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\P3DCommon\Network.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -144,6 +129,9 @@
     <ClInclude Include="FailuresMessageHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TrafficMessageHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -156,21 +144,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\P3DCommon\P3DCommon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\SimObjectData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\SimObjectDataRequest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\SimObjectDataRequestList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\TCPClient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\UDPClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MessageThread.cpp">
@@ -273,6 +246,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FailuresMessageHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TrafficMessageHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include <SimConnect.h>
 #include <vector>
+#include "../P3DCommon/SimObjectList.h"
 #include "../P3DCommon/SimObjectDataRequestList.h"
 
 class SimObjectDataRequest;
@@ -21,7 +22,7 @@ class Prepar3D
 	HANDLE hSimConnect; // use SimConnect_Open to set this value.
 
 	LONG volatile requestIdSequence;
-
+	SimObjectList simObjects; // keyed by object ID (eventually).
 	SimObjectDataRequestList dataRequests; // keyed by request ID
 	bool waitingDataRequests;
 
@@ -47,6 +48,7 @@ class Prepar3D
 	void handleException(SIMCONNECT_RECV* pData);
 	void handleSimObjectData(SIMCONNECT_RECV* pData);
 	void handleSimObjectDataByType(SIMCONNECT_RECV* pData);
+	void handleAssignedObjectId(SIMCONNECT_RECV* pData);
 
 public:
 

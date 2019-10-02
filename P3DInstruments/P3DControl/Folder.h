@@ -2,6 +2,7 @@
 #include <string>
 #include <list>
 
+
 class FileException : public std::exception {
 	const char* pszReason;
 	DWORD code;
@@ -14,7 +15,7 @@ public:
 
 
 class File {
-	std::string path;
+	std::string path;  
 public:
 	typedef std::list<File> ListT;
 
@@ -24,19 +25,21 @@ public:
 	const std::string& name() const { return path; }
 	operator const std::string&() const { return path; }
 	explicit operator const char*() const { return path.c_str(); }
+	bool exists() const;
 };
 
 class Directory
 {
 protected:
-	std::string path;
+	std::string path; // without any trailing slash.
 	char separator = '\\';
+	void trim(std::string& name);
 public:
 	typedef std::list<Directory> ListT;
 
 	Directory() {}
-	Directory(const std::string& path) : path(path) {}
-	Directory(const char* path) : path(path) {}
+	Directory(const std::string& path);
+	Directory(const char* path);
 	Directory sub(const char* name);
 	Directory sub(const std::string& name) { return sub(name.c_str()); }
 	File file(const char* name); 

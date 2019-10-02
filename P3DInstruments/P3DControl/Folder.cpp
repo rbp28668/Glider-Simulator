@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <shlobj.h>
+#include <Shlwapi.h>
 #include "WideConverter.h"
 
 #include "Folder.h"
@@ -23,14 +24,38 @@ DocumentDirectory::DocumentDirectory()
 	}
 }
 
+// Trim and leading or trailing separators.
+void Directory::trim(std::string& name)
+{
+	while (name.front() == separator) name = name.substr(1);
+	while (name.back() == separator) name.pop_back();
+}
+
+Directory::Directory(const std::string& path)
+	: path(path)
+{
+	trim(this->path);  // note windows path assumed X:/root/sub etc so no leading /
+}
+
+Directory::Directory(const char* path)
+	: Directory(std::string(path))
+{
+}
+
 Directory Directory::sub(const char* name)
 {
-	return Directory(path + separator + name);
+	std::string trimmed(name);
+	trim(trimmed);
+
+	std::string newPath = path + separator + trimmed;
+	return Directory(newPath);
 }
 
 File Directory::file(const char* name)
 {
-	return File(path + separator + name);
+	std::string trimmed(name);
+	trim(trimmed);
+	return File(path + separator + trimmed);
 }
 
 File::ListT& Directory::files(File::ListT& fileList, const std::string& filter)
@@ -71,12 +96,16 @@ Directory::ListT& Directory::folders(Directory::ListT& folderList, const std::st
 	DWORD dwError = 0;
 
 	std::string search = path;
-	if (!filter.empty()) {
-		search.append("\\");
+	search.append("\\"); // as want to find sub-folders.
+
+	if (filter.empty()) {
+		search.append("*");
+	} 
+	else {
 		search.append(filter);
 	}
 
-	HANDLE hFind = FindFirstFileA(search.c_str(), &ffd);
+	HANDLE hFind = ::FindFirstFileA(search.c_str(), &ffd);
 
 	if (INVALID_HANDLE_VALUE == hFind) {
 		throw FileException("Unable to start folder enumeration", GetLastError());
@@ -84,7 +113,9 @@ Directory::ListT& Directory::folders(Directory::ListT& folderList, const std::st
 
 	do {
 		if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-			folderList.push_back(ffd.cFileName);
+			if (ffd.cFileName[0] != '.') {  // ignore both . and .. folders
+				folderList.push_back(this->sub(ffd.cFileName));
+			}
 		}
 	} while (FindNextFileA(hFind, &ffd) != 0);
 	dwError = GetLastError();
@@ -96,4 +127,9 @@ Directory::ListT& Directory::folders(Directory::ListT& folderList, const std::st
 
 	return folderList;
 
+}
+
+bool File::exists() const
+{
+	return ::PathFileExistsA(path.c_str()) == TRUE;
 }

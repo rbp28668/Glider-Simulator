@@ -157,11 +157,6 @@
     <ClInclude Include="..\P3DCommon\Network.h" />
     <ClInclude Include="..\P3DCommon\P3DCommon.h" />
     <ClInclude Include="..\P3DCommon\Prepar3D.h" />
-    <ClInclude Include="..\P3DCommon\SimObjectData.h" />
-    <ClInclude Include="..\P3DCommon\SimObjectDataRequest.h" />
-    <ClInclude Include="..\P3DCommon\SimObjectDataRequestList.h" />
-    <ClInclude Include="..\P3DCommon\TCPClient.h" />
-    <ClInclude Include="..\P3DCommon\UDPClient.h" />
     <ClInclude Include="AIObject.h" />
     <ClInclude Include="APIParameters.h" />
     <ClInclude Include="APIThread.h" />
@@ -193,6 +188,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="ThermalMessageHandler.h" />
     <ClInclude Include="Thread.h" />
+    <ClInclude Include="TrafficMessageHandler.h" />
     <ClInclude Include="WideConverter.h" />
   </ItemGroup>
   <ItemGroup>
@@ -203,11 +199,6 @@
     <ClCompile Include="..\P3DCommon\Network.cpp" />
     <ClCompile Include="..\P3DCommon\P3DCommon.cpp" />
     <ClCompile Include="..\P3DCommon\Prepar3D.cpp" />
-    <ClCompile Include="..\P3DCommon\SimObjectData.cpp" />
-    <ClCompile Include="..\P3DCommon\SimObjectDataRequest.cpp" />
-    <ClCompile Include="..\P3DCommon\SimObjectDataRequestList.cpp" />
-    <ClCompile Include="..\P3DCommon\TCPClient.cpp" />
-    <ClCompile Include="..\P3DCommon\UDPClient.cpp" />
     <ClCompile Include="AIObject.cpp" />
     <ClCompile Include="APIParameters.cpp" />
     <ClCompile Include="APIThread.cpp" />
@@ -243,11 +234,17 @@
     </ClCompile>
     <ClCompile Include="ThermalMessageHandler.cpp" />
     <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="TrafficMessageHandler.cpp" />
     <ClCompile Include="WideConverter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\jsoncpp\json_valueiterator.inl" />
     <None Include="ClassDiagram.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\P3DCommon\P3DCommon.vcxproj">
+      <Project>{863d5727-3e2e-4158-b8a3-6c943ca31c61}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

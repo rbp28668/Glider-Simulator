@@ -34,11 +34,15 @@ public:
 		PAUSE_OFF,
 		SITUATION_SAVE,
 		SITUATION_RESET,
+		TOGGLE_AIRCRAFT_LABELS, 
 		EXIT,
 		ABORT,
 		SIM_RESET,
 		REFRESH_SCENERY,
 		CAPTURE_SCREENSHOT,
+		AUTORUDDER_TOGGLE, // TODO
+		FREEZE_ALTITUDE_TOGGLE, // TODO
+		FREEZE_ALTITUDE_SET, // TODO
 		SLEW_TOGGLE,	// Toggles slew on / off	Shared Cockpit(Pilot only)
 		SLEW_OF,		// Turns slew off	Shared Cockpit(Pilot only)
 		SLEW_ON,		// Turns slew on	Shared Cockpit(Pilot only)

@@ -45,12 +45,15 @@ void P3DEventCommand::setupEvents() {
 	mapEvent(PAUSE_OFF, "PAUSE_OFF");
 	mapEvent(SITUATION_SAVE, "SITUATION_SAVE");
 	mapEvent(SITUATION_RESET, "SITUATION_RESET");
+	mapEvent(TOGGLE_AIRCRAFT_LABELS, "TOGGLE_AIRCRAFT_LABELS");
 	mapEvent(EXIT, "EXIT");
 	mapEvent(ABORT, "ABORT");
 	mapEvent(SIM_RESET, "SIM_RESET");
 	mapEvent(REFRESH_SCENERY, "REFRESH_SCENERY");
 	mapEvent(CAPTURE_SCREENSHOT, "CAPTURE_SCREENSHOT");
-
+	mapEvent(AUTORUDDER_TOGGLE, "AUTORUDDER_TOGGLE");
+	mapEvent(FREEZE_ALTITUDE_TOGGLE, "FREEZE_ALTITUDE_TOGGLE");
+	mapEvent(FREEZE_ALTITUDE_SET, "FREEZE_ALTITUDE_SET");
 	mapEvent(SLEW_TOGGLE, "SLEW_TOGGLE"); // Toggles slew on / off	Shared Cockpit(Pilot only)
 	mapEvent(SLEW_OF, "SLEW_OFF"); // 	Turns slew off	Shared Cockpit(Pilot only)
 	mapEvent(SLEW_ON, "SLEW_ON"); // 	Turns slew on	Shared Cockpit(Pilot only)

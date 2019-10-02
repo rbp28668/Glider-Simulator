@@ -20,7 +20,8 @@ Prepar3D::Prepar3D(const char* appName, bool verbose)
 	quit(false),
 	verbose(verbose),
 	waitingDataRequests(false),
-	requestIdSequence(0)
+	requestIdSequence(0),
+	simObjects(this)
 
 {	
 	connect(appName);
@@ -206,6 +207,18 @@ void Prepar3D::handleSimObjectDataByType(SIMCONNECT_RECV* pData)
 	}
 }
 
+void Prepar3D::handleAssignedObjectId(SIMCONNECT_RECV* pData)
+{
+	assert(this);
+	assert(pData);
+	assert(pData->dwID == SIMCONNECT_RECV_ID_ASSIGNED_OBJECT_ID);
+	
+	SIMCONNECT_RECV_ASSIGNED_OBJECT_ID* paoid = static_cast<SIMCONNECT_RECV_ASSIGNED_OBJECT_ID*>(pData);
+	DWORD objectId = paoid->dwObjectID;
+	DWORD requestId = paoid->dwRequestID;
+	simObjects.associate(requestId, objectId); 
+}
+
 void Prepar3D::showLastRequest(const char* name)
 {
 	if (verbose) {
@@ -263,6 +276,10 @@ void Prepar3D::Process(SIMCONNECT_RECV *pData, DWORD cbData)
 		handleSimObjectDataByType(pData);
         break; 
  
+	case SIMCONNECT_RECV_ID_ASSIGNED_OBJECT_ID:
+		handleAssignedObjectId(pData);
+		break;
+
     case SIMCONNECT_RECV_ID_QUIT: 
         std::cout << "Sim quit" << std::endl;
         quit = true; 

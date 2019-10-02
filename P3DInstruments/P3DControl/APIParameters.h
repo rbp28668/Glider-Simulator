@@ -16,6 +16,7 @@ public:
 	std::string getString(const std::string& name) const;
 	int getInt(const std::string& name, int default=0) const;
 	float getFloat(const std::string& name, float default = 0) const;
+	double getDouble(const std::string& name, double default = 0) const;
 	bool getBool(const std::string& name, bool default = false) const;
 	DWORD getDWORD(const std::string& name, DWORD default = 0) const;
 

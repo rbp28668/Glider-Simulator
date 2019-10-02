@@ -32,7 +32,7 @@
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
@@ -45,7 +45,7 @@
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -157,9 +157,11 @@
     <ClInclude Include="P3DCommon.h" />
     <ClInclude Include="Prepar3D.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="SimObject.h" />
     <ClInclude Include="SimObjectData.h" />
     <ClInclude Include="SimObjectDataRequest.h" />
     <ClInclude Include="SimObjectDataRequestList.h" />
+    <ClInclude Include="SimObjectList.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TCPClient.h" />
@@ -170,9 +172,11 @@
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="P3DCommon.cpp" />
     <ClCompile Include="Prepar3D.cpp" />
+    <ClCompile Include="SimObject.cpp" />
     <ClCompile Include="SimObjectData.cpp" />
     <ClCompile Include="SimObjectDataRequest.cpp" />
     <ClCompile Include="SimObjectDataRequestList.cpp" />
+    <ClCompile Include="SimObjectList.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -92,6 +92,16 @@ float APIParameters::getFloat(const std::string& name, float default) const
 	return default;
 }
 
+double APIParameters::getDouble(const std::string& name, double default) const
+{
+	ParamsT::const_iterator it = params.find(name);
+	if (it != params.end()) {
+		return stod(it->second);
+	}
+
+	return default;
+}
+
 bool APIParameters::getBool(const std::string& name, bool default) const
 {
 	ParamsT::const_iterator it = params.find(name);
