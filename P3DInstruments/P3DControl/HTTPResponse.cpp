@@ -28,6 +28,20 @@ void HTTPResponse::addHeader(HTTP_HEADER_ID id, const char* value)
 	response.Headers.KnownHeaders[id].RawValueLength = (USHORT)strlen(value);                               \
 }
 
+void HTTPResponse::addHeader(const char* name, const char* value)
+{
+	HTTP_UNKNOWN_HEADER header;
+	header.pName = name;
+	header.NameLength = (USHORT)strlen(name);
+	header.pRawValue = value;
+	header.RawValueLength = (USHORT)strlen(value);
+	
+	unknownHeaders.push_back(header);
+	
+	response.Headers.pUnknownHeaders = unknownHeaders.data();
+	response.Headers.UnknownHeaderCount = (USHORT)unknownHeaders.size();
+}
+
 void HTTPResponse::setEntityString(const char* value)
 {
 	if (pszEntity) {

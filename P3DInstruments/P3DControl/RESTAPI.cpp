@@ -52,6 +52,7 @@ void RESTAPI::onGet(const HTTPRequest& request, HTTPResponse& response)
 	pInterpreter->process(cmd, params, output);
 
 	response.setStatus(200, "OK");
-	response.addHeader(HttpHeaderContentType, "text/html");
+	response.addHeader(HttpHeaderContentType, "application/json");
+	response.addHeader("Access-Control-Allow-Origin", "*"); // CORS - see https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
 	response.setEntityString(output.c_str());
 }
