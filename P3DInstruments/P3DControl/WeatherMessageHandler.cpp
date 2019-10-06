@@ -111,7 +111,7 @@ void WeatherMessageHandler::run(const std::string& cmd, const APIParameters& par
 		Metar m;
 		std::string error("Unable to set weather station");
 		if (buildMetar(params, m, error)) {
-			update(m, seconds, output);
+			set(m, seconds, output);
 		}
 		else {
 			reportFailure(error.c_str(), 0, output);
@@ -130,13 +130,49 @@ void WeatherMessageHandler::run(const std::string& cmd, const APIParameters& par
 			reportFailure(error.c_str(), 0, output);
 		}
 	}
-
+	// Sets the weather at the given station from a single metar string completely over-writing
+	// any existing data
+	else if (cmd == "set_metar") {
+		std::string metarText = params.getString("metar");
+		DWORD seconds = params.getDWORD("seconds");
+		Metar m;
+		std::string residual = m.parse(metarText);
+		if (residual.empty()) {
+			set(m, seconds, output);
+		}
+		else { // wasn't able to parse whole string so fail...
+			JSONWriter json(output);
+			json.add("status", "FAILED");
+			json.add("reason", "Unable to parse complete metar");
+			json.add("residual", residual);
+			json.add("metar", m.show());
+		}
+	}
+	// Sets the global weather from a single metar string completely over-writing any existing data.
+	else if (cmd == "set_global_metar") {
+		std::string metarText = params.getString("metar");
+		DWORD seconds = params.getDWORD("seconds");
+		Metar m;
+		std::string residual = m.parse(metarText);
+		if (residual.empty()) {
+			m.set(Metar::STATION, "GLOB");
+			setGlobal(m, seconds, output);
+		}
+		else { // wasn't able to parse whole string so fail...
+			JSONWriter json(output);
+			json.add("status", "FAILED");
+			json.add("reason", "Unable to parse complete metar");
+			json.add("residual", residual);
+			json.add("metar", m.show());
+		}
+	}
 
 	else {
 		reportFailure("Unknown weather command", 0, output);
 	}
 }
 
+// Creates a weather station at the given location.
 void WeatherMessageHandler::createStationHere(const std::string& icao, const std::string& name, std::string& output)
 {
 	SimState::Data currentPosition = pSim->getState()->current();
@@ -144,6 +180,7 @@ void WeatherMessageHandler::createStationHere(const std::string& icao, const std
 	reportSuccess(output);
 }
 
+// Enables global weather
 void WeatherMessageHandler::setGlobalWeather(std::string& output)
 {
 	HRESULT hr = ::SimConnect_WeatherSetModeGlobal(pSim->getHandle());
@@ -156,6 +193,7 @@ void WeatherMessageHandler::setGlobalWeather(std::string& output)
 
 }
 
+// Enables custom weather
 void WeatherMessageHandler::setCustomWeather(std::string& output)
 {
 	HRESULT hr = ::SimConnect_WeatherSetModeCustom( pSim->getHandle() );
@@ -167,6 +205,7 @@ void WeatherMessageHandler::setCustomWeather(std::string& output)
 	}
 }
 
+// Sets a standard weather theme
 void WeatherMessageHandler::setWeatherTheme(const std::string& themeName, std::string& output)
 {
 	HRESULT hr = ::SimConnect_WeatherSetModeTheme(
@@ -296,6 +335,8 @@ void WeatherMessageHandler::tidy(std::string& value)
 	}
 }
 
+// Lists all the weather themes in the default location under
+// the P3D install directory.
 void WeatherMessageHandler::listWeatherThemes(std::string& output)
 {
 	try {
@@ -386,121 +427,74 @@ void WeatherMessageHandler::addWeatherStationHere(const std::string& icao, const
 	json.add("icao", result);
 }
 
+// Processes the parameter(s) for a single metar field.
+// params holds the params.
+// type is the type of field.
+// pszName is the name of the parameter
+// metar is the metar we're trying to fill in.
+// errorMessage is used to create any error messages
+// valid is set if there is a failure
+// returns valid.
+bool WeatherMessageHandler::processMetarParam(const APIParameters& params, Metar::FieldType type, const char* pszName,  Metar& metar, std::ostringstream& errorMessage, bool& valid) {
+
+	std::string value = params.getString(pszName);
+	if (!metar.set(type, value)) {
+		errorMessage << (valid ? "Metar error " : ", ");
+		errorMessage << "Invalid " << metar.typeName(type) << " : " << value;
+		valid = false;
+	}
+
+	// So if we read in one good non empty value and there may be multiple ones, go look...
+	else if(!value.empty() && metar.multiple(type)) {
+		for (int idx = 0; valid; ++idx) {
+			std::ostringstream os;
+			os << pszName << idx;
+			value = params.getString(os.str());
+			if (value.empty()) {
+				break;
+			}
+			else {
+				if (!metar.add(type, value)) {
+					errorMessage << (valid ? "Metar error " : ", ");
+					errorMessage << "Invalid " << metar.typeName(type) << " : " << value;
+					valid = false;
+				}
+
+			}
+		}
+	}
+
+	return valid;
+}
 // Builds a metar out of its different parameters.
 bool WeatherMessageHandler::buildMetar(const APIParameters& params, Metar& metar, std::string& error) {
 
 	std::ostringstream errorMessage;
-
-	std::string  station = params.getString("icao");
-	std::string  report_type = params.getString("report_type");
-	std::string  automated = params.getString("automated");
-	std::string  cor = params.getString("cor");
-	std::string  datetime = params.getString("datetime");
-	std::string  nil = params.getString("nil");
-	std::string  surface_wind = params.getString("surface_wind");
-	std::string  min_max_wind_dir = params.getString("min_max_wind_dir");
-	std::string  winds_aloft = params.getString("winds_aloft");
-	std::string  min_max_wind_dir_aloft = params.getString("min_max_wind_dir_aloft");
-	std::string  cavok = params.getString("cavok");
-	std::string  visibility = params.getString("visibility");
-	std::string  rvr = params.getString("rvr");
-	std::string  present_conditions = params.getString("present_conditions");
-	std::string  partial_obscuration = params.getString("partial_obscuration");
-	std::string  sky_conditions = params.getString("sky_conditions");
-	std::string  temperature = params.getString("temperature");
-	std::string  altimeter = params.getString("altimeter");
 
 	bool valid = true;
 	if (!error.empty()) {
 		errorMessage << error << ": ";
 	}
 
-	if (!metar.set(Metar::STATION, station)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid station " << station;
-		valid = false;
-	}
-	metar.set(Metar::REPORT_TYPE, report_type);
-	if (!metar.set(Metar::AUTO, automated)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid report type " << report_type;
-		valid = false;
-	}
-	if (!metar.set(Metar::COR, cor)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid COR " << cor;
-		valid = false;
-	}
-	if (!metar.set(Metar::DATETIME, datetime)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid date time " << datetime;
-		valid = false;
-	}
-	if (!metar.set(Metar::NIL, nil)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid NIL " << nil;
-		valid = false;
-	}
-	if (!metar.set(Metar::SURFACE_WIND, surface_wind)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid surface wind " << surface_wind;
-		valid = false;
-	}
-	if (!metar.set(Metar::MIN_MAX_WIND_DIR, min_max_wind_dir)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid min/max wind direction " << min_max_wind_dir;
-		valid = false;
-	}
-	if (!metar.set(Metar::WINDS_ALOFT, winds_aloft)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid winds aloft " << winds_aloft;
-		valid = false;
-	}
-	if (!metar.set(Metar::MIN_MAX_WIND_DIR_ALOFT, min_max_wind_dir_aloft)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid min/max wind direction aloft " << min_max_wind_dir_aloft;
-		valid = false;
-	}
-	if (!metar.set(Metar::CAVOK, cavok)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid CAVOK " << cavok;
-		valid = false;
-	}
-	if (!metar.set(Metar::VISIBILITY, visibility)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid visibility " << visibility;
-		valid = false;
-	}
-	if (!metar.set(Metar::RVR, rvr)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid RVR " << rvr;
-		valid = false;
-	}
-	if (!metar.set(Metar::PRESENT_CONDITIONS, present_conditions)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid present conditions " << present_conditions;
-		valid = false;
-	}
-	if (!metar.set(Metar::PARTIAL_OBSCURATION, partial_obscuration)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid partial obscuration " << partial_obscuration;
-		valid = false;
-	}
-	if (!metar.set(Metar::SKY_CONDITIONS, sky_conditions)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid sky conditions " << sky_conditions;
-		valid = false;
-	}
-	if (!metar.set(Metar::TEMPERATURE, temperature)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid temperature " << temperature;
-		valid = false;
-	}
-	if (!metar.set(Metar::ALTIMETER, altimeter)) {
-		errorMessage << (valid ? "Metar error " : ", ");
-		errorMessage << "Invalid altimeter " << altimeter;
-		valid = false;
-	}
+	processMetarParam(params, Metar::STATION, "icao", metar, errorMessage, valid);
+	processMetarParam(params, Metar::REPORT_TYPE, "report_type", metar, errorMessage, valid);
+	processMetarParam(params, Metar::AUTO, "automated", metar, errorMessage, valid);
+	processMetarParam(params, Metar::COR, "cor", metar, errorMessage, valid);
+	processMetarParam(params, Metar::DATETIME, "datetime", metar, errorMessage, valid);
+	processMetarParam(params, Metar::NIL, "nil", metar, errorMessage, valid);
+	processMetarParam(params, Metar::SURFACE_WIND, "surface_wind", metar, errorMessage, valid);
+	processMetarParam(params, Metar::MIN_MAX_WIND_DIR, "min_max_wind_dir", metar, errorMessage, valid);
+	processMetarParam(params, Metar::WINDS_ALOFT, "winds_aloft", metar, errorMessage, valid);
+	processMetarParam(params, Metar::MIN_MAX_WIND_DIR_ALOFT, "min_max_wind_dir_aloft", metar, errorMessage, valid);
+	processMetarParam(params, Metar::CAVOK, "cavok", metar, errorMessage, valid);
+	processMetarParam(params, Metar::VISIBILITY, "visibility", metar, errorMessage, valid);
+	processMetarParam(params, Metar::RVR, "rvr", metar, errorMessage, valid);
+	processMetarParam(params, Metar::PRESENT_CONDITIONS, "present_conditions", metar, errorMessage, valid);
+	processMetarParam(params, Metar::PARTIAL_OBSCURATION, "partial_obscuration", metar, errorMessage, valid);
+	processMetarParam(params, Metar::SKY_CONDITIONS, "sky_conditions", metar, errorMessage, valid);
+	processMetarParam(params, Metar::TEMPERATURE, "temperature", metar, errorMessage, valid);
+	processMetarParam(params, Metar::ALTIMETER, "altimeter", metar, errorMessage, valid);
+	
 
 	if (!valid) {
 		error = errorMessage.str();

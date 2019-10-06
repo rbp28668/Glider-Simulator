@@ -14,6 +14,7 @@ class WeatherMessageHandler :
 	void processTheme(File& file, JSONWriter& json);
 	void tidy(std::string& value);
 
+	bool processMetarParam(const APIParameters& params, Metar::FieldType type, const char* pszName, Metar& metar, std::ostringstream& errorMessage, bool& valid);
 	bool buildMetar(const APIParameters& params, Metar& metar, std::string& error);
 public:
 	WeatherMessageHandler(Prepar3D* p3d);

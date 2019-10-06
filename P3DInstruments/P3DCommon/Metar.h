@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 
 // See SimConnect_WeatherSetObservation for details of metar format.
 // http://www.prepar3d.com/SDKv4/sdk/simconnect_api/references/world_functions.html#Metar%20Data%20Format
@@ -30,21 +31,37 @@ public:
 	};
 
 private:
-	std::string fields[FIELD_COUNT];
-	static const char* regex[FIELD_COUNT];
+	using Field = std::vector<std::string>;
 
-	void skipSpaces(std::string::iterator& pos);
-	std::string match(const char* pszRegex, std::string::iterator& pos, const std::string::iterator& end);
-	void parseField(FieldType field, std::string::iterator& pos, const std::string::iterator& end);
-	
+	struct FieldDefinition {
+		FieldType type;
+		const char* name;
+		const char* regex;
+		bool multiple;
+	};
+
+	Field fields[FIELD_COUNT];
+	static FieldDefinition definitions[FIELD_COUNT];
+
+	void skipSpaces(std::string::const_iterator& pos);
+	std::string match(const char* pszRegex, std::string::const_iterator& pos, const std::string::const_iterator& end);
+	bool parseSingleField(FieldType field, std::string::const_iterator& pos, const std::string::const_iterator& end);
+	bool parseField(FieldType field, std::string::const_iterator& pos, const std::string::const_iterator& end);
+	void clear();
+	bool outputField(FieldType ft, std::string& output, bool needsSpace) const;
+	void showField(FieldType field, std::string& text) const;
 
 public:
 	Metar();
-	Metar(const char* pszMetar);
+	Metar(const std::string& metar);
 	std::string text() const;
-	void parse(const char* pszMetar);
+	std::string show() const;
+	std::string parse(const std::string& metar);
 	void merge(const Metar& metar);
 	bool set(FieldType field, const std::string& value); // true if successful set, false if invalid format
+	bool add(FieldType field, const std::string& value); // true if successful set, false if invalid format
 	std::string get(FieldType field) const;
+	bool multiple(FieldType field) const;
+	const char* typeName(FieldType field) const;
 };
 
