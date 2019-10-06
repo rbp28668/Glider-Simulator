@@ -3,8 +3,10 @@
 #include "stdafx.h"
 #include <SimConnect.h>
 #include <vector>
-#include "../P3DCommon/SimObjectList.h"
-#include "../P3DCommon/SimObjectDataRequestList.h"
+#include "SimObjectList.h"
+#include "SimObjectDataRequestList.h"
+#include "WeatherStation.h"
+#include "WeatherStations.h"
 
 class SimObjectDataRequest;
 
@@ -25,6 +27,9 @@ class Prepar3D
 	SimObjectList simObjects; // keyed by object ID (eventually).
 	SimObjectDataRequestList dataRequests; // keyed by request ID
 	bool waitingDataRequests;
+
+	WeatherStations wxStations;
+
 
     static void CALLBACK DispatchCallback(SIMCONNECT_RECV *pData, DWORD cbData, void *pContext);
     void Process(SIMCONNECT_RECV *pData, DWORD cbData);
@@ -49,6 +54,7 @@ class Prepar3D
 	void handleSimObjectData(SIMCONNECT_RECV* pData);
 	void handleSimObjectDataByType(SIMCONNECT_RECV* pData);
 	void handleAssignedObjectId(SIMCONNECT_RECV* pData);
+	void handleWeatherObservation(SIMCONNECT_RECV* pData);
 
 public:
 
@@ -62,6 +68,8 @@ public:
 	bool isCrashed() const { return crashed; }
 	bool isVerbose() const { return verbose; } 
 	void setVerbose(bool isVerbose) { verbose = isVerbose; }
+
+	WeatherStations& weatherStations() { return wxStations; }
 
     void Dispatch();
 	void DispatchLoop();

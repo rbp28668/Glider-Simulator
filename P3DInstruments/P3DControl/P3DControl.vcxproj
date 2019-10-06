@@ -177,6 +177,7 @@
     <ClInclude Include="MessageHandler.h" />
     <ClInclude Include="MessageThread.h" />
     <ClInclude Include="P3DEventCommand.h" />
+    <ClInclude Include="P3DInstallationDirectory.h" />
     <ClInclude Include="PositionMessageHandler.h" />
     <ClInclude Include="QuitHandler.h" />
     <ClInclude Include="RecordMessageHandler.h" />
@@ -189,6 +190,7 @@
     <ClInclude Include="ThermalMessageHandler.h" />
     <ClInclude Include="Thread.h" />
     <ClInclude Include="TrafficMessageHandler.h" />
+    <ClInclude Include="WeatherMessageHandler.h" />
     <ClInclude Include="WideConverter.h" />
   </ItemGroup>
   <ItemGroup>
@@ -219,6 +221,7 @@
     <ClCompile Include="EventMessageHandler.cpp" />
     <ClCompile Include="MessageThread.cpp" />
     <ClCompile Include="P3DEventCommand.cpp" />
+    <ClCompile Include="P3DInstallationDirectory.cpp" />
     <ClCompile Include="PositionMessageHandler.cpp" />
     <ClCompile Include="QuitHandler.cpp" />
     <ClCompile Include="RecordMessageHandler.cpp" />
@@ -235,6 +238,7 @@
     <ClCompile Include="ThermalMessageHandler.cpp" />
     <ClCompile Include="Thread.cpp" />
     <ClCompile Include="TrafficMessageHandler.cpp" />
+    <ClCompile Include="WeatherMessageHandler.cpp" />
     <ClCompile Include="WideConverter.cpp" />
   </ItemGroup>
   <ItemGroup>

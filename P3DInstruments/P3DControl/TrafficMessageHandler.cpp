@@ -8,6 +8,7 @@
 #include "Folder.h"
 #include "JSONWriter.h"
 #include "WideConverter.h"
+#include "P3DInstallationDirectory.h"
 
 
 std::string TrafficMessageHandler::getAircraftTitle(const std::string& path) {
@@ -24,7 +25,7 @@ std::string TrafficMessageHandler::getAircraftTitle(const std::string& path) {
 	char ch0, ch1;
 	ifs >> ch0 >> ch1;
 
-	std::cout << (int)ch0 << "," << (int)ch1 << std::endl;
+	//std::cout << (int)ch0 << "," << (int)ch1 << std::endl;
 
 	if (-1 == (int)ch0 && -2 == (int)ch1) { // UTF-16
 		std::wstring line;
@@ -78,38 +79,6 @@ std::string TrafficMessageHandler::getAircraftTitle(const std::string& path) {
 	return title;
 }
 
-std::string TrafficMessageHandler::getInstallationDirectory() {
-	// Look for AppPath value under key:
-	// Computer\HKEY_CURRENT_USER\Software\Lockheed Martin\Prepar3D v4
-	HKEY hkeyLM;
-	std::string appDir;
-
-	LSTATUS stat = ::RegOpenKeyExA(HKEY_CURRENT_USER,
-		"Software\\Lockheed Martin",
-		0,
-		KEY_READ,
-		&hkeyLM);
-	if (stat == ERROR_SUCCESS )	{
-		char* subKey = "Prepar3D v4";
-		char* value = "AppPath";
-		DWORD dwType;
-		char result[1024];
-		DWORD size = sizeof(result);
-		stat = ::RegGetValueA(hkeyLM, subKey, value, RRF_RT_REG_SZ, &dwType, result, &size);
-		if (stat != ERROR_SUCCESS) {
-			::RegCloseKey(hkeyLM);
-			throw FileException("Unable to get P3d installation folder(read value)", stat);
-		}
-
-		appDir = std::string(result);
-	}
-	else {
-		throw FileException("Unable to get P3d installation folder (open registry key)", stat);
-	}
-
-	::RegCloseKey(hkeyLM);
-	return appDir;
-}
 
 
 TrafficMessageHandler::TrafficMessageHandler(Prepar3D* p3d)
@@ -201,7 +170,7 @@ void TrafficMessageHandler::launch(const std::string& targetName, const std::str
 void TrafficMessageHandler::availableAircraft(std::string& output)
 {
 	try {
-		Directory p3dInstall = Directory(getInstallationDirectory());
+		P3DInstallationDirectory p3dInstall;
 		Directory airplanesFolder = p3dInstall.sub("SimObjects").sub("Airplanes");
 
 		Directory::ListT folders;

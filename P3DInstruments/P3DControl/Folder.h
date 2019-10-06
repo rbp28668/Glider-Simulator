@@ -22,7 +22,7 @@ public:
 	File(const std::string& path) : path(path) {}
 	File(const char* path) : path(path) {}
 
-	const std::string& name() const { return path; }
+	const std::string name() const;
 	operator const std::string&() const { return path; }
 	explicit operator const char*() const { return path.c_str(); }
 	bool exists() const;

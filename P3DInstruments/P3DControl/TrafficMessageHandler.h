@@ -9,7 +9,6 @@ class TrafficMessageHandler :
 {
 	Simulator* pSim;
 
-	std::string getInstallationDirectory();
 	std::string getAircraftTitle(const std::string& path);
 public:
 	TrafficMessageHandler(Prepar3D* p3d);

@@ -5,6 +5,8 @@
 #include <sstream>
 #include "Prepar3D.h"
 #include "SimObjectDataRequest.h"
+#include "Metar.h"
+#include "WeatherStations.h"
 
 // Folder in documents that P3D uses for its files.
 const char* Prepar3D::DOCUMENTS = "Prepar3D v4 Files";
@@ -21,7 +23,8 @@ Prepar3D::Prepar3D(const char* appName, bool verbose)
 	verbose(verbose),
 	waitingDataRequests(false),
 	requestIdSequence(0),
-	simObjects(this)
+	simObjects(this),
+	wxStations(this)
 
 {	
 	connect(appName);
@@ -42,6 +45,7 @@ void Prepar3D::connect(const char* appName)
 		if (connected = SUCCEEDED(SimConnect_Open(&hSimConnect, appName, NULL, 0, 0, 0))) {
 			showLastRequest("Connected to Prepar3D");
 			registerSystemEvents();
+			weatherStations().refresh(); // make sure global is initialised initially
 		}
 		else {  // Failed to connect on this attempt
 			if (attemptCount >= 10) {
@@ -90,7 +94,6 @@ void Prepar3D::subscribeToSystemEvent(EVENT_ID event, const char* name, const ch
 	{
 		std::cerr << pszFailureMessage << std::endl;
 		exit(2);
-
 	}
 }
 
@@ -121,6 +124,7 @@ void Prepar3D::handleSystemEvent(SIMCONNECT_RECV* pData)
 		// Defer creation of SimConnect requests until the sim proper has started.
 		dataRequests.createRequests();
 		waitingDataRequests = false;
+		weatherStations().refresh();
 		started = true;
 
 		if (isVerbose()) {
@@ -136,6 +140,9 @@ void Prepar3D::handleSystemEvent(SIMCONNECT_RECV* pData)
 	case EVENT_PAUSE:
 		logEvent("Paused", evt->dwData);
 		paused = (evt->dwData != 0);
+		if (!paused) {
+			weatherStations().refresh();
+		}
 		break;
 
 	case EVENT_SIM:
@@ -145,6 +152,7 @@ void Prepar3D::handleSystemEvent(SIMCONNECT_RECV* pData)
 			dataRequests.createRequests();
 			waitingDataRequests = false;
 		}
+		weatherStations().refresh();
 		break;
 
 	case EVENT_CRASHED:
@@ -219,6 +227,16 @@ void Prepar3D::handleAssignedObjectId(SIMCONNECT_RECV* pData)
 	simObjects.associate(requestId, objectId); 
 }
 
+void Prepar3D::handleWeatherObservation(SIMCONNECT_RECV* pData)
+{
+	SIMCONNECT_RECV_WEATHER_OBSERVATION* pwxData = (SIMCONNECT_RECV_WEATHER_OBSERVATION*)pData;
+	const char* pszMETAR = (const char*) &(pwxData->szMetar);
+	wxStations.update(pszMETAR);
+	if (verbose) {
+		std::cout << pszMETAR << std::endl;
+	}
+}
+
 void Prepar3D::showLastRequest(const char* name)
 {
 	if (verbose) {
@@ -278,6 +296,10 @@ void Prepar3D::Process(SIMCONNECT_RECV *pData, DWORD cbData)
  
 	case SIMCONNECT_RECV_ID_ASSIGNED_OBJECT_ID:
 		handleAssignedObjectId(pData);
+		break;
+
+	case SIMCONNECT_RECV_ID_WEATHER_OBSERVATION:
+		handleWeatherObservation(pData);
 		break;
 
     case SIMCONNECT_RECV_ID_QUIT: 

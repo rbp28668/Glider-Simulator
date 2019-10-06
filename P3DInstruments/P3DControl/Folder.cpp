@@ -77,7 +77,7 @@ File::ListT& Directory::files(File::ListT& fileList, const std::string& filter)
 
 	do {
 		if ((ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-			fileList.push_back(ffd.cFileName);
+			fileList.push_back(file(ffd.cFileName));
 		}
 	} while (FindNextFileA(hFind, &ffd) != 0);
 	dwError = GetLastError();
@@ -127,6 +127,17 @@ Directory::ListT& Directory::folders(Directory::ListT& folderList, const std::st
 
 	return folderList;
 
+}
+
+const std::string File::name() const
+{
+	size_t pos = path.find_last_of('\\');
+	if (pos != std::string::npos) {
+		return path.substr(pos+1);
+	}
+	else {
+		return path;
+	}
 }
 
 bool File::exists() const

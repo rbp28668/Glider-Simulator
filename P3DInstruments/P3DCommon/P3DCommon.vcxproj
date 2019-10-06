@@ -153,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IndexedList.h" />
+    <ClInclude Include="Metar.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="P3DCommon.h" />
     <ClInclude Include="Prepar3D.h" />
@@ -166,9 +167,12 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TCPClient.h" />
     <ClInclude Include="UDPClient.h" />
+    <ClInclude Include="WeatherStation.h" />
+    <ClInclude Include="WeatherStations.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IndexedList.cpp" />
+    <ClCompile Include="Metar.cpp" />
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="P3DCommon.cpp" />
     <ClCompile Include="Prepar3D.cpp" />
@@ -185,6 +189,8 @@
     </ClCompile>
     <ClCompile Include="TCPClient.cpp" />
     <ClCompile Include="UDPClient.cpp" />
+    <ClCompile Include="WeatherStation.cpp" />
+    <ClCompile Include="WeatherStations.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="P3DCommon.rc" />
