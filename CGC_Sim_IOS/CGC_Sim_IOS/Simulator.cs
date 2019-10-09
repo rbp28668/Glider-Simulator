@@ -1,0 +1,745 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Diagnostics;
+using LockheedMartin.Prepar3D.SimConnect;
+//using System.Runtime.InteropServices;
+
+namespace CGC_Sim_IOS
+{
+
+
+    public enum DataRequestID
+    {
+        Weather_Data = 0,
+        Location_Data = 1,
+    }
+
+    enum REQUESTS
+    {
+        REQUEST_4S,
+        REQUEST_SIMSTATE,
+    }
+
+    enum EVENTS
+    {
+        SIMSTART,
+        FOURSECS,
+        SIMSTOP,
+        PAUSE,
+        PAUSE_TOGGLE, //set pause
+        ABORT, //Quit without message
+        CLOCK, //Hours of Local Time
+        SLEW,
+        SLEW_FREEZE,
+        SLEW_LEFT,
+        SLEW_RIGHT,
+        SLEW_AHEAD_PLUS,
+        SLEW_AHEAD_MINUS,
+        AXIS_SLEW_AHEAD_SET,
+        SLEW_HEADING_PLUS,
+        SLEW_HEADING_MINUS,
+        SLEW_ALTIT_PLUS,
+        SLEW_ALTIT_MINUS,
+        SLEW_ALTIT_UP_SLOW,
+        SLEW_ALTIT_DN_SLOW,
+        SLEW_ALTIT_UP_FAST,
+        SLEW_ALTIT_DN_FAST,
+        TOW_PLANE_REQUEST,
+        TOW_PLANE_RELEASE,
+        SITUATION_RESET,
+        SITUATION_SAVE,
+    }
+
+
+    enum GROUP_IDS
+    {
+        GROUP_0,
+        GROUP_1,
+    }
+
+    enum MetarElementType
+    {
+        Station_ID,
+        Report_Type,
+        Auto,
+        Corrected,
+        DateTime,
+        Nil,
+        SurfaceWind,
+        SurfaceWindExtension,
+        WindsAloft,
+        WindsAloftExtension,
+        MinMaxWindDir,
+        Cavok,
+        Visibility,
+        RunwayVisualRange,
+        PresentConditions,
+        PartialObscuration,
+        SkyConditions,
+        SkyConditionsExtension,
+        Temperature,
+        TemperatureExtension,
+        Altimeter,
+        WindsToFollow,
+        Unknown,
+    }
+
+    class Simulator
+    {
+
+        // User-defined win32 event 
+        const int WM_USER_SIMCONNECT = 0x0402;
+        #region Private Properties
+
+        private Process[] processes;
+        private string procName = "Prepar3D";
+        private static bool isP3DRunning = false;
+
+        private SimConnect simConnection = null;
+
+        private readonly Metar currentMetar = new Metar();
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// The Logic member
+        /// </summary>
+        public SimConnect SimConnection
+        {
+            get
+            {
+                return simConnection;
+            }
+        }
+
+        public bool IsP3DRunning
+        {
+            get
+            {
+                return isP3DRunning;
+            }
+        }
+
+        public Metar CurrentMetar
+        {
+            get
+            {
+                return currentMetar;
+            }
+        }
+
+        #endregion
+
+        public bool OpenSimConnection(IntPtr handle)
+        {
+            bool rc = false;
+            try
+            {
+                simConnection = new SimConnect("CGC_IOS", handle, WM_USER_SIMCONNECT, null, 0);
+                if (simConnection != null)
+                {
+                    rc = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                // We were unable to connect so let the user know why. 
+                System.Console.WriteLine("Sim Connect unable to connect to Prepar3D!\n\n{0}\n\n{1}",
+                                         ex.Message, ex.StackTrace);
+            }
+            return rc;
+        }
+
+
+        public void CloseSimConnection()
+        {
+            if (simConnection != null)
+            {
+                simConnection.Dispose();
+                simConnection = null;
+            }
+        }
+
+
+        public void StartP3D(string initialScenario)
+        {
+            if (isP3DRunning == false)
+            {
+                // Launch P3D
+                ProcessStartInfo start = new ProcessStartInfo();
+                // Do you want to show a console window?
+                start.WindowStyle = ProcessWindowStyle.Hidden;
+                start.CreateNoWindow = false;
+                start.FileName = "C:\\SimP3D\\Lockheed Martin\\Prepar3D v4\\Prepar3D.exe";
+
+                if (initialScenario == "")
+                {
+                    Process proc = Process.Start(start);
+                }
+                else
+                {
+                    string args = "-fxml: " + initialScenario;
+                    Process proc = Process.Start(start.FileName,args,null,null,null);
+                }
+            }
+        }
+
+        public void KillP3D()
+        {
+            processes = Process.GetProcessesByName(procName);
+            foreach (Process proc in processes)
+            {
+                Process tempProc = Process.GetProcessById(proc.Id);
+                tempProc.CloseMainWindow();
+                tempProc.WaitForExit();
+            }
+
+        }
+
+        public void WeatherRequest()
+        {
+            if (simConnection != null)
+            {
+                simConnection.WeatherSetModeGlobal();
+                float lat = 0;
+                float lng = 0;
+                simConnection.WeatherRequestObservationAtNearestStation(DataRequestID.Weather_Data, lat, lng);
+            }
+        }
+
+        public void WeatherSetWind()
+        {
+            try
+            {
+                string newMetar = CurrentMetar.MetarString;
+                System.Console.WriteLine("Put Weather Data: " + newMetar);
+                simConnection.WeatherSetModeGlobal();
+                //simConnection.WeatherSetModeCustom();
+                simConnection.WeatherSetObservation(0, newMetar);
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine("Problem Setting Weather!\n\n{0}\n\n{1}",
+                                          ex.Message, ex.StackTrace);
+            }
+        }
+
+        #region Constructor / Destructor
+
+        public Simulator()
+        {
+        }
+
+        ~Simulator()
+        {
+            CloseSimConnection();
+        }
+
+
+        #endregion
+      
+    }
+
+    class MetarElement
+    {
+        
+        public MetarElementType ElementType { get; set; }
+
+        public string ElementTypeStr()
+        {
+            string str = "???";
+            switch (ElementType)
+            {
+                case (MetarElementType.Station_ID):
+                    str = "Station_ID";
+                    break;
+                case (MetarElementType.Report_Type):
+                    str = "Report_Type";
+                    break;
+                case (MetarElementType.Auto):
+                    str = "Auto";
+                    break;
+                case (MetarElementType.Corrected):
+                    str = "Corrected";
+                    break;
+                case (MetarElementType.DateTime):
+                    str = "DateTime";
+                    break;
+                case (MetarElementType.Nil):
+                    str = "Nil";
+                    break;
+                case (MetarElementType.SurfaceWind):
+                    str = "SurfaceWind";
+                    break;
+                case (MetarElementType.SurfaceWindExtension):
+                    str = "SurfaceWindExtension";
+                    break;
+                case (MetarElementType.WindsAloft):
+                    str = "WindsAloft";
+                    break;
+                case (MetarElementType.WindsAloftExtension):
+                    str = "WindsAloftExtension";
+                    break;
+                case (MetarElementType.MinMaxWindDir):
+                    str = "MinMaxWindDir";
+                    break;
+                case (MetarElementType.Cavok):
+                    str = "Cavok";
+                    break;
+                case (MetarElementType.Visibility):
+                    str = "Visibility";
+                    break;
+                case (MetarElementType.RunwayVisualRange):
+                    str = "RunwayVisualRange";
+                    break;
+                case (MetarElementType.PresentConditions):
+                    str = "PresentConditions";
+                    break;
+                case (MetarElementType.PartialObscuration):
+                    str = "PartialObscuration";
+                    break;
+                case (MetarElementType.SkyConditions):
+                    str = "SkyConditions";
+                    break;
+                case (MetarElementType.SkyConditionsExtension):
+                    str = "SkyConditionsExtension";
+                    break;
+                case (MetarElementType.Temperature):
+                    str = "Temperature";
+                    break;
+                case (MetarElementType.TemperatureExtension):
+                    str = "TemperatureExtension";
+                    break;
+                case (MetarElementType.Altimeter):
+                    str = "Altimeter";
+                    break;
+                case (MetarElementType.WindsToFollow):
+                    str = "WindsToFollow";
+                    break;
+                case (MetarElementType.Unknown):
+                    str = "Unknown";
+                    break;
+            }
+            return str;
+        }
+
+        protected string subString = "";
+
+        public virtual string SubString
+        {
+            get
+            {
+                if (ElementType == MetarElementType.Station_ID)
+                    return "GLOB";
+                else
+                    return subString;
+            }
+            set
+            {
+                subString = value;
+            }
+        }
+
+        public MetarElement(MetarElementType value, string str)
+        {
+            ElementType = value;
+            SubString = str;
+            if (ElementType != MetarElementType.SurfaceWind)
+                System.Console.WriteLine("MetarElement type : " + ElementTypeStr() + "  " + SubString);
+
+        }
+    }
+
+    class MetarWind : MetarElement
+    {
+        public string DirectionDescription { get; set; } = "";
+        public int Speed { get; set; } = 0;
+        public int Direction { get; set; } = 0;
+        public int Gust { get; set; } = 0;
+        public int DepthInMeters { get; set; } = 3000;
+        public string Units { get; set; } = "";
+        private List<String> extensions = new List<String>();
+
+        public string MetarString
+        {
+            get
+            {
+                return "XXXX";
+            }
+        }
+
+        public MetarWind(MetarElementType value, string str,  string units) : base(value, str)
+        {
+            // parse the str for speed and direction
+            Direction = (int)Convert.ToInt32((str.Substring(0, 3)));
+            Speed = (int)Convert.ToInt32((str.Substring(3, 2)));
+            Units = units;
+
+            int i = 0;
+            i = str.IndexOf("G");
+            if ((i == 5) || (i == 6))
+            {
+                // has gusts
+                Gust = (int)Convert.ToInt32((str.Substring(i + 1,2)));
+                Console.WriteLine("Gusts {0}", Gust);
+            }
+
+            i = str.IndexOf("&");
+            if ( i >= 0)
+            {
+                Extension = str.Substring(i);
+            }
+            System.Console.WriteLine("MetarElement type : " + ElementTypeStr() + "  " + SubString);
+
+        }
+
+        public MetarWind(MetarElementType value, string str, int Speed, int Direction) : base (value, str)
+        {
+
+        }
+
+        public override string SubString
+        {
+            get
+            {
+                subString = Direction.ToString().PadLeft(3, '0');
+                subString += Speed.ToString().PadLeft(2, '0');
+                if (Gust != 0)
+                {
+                    subString += "G" + Gust.ToString().PadLeft(2, '0');
+                }
+                subString += Units;
+                subString += Extension;
+                return subString;
+            }
+
+            set
+            {
+                subString = value;
+            }
+        }
+
+        public string Extension
+        {
+            get
+            {
+                string value = "";
+                if (extensions.Count == 3)
+                {
+                    value += extensions[0];
+                    if (DepthInMeters > 0)
+                    {
+                        value += DepthInMeters.ToString();
+                    }
+                    else
+                    {
+                        value += extensions[1];
+                    }
+                    value += extensions[2];
+                }
+                else
+                {
+                    foreach (string item in extensions)
+                    {
+                        value += item;
+                    }
+                }
+                return value;
+            }
+            set
+            {
+                int i = value.IndexOf("&");
+                if (i >= 0)
+                {
+                    extensions.Add(value.Substring(0,2));
+                    extensions.Add(value.Substring(2, value.Length-4));
+                    extensions.Add(value.Substring(value.Length-2));
+                }
+            }
+        }
+
+    }
+
+    class Metar
+    {
+        private string setMetarString = "";
+        private string builtMetarString = "";
+        private List<string> currentMetarElements = new List<String>();
+        private List<MetarElement> metarElements = new List<MetarElement>();
+
+        public string MetarString
+        {
+            get
+            {
+                builtMetarString = "";
+                // Build metar string from array of elements
+                int surfaceWindElements = 0;
+                //bool windsAloft = false;
+                foreach (var element in metarElements)
+                {
+                    // Discard all but the first Surface Wind elements.
+                    if (element.ElementType == MetarElementType.SurfaceWind)
+                    {
+                        if (surfaceWindElements == 0)
+                        {
+                            builtMetarString += element.SubString + " ";
+                            surfaceWindElements++;
+                        }
+                    }
+                    else if (element.ElementType != MetarElementType.WindsAloft &&
+                        element.ElementType != MetarElementType.WindsAloftExtension &&
+                        element.ElementType != MetarElementType.WindsToFollow)
+                    {
+                        builtMetarString += element.SubString + " ";
+                    }
+                }
+                builtMetarString.Trim();
+                return builtMetarString;
+            }
+            set
+            {
+                setMetarString = value;
+                // split into subsections
+
+                currentMetarElements.Clear();
+                char[] delimiterChars = { ' ' };
+                string[] words = setMetarString.Split(delimiterChars);
+                foreach (var entry in words)
+                {
+                    currentMetarElements.Add(entry);
+                    Console.WriteLine(entry);
+                }
+                ParseCurrentMetarElements();
+            }
+        }
+
+        public int SurfaceWindSpeed
+        {
+            get
+            {
+                if (metarElements.Count > 0)
+                {
+                    foreach (var item in metarElements)
+                    {
+                        if (item.ElementType == MetarElementType.SurfaceWind)
+                        {
+                            MetarWind mwItem = (MetarWind)item;
+                            return mwItem.Speed;
+                        }
+                    }
+                }
+                return 0;
+            }
+            set
+            {
+                if (metarElements.Count > 0)
+                {
+                    foreach (var item in metarElements)
+                    {
+                        if (item.ElementType == MetarElementType.SurfaceWind)
+                        {
+                            MetarWind mwItem = (MetarWind)item;
+                            mwItem.Speed = value;
+                        }
+                    }
+                }
+            }
+        }
+
+        public int SurfaceWindDirection
+        {
+            get
+            {
+                if (metarElements.Count > 0)
+                {
+                    foreach (var item in metarElements)
+                    {
+                        if (item.ElementType == MetarElementType.SurfaceWind)
+                        {
+                            MetarWind mwItem = (MetarWind)item;
+                            return mwItem.Direction;
+                        }
+                    }
+                }
+                return 0;
+            }
+            set
+            {
+                if (metarElements.Count > 0)
+                {
+                    foreach (var item in metarElements)
+                    {
+                        if (item.ElementType == MetarElementType.SurfaceWind)
+                        {
+                            MetarWind mwItem = (MetarWind)item;
+                            mwItem.Direction = value;
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool IsWindSpeedEntry(string entry, out string units)
+        {
+            bool bRc = false;
+            units = "";
+            // check for units
+            if ((entry.Contains("KT") || entry.Contains("MPS") || entry.Contains("KMH")))
+            {
+                int i = 0;
+                i = entry.IndexOf("KT");
+                if ((i == 4) || (i == 5) || (i == 8) || (i == 9))
+                {
+                    units = "KT";
+                    bRc = true;
+                }
+                else
+                {
+                    i = entry.IndexOf("MPS");
+                    if ((i == 4) || (i == 5) || (i == 8) || (i == 9))
+                    {
+                        units = "MPS";
+                        bRc = true;
+                    }
+                    else
+                    {
+                        i = entry.IndexOf("KMH");
+                        if ((i == 4) || (i == 5) || (i == 8) || (i == 9))
+                        {
+                            units = "KMH";
+                            bRc = true;
+                        }
+                    }
+                }
+            }
+            return bRc;
+        }
+
+        private void ParseCurrentMetarElements()
+        {
+            metarElements.Clear();
+            int numElements = currentMetarElements.Count;
+            bool bWindsToFollow = false;
+
+            if (numElements > 6)
+            {
+                int index = 0;
+                foreach (var entry in currentMetarElements)
+                {
+                    if (index == 0)
+                    {
+                        MetarElement item = new MetarElement(MetarElementType.Station_ID, entry);
+                        metarElements.Add(item);
+                        index++;
+                    }
+                    else
+                    {
+                        if (entry.Contains("METAR") || entry.Contains("SPECI"))
+                        {
+                            MetarElement item = new MetarElement(MetarElementType.Report_Type, entry);
+                            metarElements.Add(item);
+                            index++;
+                        }
+                        else
+                        {
+                            if (entry.Contains("AUTO"))
+                            {
+                                MetarElement item = new MetarElement(MetarElementType.Auto, entry);
+                                metarElements.Add(item);
+                                index++;
+                            }
+                            else
+                            {
+                                if (entry.Contains("COR"))
+                                {
+                                    MetarElement item = new MetarElement(MetarElementType.Corrected, entry);
+                                    metarElements.Add(item);
+                                    index++;
+                                }
+                                else
+                                {
+                                    if (entry.Contains("NIL"))
+                                    {
+                                        MetarElement item = new MetarElement(MetarElementType.Nil, entry);
+                                        metarElements.Add(item);
+                                        index++;
+                                    }
+                                    else
+                                    {
+                                        // test for windspeed
+                                        string units = "";
+                                        if (IsWindSpeedEntry(entry, out units))
+                                        {
+                                            MetarElement item = new MetarWind(MetarElementType.SurfaceWind, entry, units);
+                                            metarElements.Add(item);
+                                            index++;
+                                        }
+                                        else
+                                        {
+                                            if ((entry.Length == 7) && (entry.Substring(3, 1) == "V"))
+                                            {
+                                                MetarElement item = new MetarElement(MetarElementType.MinMaxWindDir, entry);
+                                                metarElements.Add(item);
+                                                index++;
+                                            }
+                                            else
+                                            {
+                                                if (entry.Contains("CAVOK"))
+                                                {
+                                                    MetarElement item = new MetarElement(MetarElementType.Cavok, entry);
+                                                    metarElements.Add(item);
+                                                    index++;
+                                                }
+                                                else
+                                                {
+                                                    if ((entry.Length == 6) && (entry.Substring(0, 1) == "A") || ((entry.Length == 6) && (entry.Substring(0, 1) == "Q")))
+                                                    {
+                                                        MetarElement item = new MetarElement(MetarElementType.Altimeter, entry);
+                                                        metarElements.Add(item);
+                                                        index++;
+                                                    }
+                                                    else
+                                                    {
+                                                        if (entry == "@@@")
+                                                        {
+                                                            MetarElement item = new MetarElement(MetarElementType.WindsToFollow, entry);
+                                                            metarElements.Add(item);
+                                                            bWindsToFollow = true;
+                                                            index++;
+                                                        }
+                                                        else
+                                                        {
+                                                            if (bWindsToFollow == false)
+                                                            {
+                                                                MetarElement item = new MetarElement(MetarElementType.Unknown, entry);
+                                                                metarElements.Add(item);
+                                                                index++;
+                                                            }
+                                                            else
+                                                            {
+                                                                MetarElement item = new MetarElement(MetarElementType.WindsAloft, entry);
+                                                                metarElements.Add(item);
+                                                                index++;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+//                    System.Console.WriteLine("Index {0} ", index);
+                }
+            }
+        }
+    }
+}
+ 
