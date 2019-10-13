@@ -11,7 +11,7 @@ class EventMessageHandler : public MessageHandler
 	P3DEventCommand commands;
 public:
 	EventMessageHandler(Prepar3D* p3d);
-	~EventMessageHandler();
+	virtual ~EventMessageHandler();
 	virtual void run(const std::string& cmd, const APIParameters& params, std::string& output);
 
 };

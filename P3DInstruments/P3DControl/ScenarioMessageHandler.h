@@ -7,7 +7,7 @@ class ScenarioMessageHandler :
 
 public:
 	ScenarioMessageHandler(Prepar3D* p3d);
-	~ScenarioMessageHandler();
+	virtual ~ScenarioMessageHandler();
 
 	virtual void run(const std::string& cmd, const APIParameters& params, std::string& output);
 

@@ -10,6 +10,7 @@
 #include "FailuresMessageHandler.h"
 #include "TrafficMessageHandler.h"
 #include "WeatherMessageHandler.h"
+#include "IgcMessageHandler.h"
 #include "QuitHandler.h"
 #include "JSONWriter.h"
 #include "APIParameters.h"
@@ -25,6 +26,7 @@ CommandInterpreter::CommandInterpreter(Prepar3D* pSim)
 	add(new FailuresMessageHandler(pSim));
 	add(new TrafficMessageHandler(pSim));
 	add(new WeatherMessageHandler(pSim));
+	add(new IgcMessageHandler(pSim));
 }
 
 CommandInterpreter::~CommandInterpreter()

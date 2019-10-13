@@ -14,7 +14,8 @@ private:
 	DWORD limit;
 	
 	Prepar3D* pSim;
-	SimObjectData* pData;
+	SimObjectData* pData;   // Request this data
+	SimObject* pSimObject;  // for this object
 
 	SIMCONNECT_DATA_REQUEST_ID requestId;
 
@@ -24,12 +25,7 @@ public:
 
 	SIMCONNECT_DATA_REQUEST_ID getId() { return requestId; }
 
-	void setPeriod(SIMCONNECT_PERIOD period) { this->period = period; }
-	void setOrigin(DWORD origin) { this->origin = origin; }
-	void setInterval(DWORD interval) { this->interval = interval; }
-    void setLimit(DWORD limit) { this->limit = limit; }
-
-	SimObjectDataRequest(Prepar3D* pSim, SimObjectData* pData, SIMCONNECT_PERIOD period = SIMCONNECT_PERIOD_VISUAL_FRAME);
+	SimObjectDataRequest(Prepar3D* pSim, SimObjectData* pData, SimObject* pSimObject, SIMCONNECT_PERIOD period = SIMCONNECT_PERIOD_VISUAL_FRAME, DWORD origin = 0, DWORD interval = 0, DWORD limit = 0);
 	virtual ~SimObjectDataRequest(void);
 
 	void createRequest(void);

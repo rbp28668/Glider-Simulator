@@ -46,7 +46,7 @@ public:
 	virtual DataItem* items();
 	virtual int itemCount();
 
-	virtual void onData(void* pData);
+	virtual void onData(void* pData, SimObject* pObject);
 
 	SimState(Prepar3D* pSim);
 	~SimState();

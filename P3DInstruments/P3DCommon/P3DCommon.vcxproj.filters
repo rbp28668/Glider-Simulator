@@ -75,6 +75,12 @@
     <ClInclude Include="WeatherStations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ExternalSim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ExternalSimVehicle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -120,6 +126,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WeatherStations.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ExternalSim.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ExternalSimVehicle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

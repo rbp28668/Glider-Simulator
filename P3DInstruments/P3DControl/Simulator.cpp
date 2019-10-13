@@ -12,9 +12,9 @@ Simulator::Simulator(const char* appName, bool verbose)
 	, failuresRequest(0)
 {
 	state = new SimState(this);
-	stateRequest = new SimObjectDataRequest(this, state, SIMCONNECT_PERIOD_SECOND);
+	stateRequest = new SimObjectDataRequest(this, state, &userAircraft(), SIMCONNECT_PERIOD_SECOND);
 	failures = new Failures(this);
-	failuresRequest = new SimObjectDataRequest(this, failures, SIMCONNECT_PERIOD_SECOND);
+	failuresRequest = new SimObjectDataRequest(this, failures, &userAircraft(), SIMCONNECT_PERIOD_SECOND);
 }
 
 Simulator::~Simulator()

@@ -9,13 +9,32 @@ SimObject::SimObject(Prepar3D* p3d, DWORD requestId)
 {
 }
 
+SimObject::SimObject(Prepar3D* p3d)
+	: p3d(p3d)
+	, requestId(-1)
+	, objectId((DWORD)-1)
+{
+}
+
+void SimObject::onCreate()
+{
+	// Default behaviour is no operation.
+}
+
 SimObject::~SimObject()
 {
+	// Kill off in P3D first so we don't get events for dead objects.
 	::SimConnect_AIRemoveObject(p3d->getHandle(), objectId, p3d->nextRequestId());
+	p3d->unregisterSimObject(objectId);
 	p3d = 0;
 }
 
 void SimObject::setObjectId(DWORD objectId)
 {
 	this->objectId = objectId;
+}
+
+void SimObject::setRequestId(DWORD requestId)
+{ 
+	this->requestId = requestId;
 }

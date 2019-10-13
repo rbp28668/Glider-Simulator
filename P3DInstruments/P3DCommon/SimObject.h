@@ -8,14 +8,20 @@ class SimObject
 {
 	DWORD objectId;
 	DWORD requestId;
+	const char* pszName;
+
+protected:
 	Prepar3D* p3d; // need ref as destructor needs to clean up.
 
 public:
 	SimObject(Prepar3D* p3d, DWORD requestId);
-	~SimObject();
+	SimObject(Prepar3D* p3d);
+	virtual void onCreate();
+	virtual ~SimObject();
 
-
+	void setName(const char* pszName) { this->pszName = pszName; }
 	void setObjectId(DWORD objectId);
+	void setRequestId(DWORD requestId);
 	DWORD id() const {return objectId; }
 	DWORD request() const { return requestId; }
 

@@ -3,12 +3,14 @@
 #include "stdafx.h"
 #include <SimConnect.h>
 #include <vector>
+#include "SimObject.h"
 #include "SimObjectList.h"
 #include "SimObjectDataRequestList.h"
 #include "WeatherStation.h"
 #include "WeatherStations.h"
 
 class SimObjectDataRequest;
+class ExternalSim;
 
 // Encapsulate the core P3D interface.
 class Prepar3D
@@ -23,13 +25,15 @@ class Prepar3D
 	bool verbose;		// set to true for verbose output.
 	HANDLE hSimConnect; // use SimConnect_Open to set this value.
 
+	// Provides a sequence number for calls.
 	LONG volatile requestIdSequence;
+
 	SimObjectList simObjects; // keyed by object ID (eventually).
 	SimObjectDataRequestList dataRequests; // keyed by request ID
 	bool waitingDataRequests;
-
 	WeatherStations wxStations;
-
+	ExternalSim* extSim;
+	SimObject userAc;
 
     static void CALLBACK DispatchCallback(SIMCONNECT_RECV *pData, DWORD cbData, void *pContext);
     void Process(SIMCONNECT_RECV *pData, DWORD cbData);
@@ -55,6 +59,12 @@ class Prepar3D
 	void handleSimObjectDataByType(SIMCONNECT_RECV* pData);
 	void handleAssignedObjectId(SIMCONNECT_RECV* pData);
 	void handleWeatherObservation(SIMCONNECT_RECV* pData);
+	//void handleExternalSimCreate(SIMCONNECT_RECV_EXTERNAL_SIM_CREATE* pData);
+	//void handleExternalSimDestroy(SIMCONNECT_RECV_EXTERNAL_SIM_DESTROY* pData);
+	//void handleExternalSimSimulate(SIMCONNECT_RECV_EXTERNAL_SIM_SIMULATE* pData);
+	//void handleExternalSimLocationChanged(SIMCONNECT_RECV_EXTERNAL_SIM_LOCATION_CHANGED* pData);
+	//void handleExternalSimEvent(SIMCONNECT_RECV_EXTERNAL_SIM_EVENT* pData);
+
 
 public:
 
@@ -70,6 +80,8 @@ public:
 	void setVerbose(bool isVerbose) { verbose = isVerbose; }
 
 	WeatherStations& weatherStations() { return wxStations; }
+	ExternalSim& externalSim() { return *extSim; }
+	SimObject& userAircraft() { return userAc; }
 
     void Dispatch();
 	void DispatchLoop();
@@ -79,6 +91,10 @@ public:
 
 	size_t registerDataRequest(SimObjectDataRequest* pRequest);
 	void unregisterDataRequest(SimObjectDataRequest* pRequest);
+
+	void registerSimObject(SimObject* pObject, DWORD dwRequestId);
+	SimObject* lookupSimObject(DWORD dwObjectId);
+	void unregisterSimObject(DWORD dwObjectId);
 
 	Prepar3D(const char* appName, bool verbose = false);
 	virtual ~Prepar3D(void);

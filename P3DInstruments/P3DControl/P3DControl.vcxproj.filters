@@ -141,6 +141,18 @@
     <ClInclude Include="Spline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Trace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IgcMessageHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IGCAircraft.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IGCFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -267,6 +279,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Spline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Extension.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IGCFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TracePoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Trace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IgcMessageHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IGCAircraft.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

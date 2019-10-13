@@ -7,6 +7,8 @@
 #include "SimObjectDataRequest.h"
 #include "Metar.h"
 #include "WeatherStations.h"
+#include "ExternalSim.h"
+
 
 // Folder in documents that P3D uses for its files.
 const char* Prepar3D::DOCUMENTS = "Prepar3D v4 Files";
@@ -24,16 +26,20 @@ Prepar3D::Prepar3D(const char* appName, bool verbose)
 	waitingDataRequests(false),
 	requestIdSequence(0),
 	simObjects(this),
-	wxStations(this)
-
-{	
+	wxStations(this),
+	extSim(0),
+	userAc(this)
+{
 	connect(appName);
 }
 
 
 Prepar3D::~Prepar3D(void)
 {
-	HRESULT hr = ::SimConnect_Close(hSimConnect); 
+	if (extSim) {
+		delete extSim;
+	}
+	HRESULT hr = ::SimConnect_Close(hSimConnect);
 }
 
 // Tries to connect to P3d for a while then exits if it fails.
@@ -46,6 +52,9 @@ void Prepar3D::connect(const char* appName)
 			showLastRequest("Connected to Prepar3D");
 			registerSystemEvents();
 			weatherStations().refresh(); // make sure global is initialised initially
+			extSim = new ExternalSim(this);
+			userAc.setObjectId(SIMCONNECT_OBJECT_ID_USER);
+			userAc.setName("User Aircraft");
 		}
 		else {  // Failed to connect on this attempt
 			if (attemptCount >= 10) {
@@ -71,12 +80,12 @@ void Prepar3D::registerSystemEvents()
 	// Subscribe to system events.
 	// See https://www.prepar3d.com/SDKv4/sdk/simconnect_api/references/general_functions.html#SimConnect_SubscribeToSystemEvent
 
-	subscribeToSystemEvent( EVENT_SIM_START, "SimStart", "Unable to subscribe to SimStart");
-	subscribeToSystemEvent( EVENT_SIM_STOP, "SimStop", "Unable to subscribe to SimStop");
-	subscribeToSystemEvent( EVENT_PAUSE, "Pause", "Unable to subscribe to Pause");
-	subscribeToSystemEvent( EVENT_SIM, "Sim", "Unable to subscribe to Sim");
-	subscribeToSystemEvent( EVENT_CRASHED, "Crashed", "Unable to subscribe to Crashed");
-	subscribeToSystemEvent( EVENT_CRASH_RESET, "CrashReset", "Unable to subscribe to CrashReset");
+	subscribeToSystemEvent(EVENT_SIM_START, "SimStart", "Unable to subscribe to SimStart");
+	subscribeToSystemEvent(EVENT_SIM_STOP, "SimStop", "Unable to subscribe to SimStop");
+	subscribeToSystemEvent(EVENT_PAUSE, "Pause", "Unable to subscribe to Pause");
+	subscribeToSystemEvent(EVENT_SIM, "Sim", "Unable to subscribe to Sim");
+	subscribeToSystemEvent(EVENT_CRASHED, "Crashed", "Unable to subscribe to Crashed");
+	subscribeToSystemEvent(EVENT_CRASH_RESET, "CrashReset", "Unable to subscribe to CrashReset");
 }
 
 // Checks for failure code, outputs the given message if necessary and exits if failed.
@@ -193,7 +202,7 @@ void Prepar3D::handleSimObjectData(SIMCONNECT_RECV* pData)
 {
 	SIMCONNECT_RECV_SIMOBJECT_DATA* pObjData = (SIMCONNECT_RECV_SIMOBJECT_DATA*)pData;
 	SimObjectDataRequest* pRequest = dataRequests[pObjData->dwRequestID];
-
+	
 	if (pRequest != 0) {
 		pRequest->handle(pObjData);
 	}
@@ -220,22 +229,61 @@ void Prepar3D::handleAssignedObjectId(SIMCONNECT_RECV* pData)
 	assert(this);
 	assert(pData);
 	assert(pData->dwID == SIMCONNECT_RECV_ID_ASSIGNED_OBJECT_ID);
-	
+
 	SIMCONNECT_RECV_ASSIGNED_OBJECT_ID* paoid = static_cast<SIMCONNECT_RECV_ASSIGNED_OBJECT_ID*>(pData);
 	DWORD objectId = paoid->dwObjectID;
 	DWORD requestId = paoid->dwRequestID;
-	simObjects.associate(requestId, objectId); 
+	simObjects.associate(requestId, objectId);
+	if (verbose) {
+		std::cout << "Associated object ID " << objectId << " to request " << requestId << std::endl;
+	}
 }
 
 void Prepar3D::handleWeatherObservation(SIMCONNECT_RECV* pData)
 {
 	SIMCONNECT_RECV_WEATHER_OBSERVATION* pwxData = (SIMCONNECT_RECV_WEATHER_OBSERVATION*)pData;
-	const char* pszMETAR = (const char*) &(pwxData->szMetar);
+	const char* pszMETAR = (const char*) & (pwxData->szMetar);
 	wxStations.update(pszMETAR);
 	if (verbose) {
 		std::cout << pszMETAR << std::endl;
 	}
 }
+
+//void Prepar3D::handleExternalSimCreate(SIMCONNECT_RECV_EXTERNAL_SIM_CREATE* pData)
+//{
+//	extSim->create(pData);
+//	::SimConnect_SynchronousUnblock(hSimConnect);
+//	if (verbose) {
+//		std::cout << "External sim create " << pData->dwObjectID << std::endl;
+//	}
+//}
+//
+//void Prepar3D::handleExternalSimDestroy(SIMCONNECT_RECV_EXTERNAL_SIM_DESTROY* pData)
+//{
+//	extSim->destroy(pData);
+//	::SimConnect_SynchronousUnblock(hSimConnect);
+//}
+//
+//void Prepar3D::handleExternalSimSimulate(SIMCONNECT_RECV_EXTERNAL_SIM_SIMULATE* pData)
+//{
+//	extSim->simulate(pData);
+//	::SimConnect_SynchronousUnblock(hSimConnect);
+//	if (verbose) {
+//		std::cout << "External sim simulate " << pData->dwObjectID << std::endl;
+//	}
+//}
+//
+//void Prepar3D::handleExternalSimLocationChanged(SIMCONNECT_RECV_EXTERNAL_SIM_LOCATION_CHANGED* pData)
+//{
+//	extSim->locationChanged(pData);
+//	::SimConnect_SynchronousUnblock(hSimConnect);
+//}
+//
+//void Prepar3D::handleExternalSimEvent(SIMCONNECT_RECV_EXTERNAL_SIM_EVENT* pData)
+//{
+//	extSim->event(pData);
+//	::SimConnect_SynchronousUnblock(hSimConnect);
+//}
 
 void Prepar3D::showLastRequest(const char* name)
 {
@@ -248,52 +296,52 @@ void Prepar3D::showLastRequest(const char* name)
 
 void Prepar3D::Dispatch()
 {
-    ::SimConnect_CallDispatch(hSimConnect, &Prepar3D::DispatchCallback, this);
+	::SimConnect_CallDispatch(hSimConnect, &Prepar3D::DispatchCallback, this);
 }
 
 void Prepar3D::DispatchLoop() {
 
-        while( 0 == quit ) { 
-            Dispatch();
-            Sleep(1); 
-        }  
+	while (0 == quit) {
+		Dispatch();
+		Sleep(1);
+	}
 }
 
 // static callback function uses the context variable to identify this class instance.
-void Prepar3D::DispatchCallback(SIMCONNECT_RECV *pData, DWORD cbData, void *pContext)
+void Prepar3D::DispatchCallback(SIMCONNECT_RECV* pData, DWORD cbData, void* pContext)
 {
-    Prepar3D *pThis = reinterpret_cast<Prepar3D*>(pContext);
-    pThis->Process(pData, cbData);
+	Prepar3D* pThis = reinterpret_cast<Prepar3D*>(pContext);
+	pThis->Process(pData, cbData);
 }
 
 // OO version of the callback.
-void Prepar3D::Process(SIMCONNECT_RECV *pData, DWORD cbData)
+void Prepar3D::Process(SIMCONNECT_RECV* pData, DWORD cbData)
 {
-    switch(pData->dwID) 
-    { 
+	switch (pData->dwID)
+	{
 	case SIMCONNECT_RECV_ID_EXCEPTION:
 		handleException(pData);
 		break;
-	
-		
-	// See https://www.prepar3d.com/SDKv4/sdk/simconnect_api/references/structures_and_enumerations.html#SIMCONNECT_RECV_OPEN
+
+
+		// See https://www.prepar3d.com/SDKv4/sdk/simconnect_api/references/structures_and_enumerations.html#SIMCONNECT_RECV_OPEN
 	case SIMCONNECT_RECV_ID_OPEN:
 		logEvent("Open");
 		showVersionInformation(pData);
 		break;
 
-	case SIMCONNECT_RECV_ID_EVENT:   
+	case SIMCONNECT_RECV_ID_EVENT:
 		handleSystemEvent(pData);
-		break; 
- 
-    case SIMCONNECT_RECV_ID_SIMOBJECT_DATA: 
+		break;
+
+	case SIMCONNECT_RECV_ID_SIMOBJECT_DATA:
 		handleSimObjectData(pData);
-		break; 
- 
-    case SIMCONNECT_RECV_ID_SIMOBJECT_DATA_BYTYPE: 
+		break;
+
+	case SIMCONNECT_RECV_ID_SIMOBJECT_DATA_BYTYPE:
 		handleSimObjectDataByType(pData);
-        break; 
- 
+		break;
+
 	case SIMCONNECT_RECV_ID_ASSIGNED_OBJECT_ID:
 		handleAssignedObjectId(pData);
 		break;
@@ -302,41 +350,83 @@ void Prepar3D::Process(SIMCONNECT_RECV *pData, DWORD cbData)
 		handleWeatherObservation(pData);
 		break;
 
-    case SIMCONNECT_RECV_ID_QUIT: 
-        std::cout << "Sim quit" << std::endl;
-        quit = true; 
-        break; 
-     
-    default: 
-        std::cout << "Received unknown event ID: " << pData->dwID << std::endl; 
-        break; 
-    } 
+	/*case SIMCONNECT_RECV_ID_EXTERNAL_SIM_CREATE:
+		handleExternalSimCreate((SIMCONNECT_RECV_EXTERNAL_SIM_CREATE*)pData);
+		break;
+
+	case SIMCONNECT_RECV_ID_EXTERNAL_SIM_DESTROY:
+		handleExternalSimDestroy((SIMCONNECT_RECV_EXTERNAL_SIM_DESTROY*)pData);
+		break;
+
+	case SIMCONNECT_RECV_ID_EXTERNAL_SIM_SIMULATE:
+		handleExternalSimSimulate((SIMCONNECT_RECV_EXTERNAL_SIM_SIMULATE*)pData);
+		break;
+
+	case SIMCONNECT_RECV_ID_EXTERNAL_SIM_LOCATION_CHANGED:
+		handleExternalSimLocationChanged((SIMCONNECT_RECV_EXTERNAL_SIM_LOCATION_CHANGED*)pData);
+		break;
+
+	case SIMCONNECT_RECV_ID_EXTERNAL_SIM_EVENT:
+		handleExternalSimEvent((SIMCONNECT_RECV_EXTERNAL_SIM_EVENT*)pData);
+		break;
+	*/
+
+	case SIMCONNECT_RECV_ID_QUIT:
+		std::cout << "Sim quit" << std::endl;
+		quit = true;
+		break;
+
+	default:
+		std::cout << "Received unknown event ID: " << pData->dwID << std::endl;
+		break;
+	}
 }
 
+// Gets a sequential ID for requests to P3D.
 LONG Prepar3D::nextRequestId()
 {
 	return ::InterlockedIncrement(&requestIdSequence);
 }
 
-size_t Prepar3D::registerDataRequest(SimObjectDataRequest* pRequest){
+// Registers a data request so that the actual request to P3D can be
+// created when need be.
+size_t Prepar3D::registerDataRequest(SimObjectDataRequest* pRequest) {
 	assert(pRequest != 0);
 
-	long id = nextRequestId();
-	dataRequests.add(pRequest,id);
+	dataRequests.add(pRequest, pRequest->getId());
 	waitingDataRequests = true;
 	// If already started register (or re-register) any requests.
-	if(started || scenarioRunning) {
+	if (started || scenarioRunning) {
 		dataRequests.createRequests();
 		waitingDataRequests = false;
 	}
 
-	return id;		
+	return pRequest->getId();
 }
 
-void Prepar3D::unregisterDataRequest(SimObjectDataRequest* pRequest){
+// Unregisters a data request so that it's no longer active.
+void Prepar3D::unregisterDataRequest(SimObjectDataRequest* pRequest) {
 	assert(pRequest != 0);
 	DWORD id = pRequest->getId();
 	dataRequests.remove(id);
+}
+
+void Prepar3D::registerSimObject(SimObject* pObject, DWORD dwRequestId)
+{
+	assert(this);
+	assert(pObject);
+	pObject->setRequestId(dwRequestId);
+	simObjects.add(pObject, dwRequestId);
+}
+
+SimObject* Prepar3D::lookupSimObject(DWORD dwObjectId)
+{
+	return simObjects.lookup(dwObjectId);
+}
+
+void Prepar3D::unregisterSimObject(DWORD dwObjectId)
+{
+	simObjects.remove(dwObjectId);
 }
 
 

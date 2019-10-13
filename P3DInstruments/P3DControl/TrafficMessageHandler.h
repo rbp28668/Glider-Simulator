@@ -12,7 +12,7 @@ class TrafficMessageHandler :
 	std::string getAircraftTitle(const std::string& path);
 public:
 	TrafficMessageHandler(Prepar3D* p3d);
-	~TrafficMessageHandler();
+	virtual ~TrafficMessageHandler();
 	virtual void run(const std::string& cmd, const APIParameters& params, std::string& output);
 
 	// Launch dumb traffic at us. Units are NM, kts, feet and degrees.

@@ -14,7 +14,7 @@ class PositionMessageHandler :
 	void getPositionMetadata(File& f, std::string& title, std::string& description);
 public:
 	PositionMessageHandler(Prepar3D* p3d);
-	~PositionMessageHandler();
+	virtual ~PositionMessageHandler();
 	virtual void run(const std::string& cmd, const APIParameters& params, std::string& output);
 
 	void show(std::string& output);

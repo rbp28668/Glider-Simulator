@@ -8,7 +8,8 @@ class Prepar3D;
 
 class SimObjectList
 {
-	std::map<DWORD, SimObject* > objects;
+	using Objects = std::map<DWORD, SimObject* >;
+	Objects objects;
 	std::list<SimObject*> unregisteredObjects;
 	Prepar3D* p3d;
 public:
@@ -16,6 +17,10 @@ public:
 	~SimObjectList();
 
 	SimObject* newObject(DWORD dwRequestId);
+	void add(SimObject* pObject, DWORD dwRequestId);
 	void associate(DWORD dwRequestId, DWORD dwObjectId);
+	SimObject* lookup(DWORD dwObjectId);
+	void remove(DWORD dwObjectId);
+
 };
 

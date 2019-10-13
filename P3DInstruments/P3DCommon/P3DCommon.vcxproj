@@ -152,6 +152,8 @@
     <None Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ExternalSim.h" />
+    <ClInclude Include="ExternalSimVehicle.h" />
     <ClInclude Include="IndexedList.h" />
     <ClInclude Include="Metar.h" />
     <ClInclude Include="Network.h" />
@@ -171,6 +173,8 @@
     <ClInclude Include="WeatherStations.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ExternalSim.cpp" />
+    <ClCompile Include="ExternalSimVehicle.cpp" />
     <ClCompile Include="IndexedList.cpp" />
     <ClCompile Include="Metar.cpp" />
     <ClCompile Include="Network.cpp" />

@@ -35,7 +35,7 @@ int SimState::itemCount() {
 	return sizeof(dataItems) / sizeof(dataItems[0]);
 }
 
-void SimState::onData(void* pvData) {
+void SimState::onData(void* pvData, SimObject* pObject) {
 	struct Data* pData = reinterpret_cast<Data*>(pvData);
 	CriticalSection::Lock lock(csData);
 	data = *pData;

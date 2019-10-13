@@ -23,6 +23,12 @@ SimObject* SimObjectList::newObject(DWORD dwRequestId)
 	return pObj;
 }
 
+void SimObjectList::add(SimObject* pObject, DWORD dwRequestId)
+{
+	pObject->setRequestId(dwRequestId);
+	unregisteredObjects.push_back(pObject);
+}
+
 void SimObjectList::associate(DWORD dwRequestId, DWORD dwObjectId)
 {
 	SimObject* pObject = 0;
@@ -36,7 +42,19 @@ void SimObjectList::associate(DWORD dwRequestId, DWORD dwObjectId)
 
 			// Here is a good place to do anything that needed to wait for
 			// p3d to provide the object Id (like associate a flight plan).
+			pObject->onCreate();
 		}
 	}
 	unregisteredObjects.remove(pObject);
+}
+
+SimObject* SimObjectList::lookup(DWORD dwObjectId)
+{
+	Objects::iterator iter = objects.find(dwObjectId);
+	return (iter != objects.end()) ? iter->second : 0;
+}
+
+void SimObjectList::remove(DWORD dwObjectId)
+{
+	objects.erase(dwObjectId);
 }

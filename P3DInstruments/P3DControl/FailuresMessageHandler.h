@@ -12,7 +12,7 @@ class FailuresMessageHandler :
 
 public:
 	FailuresMessageHandler(Prepar3D* p3d);
-	~FailuresMessageHandler();
+	virtual ~FailuresMessageHandler();
 
 	virtual void run(const std::string& cmd, const APIParameters& params, std::string& output);
 

@@ -1,9 +1,4 @@
-/*
-*/
-
-
-
-
+#include "stdafx.h"
 #include <assert.h>
 #include <float.h>
 #include <math.h>

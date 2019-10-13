@@ -18,7 +18,7 @@ class WeatherMessageHandler :
 	bool buildMetar(const APIParameters& params, Metar& metar, std::string& error);
 public:
 	WeatherMessageHandler(Prepar3D* p3d);
-	~WeatherMessageHandler();
+	virtual ~WeatherMessageHandler();
 	virtual void run(const std::string& cmd, const APIParameters& params, std::string& output);
 
 	void createStationHere(const std::string& icao, const std::string& name, std::string& output);
