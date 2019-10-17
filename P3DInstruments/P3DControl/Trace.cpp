@@ -28,11 +28,11 @@ Trace::~Trace()
 
 void Trace::build(const TraceProvider& trace)
 {
-	int count = trace.count();
-	xx = new float[count];
-	yy = new float[count];
-	zz = new float[count];
-	tt = new float[count];
+	size_t count = trace.count();
+	xx = new double[count];
+	yy = new double[count];
+	zz = new double[count];
+	tt = new double[count];
 
 	time_t tStart = trace.valueAt(0).when;
 
@@ -41,13 +41,13 @@ void Trace::build(const TraceProvider& trace)
 		xx[i] = p.x; // long
 		yy[i] = p.y; // lat
 		zz[i] = p.z; // altitude feet
-		tt[i] = p.when - tStart;
+		tt[i] = (double)(p.when - tStart);
 	}
-	maxTime = trace.valueAt(count - 1).when - tStart;
+	maxTime = (double) (trace.valueAt(count - 1).when - tStart);
 
-	xSpline = new Spline(tt, xx, count);
-	ySpline = new Spline(tt, yy, count);
-	zSpline = new Spline(tt, zz, count);
+	xSpline = new Spline<double>(tt, xx, count);
+	ySpline = new Spline<double>(tt, yy, count);
+	zSpline = new Spline<double>(tt, zz, count);
 
 }
 
@@ -55,13 +55,13 @@ Position Trace::positionAtTime(double t)
 {
 	if (t < maxTime) {
 		// First and second derivatives
-		float dxdt, dydt, dzdt;
-		float d2xdt2, d2ydt2, d2zdt2;
+		double dxdt, dydt, dzdt;
+		double d2xdt2, d2ydt2, d2zdt2;
 
 		// Points at this time.
-		float x = xSpline->point(t, dxdt, d2xdt2);
-		float y = ySpline->point(t, dydt, d2ydt2);
-		float z = zSpline->point(t, dzdt, d2zdt2);
+		double x = xSpline->point(t, dxdt, d2xdt2);
+		double y = ySpline->point(t, dydt, d2ydt2);
+		double z = zSpline->point(t, dzdt, d2zdt2);
 
 		last.lon = x;
 		last.lat = y;
@@ -76,20 +76,51 @@ Position Trace::positionAtTime(double t)
 		double distPerDegreeLong = 2 * pi * R * cos(y * pi / 180) / 360;
 		double distPerDegreeLat = 2 * pi * R / 360;
 
-		// Speeds in x & y (EW and NS) now in knots
-		double vx = dxdt * distPerDegreeLong;
-		double vy = dydt * distPerDegreeLat;
+		// Speeds in x & y (EW and NS) now in knots.  Note that dxdt and dydt are speeds
+		// in degrees per second.  Hence 3600 scale factor to convert seconds to hours.
+		double vx = dxdt * distPerDegreeLong * 3600;
+		double vy = dydt * distPerDegreeLat * 3600;
 
 		// convert cartesian velocity to polar speed and heading
+		// Note that with heading, atan2 returns zero along the x axis
+		// that increases anti-clockwise whereas heading starts at north
+		// and increases clockwise.
 		last.speed = sqrt(vx * vx + vy * vy);
-		last.heading = atan2(vy, vx) * 2 *pi; // in radians
+		last.heading = pi/2 - atan2(vy, vx); // in radians
+		if (last.heading < 0) {
+			last.heading += 2 * pi;
+		}
 
-		// TODO - convert 2nd derivatives into pitch and bank angle.
+		// Convert 2nd derivatives into pitch and bank angle.
 		// 2nd derivatives give acceleration but we need acceleration
 		// normal to the velocity vector.  That normal accelaration
 		// will then give us the bank angle assuming steady turn.
-		last.pitch = 0;
-		last.bank = 0;
+
+		if (last.speed >= 10) { // don't do pitch and bank below 10 kts
+			
+			// Convert velocity into unit vector (vux,vuy).  This gives the angle
+			// we want to rotate the acceleration through to figure out what's the
+			// normal acceleration (i.e. determines the angle of bank).
+			double vux = vx / last.speed;
+			double vuy = vy / last.speed;
+
+			// Accelerations are given in degrees lat/long per second per second.
+			// Convert to metres per second per second (via NM!)
+			double ax = d2xdt2 * distPerDegreeLong * 1852; // now in metres.
+			double ay = d2ydt2 * distPerDegreeLat * 1852;
+
+			// this should give the normal (at right angles to) acceleration
+			// with +ve left.  Note as vux and vuy are equivalent to cos and -sin
+			// for a normal rotation matrix.
+			double ayr = vux * ay - vuy * ax;  // rotated and hence normal acceleration.
+
+			// Note that ayr should be in metres per sec per sec.
+			last.bank = atan2(ayr,9.81); // 
+		}
+		else { // assume level on ground
+			last.pitch = 0;
+			last.bank = 0;
+		}
 
 		// Speed wrt world axes
 		last.vwx = dxdt;

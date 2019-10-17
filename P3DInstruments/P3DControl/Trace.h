@@ -2,24 +2,30 @@
 #include <ctype.h>
 #include "Spline.h"
 
+// Classes structs to manage a Trace independently of the original source of data. 
+// Source data is an array of Point provided by a TraceProvider.  The Trace
+// will then provide a Position at time T starting at zero.
+// Note use of double - for resolution of a cm or less using lat/long float
+// starts to run out of bits and the movement is jerky.
+
 struct Point {
 	time_t when;
-	float x;  // Longitude in degrees
-	float y;  // Latitude in degrees
-	float z;  // altitude in feet
+	double x;  // Longitude in degrees
+	double y;  // Latitude in degrees
+	double z;  // altitude in feet
 };
 
 struct Position {
-	float lat;
-	float lon;
-	float alt;
-	float pitch;
-	float bank;
-	float speed;
-	float heading;
-	float vwx; // world speed in EW direction
-	float vwy; // world speed in NS direction
-	float vwz; // world speed height
+	double lat;
+	double lon;
+	double alt;
+	double pitch;
+	double bank;
+	double speed;
+	double heading;
+	double vwx; // world speed in EW direction
+	double vwy; // world speed in NS direction
+	double vwz; // world speed height
 };
 
 struct TraceProvider {
@@ -30,16 +36,16 @@ struct TraceProvider {
 
 class Trace
 {
-	Spline* xSpline; // Longitude in degrees
-	Spline* ySpline; // latitude in degrees
-	Spline* zSpline; // height in feet
+	Spline<double>* xSpline; // Longitude in degrees
+	Spline<double>* ySpline; // latitude in degrees
+	Spline<double>* zSpline; // height in feet
 
-	float* xx; // Longitude base information
-	float* yy; // Latitude base information
-	float* zz; // altitude base information
-	float* tt; // time in seconds for each xx,yy,zz point
+	double* xx; // Longitude base information
+	double* yy; // Latitude base information
+	double* zz; // altitude base information
+	double* tt; // time in seconds for each xx,yy,zz point
 
-	float maxTime; // longest time trace is valid for.
+	double maxTime; // longest time trace is valid for.
 
 	Position last;
 
