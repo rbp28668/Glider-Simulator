@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Forms;
 
 using LockheedMartin.Prepar3D.SimConnect;
 using System.Runtime.InteropServices;
@@ -28,6 +29,9 @@ namespace CGC_Sim_IOS
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        [DllImport("user32.dll")]
+        static extern bool SetForegroundWindow(IntPtr hWnd);
 
         private Simulator sim = new Simulator();
 
@@ -83,6 +87,15 @@ namespace CGC_Sim_IOS
                 handleSource.RemoveHook(HandleSimConnectEvents);
             }
         }
+
+        //void ActivateApp(string processName)
+        //{
+        //    Process[] p = Process.GetProcessesByName(processName);
+
+        //    // Activate the first application we find with this name
+        //    if (p.Count() > 0)
+        //        SetForegroundWindow(p[0].MainWindowHandle);
+        //}
 
         #region P3D Events
 
@@ -282,27 +295,24 @@ namespace CGC_Sim_IOS
 
         #endregion
 
+        private void LaunchP3D()
+        {
+            sim.StartP3D(defaultScenario);
+            Thread.Sleep(10000);
+            Process[] p = Process.GetProcessesByName("WinchX");
+            if (p.Count() > 0)
+            {
+                SetForegroundWindow(p[0].MainWindowHandle);
+                SendKeys.SendWait("N");
+            }
+            sim.OpenSimConnection(handle);
+            InitSimConnectionEvents();
+            p3DAlreadyRunning = true;
+        }
 
         private void Button_Launch_P3D_Click(object sender, RoutedEventArgs e)
         {
-            // Check if P3D is already running
-            //if (SimConnection == null)
-            //{
-            //    if (sim.OpenSimConnection(handle))
-            //    {
-            //        InitSimConnectionEvents();
-            //        p3DAlreadyRunning = true;
-            //    }
-
-            //}
-            //if (p3DAlreadyRunning == false)
-            {
-                sim.StartP3D(defaultScenario);
-                Thread.Sleep(10000);
-                sim.OpenSimConnection(handle);
-                InitSimConnectionEvents();
-                p3DAlreadyRunning = true;
-            }
+            LaunchP3D();
         }
 
         private void Button_Kill_PSD_Click(object sender, RoutedEventArgs e)
@@ -488,7 +498,7 @@ namespace CGC_Sim_IOS
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            TabControl tabControl = sender as TabControl; // e.Source could have been used instead of sender as well
+            System.Windows.Controls.TabControl tabControl = sender as System.Windows.Controls.TabControl; // e.Source could have been used instead of sender as well
             TabItem item = tabControl.SelectedValue as TabItem;
             if (item.Name == "TabWeather")
             {
@@ -611,9 +621,9 @@ namespace CGC_Sim_IOS
 
     public class TextBoxOutputter : TextWriter
     {
-        TextBox textBox = null;
+        System.Windows.Controls.TextBox textBox = null;
 
-        public TextBoxOutputter(TextBox output)
+        public TextBoxOutputter(System.Windows.Controls.TextBox output)
         {
             textBox = output;
         }
