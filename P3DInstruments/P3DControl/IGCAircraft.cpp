@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <iostream>
+#include <limits>
 #include "IGCAircraft.h"
 #include "IGCFile.h"
 #include "..\\P3DCommon\ExternalSim.h"
@@ -24,20 +25,56 @@ Point IGCTraceConverter::valueAt(size_t position) const
 	return point;
 }
 
+// Just sometimes the preprocessor is a bit of a nuisance...
+#ifdef max
+#undef max
+#endif
 
-
-IGCAircraft::IGCAircraft()
+// Calculate minimal altitude in the trace.  IGC files use a 1013hPa reference
+// for zero so actual zero on the day may change, as might the elevation of where
+// you start from from site to site.
+double IGCAircraft::getBaseAltitude(IGCFile* igc)
 {
+	double minAlt = std::numeric_limits<double>::max();
+
+	for (IGCFile::TraceList::iterator iter = igc->getTrace().begin();
+		iter != igc->getTrace().end();
+		++iter) {
+		double alt = iter->getAltBaro();
+		if (alt == 0) {
+			alt = iter->getAltGps();
+		}
+		if (alt < minAlt) {
+			minAlt = alt;
+		}
+	}
+
+	return minAlt;
+}
+
+IGCAircraft::IGCAircraft(IGCFile* igc)
+	: baseAltitude(0)
+{
+	IGCTraceConverter convert(igc);
+	trace.build(convert);
+
+	baseAltitude = getBaseAltitude(igc);
+
 }
 
 void IGCAircraft::simulate(const SimInputData& inputData, SimOutputData& outputData, double t)
 {
 	double PI = 3.1415926535897926364338;
 
+	if (!initialGroundHeightSet) {
+		initialGroundHeight = inputData.groundAltitude * 3.28084; // metres to feet
+		initialGroundHeight += inputData.staticCGToGround; // try and put it on its wheels/skid...
+		initialGroundHeightSet = true;
+	}
 	Position p = trace.positionAtTime(t);
 	outputData.latitude = p.lat * PI / 180;  // radians
 	outputData.longitude = p.lon * PI / 180; // radians
-	outputData.altitude = p.alt + 255; // BODGE of 255.
+	outputData.altitude = p.alt - baseAltitude + initialGroundHeight; 
 	outputData.bank = p.bank;
 	outputData.pitch = p.pitch;
 	outputData.heading = p.heading;
@@ -70,6 +107,7 @@ SIMCONNECT_DATA_INITPOSITION IGCAircraft::initialPosition()
 
 UserIGCAircraft::UserIGCAircraft(Prepar3D* p3d,IGCFile* igc, const char* containerName)
 	: ExternalSimVehicle(p3d, containerName)
+	, IGCAircraft(igc)
 {
 }
 
@@ -84,9 +122,8 @@ UserIGCAircraft::~UserIGCAircraft()
 
 AIIGCAircraft::AIIGCAircraft(Prepar3D* p3d, IGCFile* igc, const char* containerName)
 	: AIExternalSimVehicle(p3d, containerName)
+	, IGCAircraft(igc)
 {
-	IGCTraceConverter convert(igc);
-	trace.build(convert);
 }
 
 void AIIGCAircraft::simulate(const SimInputData& inputData, SimOutputData& outputData, double t)

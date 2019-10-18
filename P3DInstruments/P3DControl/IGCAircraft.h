@@ -9,8 +9,13 @@ class IGCAircraft
 {
 protected:
 	Trace trace;
+	double baseAltitude; // of trace
+	double getBaseAltitude(IGCFile* igc);
+	double initialGroundHeight;
+	bool initialGroundHeightSet;
+
 public:
-	IGCAircraft();
+	IGCAircraft(IGCFile* igc);
 	void simulate(const SimInputData& inputData, SimOutputData& outputData, double t);
 	SIMCONNECT_DATA_INITPOSITION initialPosition();
 

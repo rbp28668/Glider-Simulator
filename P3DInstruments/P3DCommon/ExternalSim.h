@@ -15,6 +15,7 @@ struct SimInputData {
 	double bank;
 	double heading;
 	double groundAltitude;
+	double staticCGToGround;
 	int surfaceype;
 };
 

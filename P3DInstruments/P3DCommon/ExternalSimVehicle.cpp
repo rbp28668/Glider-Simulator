@@ -17,8 +17,7 @@ double ExternalSimVehicle::runTime() const
 
 void ExternalSimVehicle::createInputRequest(SimObjectData* pData)
 {
-	SimObjectDataRequest* pInputRequest = new SimObjectDataRequest(p3d, pData, this, SIMCONNECT_PERIOD_VISUAL_FRAME);
-	// TODO SAVE INPUT REQUEST
+	pInputRequest = new SimObjectDataRequest(p3d, pData, this, SIMCONNECT_PERIOD_VISUAL_FRAME);
 }
 
 const char* ExternalSimVehicle::containerName()

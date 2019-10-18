@@ -53,6 +53,8 @@ public:
 	void build(const TraceProvider& trace);
 	Position positionAtTime(double t);
 
+	bool complete(double t) const { return t > maxTime; }
+
 	Trace();
 	~Trace();
 };

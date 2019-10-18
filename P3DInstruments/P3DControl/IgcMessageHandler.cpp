@@ -91,11 +91,16 @@ void IgcMessageHandler::launchIgcTraffic(const std::string& file, const std::str
 	Directory igcFolder = documents.sub(Prepar3D::DOCUMENTS).sub("igc");
 	File f = igcFolder.file(file);
 
-	igc.parse((const char*)f);
+	if (f.exists()) {
+		igc.parse((const char*)f);
 
-	AIIGCAircraft* aircraft = new AIIGCAircraft(p3d, &igc,  type.c_str());
-	p3d->externalSim().startAIVehicle(aircraft, "");
-	reportSuccess(output);
+		AIIGCAircraft* aircraft = new AIIGCAircraft(p3d, &igc, type.c_str());
+		p3d->externalSim().startAIVehicle(aircraft, "");
+		reportSuccess(output);
+	}
+	else {
+		reportFailure("File does not exist", 0, output);
+	}
 
 }
 
@@ -106,10 +111,15 @@ void IgcMessageHandler::replayIgcFile(const std::string& file, const std::string
 	Directory igcFolder = documents.sub(Prepar3D::DOCUMENTS).sub("igc");
 	File f = igcFolder.file(file);
 
-	igc.parse((const char*)f);
+	if (f.exists()) {
+		igc.parse((const char*)f);
 
-	UserIGCAircraft* aircraft = new UserIGCAircraft(p3d, &igc, type.c_str());
-	p3d->externalSim().startCurrentVehicle(aircraft, "");
-	reportSuccess(output);
+		UserIGCAircraft* aircraft = new UserIGCAircraft(p3d, &igc, type.c_str());
+		p3d->externalSim().startCurrentVehicle(aircraft, "");
+		reportSuccess(output);
+	}
+	else {
+		reportFailure("File does not exist", 0, output);
+	}
 
 }
