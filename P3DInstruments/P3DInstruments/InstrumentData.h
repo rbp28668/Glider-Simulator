@@ -43,7 +43,7 @@ public:
 	virtual DataItem* items();
 	virtual int itemCount();
 
-	virtual void onData(void *pData);
+	virtual void onData(void *pData, SimObject* pObject);
 
 	void setInstruments(CondorUDP* pInstruments) { this->pInstruments = pInstruments; }
 

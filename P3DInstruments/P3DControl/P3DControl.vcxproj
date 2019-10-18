@@ -22,33 +22,33 @@
     <ProjectGuid>{DFACFE04-6EDC-4F2D-BA36-F5364AC8287B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ConsoleApplication1</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>P3DControl</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>F:\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\inc\SimConnect;$(IncludePath)</IncludePath>
+    <IncludePath>F:\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\inc\SimConnect;$(MSBuildProjectDirectory)\..\jsoncpp;$(IncludePath)</IncludePath>
     <LibraryPath>F:\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\lib\SimConnect;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -83,7 +83,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>F:\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\inc\SimConnect;$(IncludePath)</IncludePath>
+    <IncludePath>F:\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\inc\SimConnect;$(MSBuildProjectDirectory)\..\jsoncpp;$(IncludePath)</IncludePath>
     <LibraryPath>F:\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\lib\SimConnect;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -152,48 +152,115 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\jsoncpp\json_tool.h" />
     <ClInclude Include="..\P3DCommon\IndexedList.h" />
     <ClInclude Include="..\P3DCommon\Network.h" />
     <ClInclude Include="..\P3DCommon\P3DCommon.h" />
     <ClInclude Include="..\P3DCommon\Prepar3D.h" />
-    <ClInclude Include="..\P3DCommon\SimObjectData.h" />
-    <ClInclude Include="..\P3DCommon\SimObjectDataRequest.h" />
-    <ClInclude Include="..\P3DCommon\SimObjectDataRequestList.h" />
-    <ClInclude Include="..\P3DCommon\TCPClient.h" />
-    <ClInclude Include="..\P3DCommon\UDPClient.h" />
     <ClInclude Include="AIObject.h" />
+    <ClInclude Include="APIParameters.h" />
+    <ClInclude Include="APIThread.h" />
+    <ClInclude Include="CommandInterpreter.h" />
+    <ClInclude Include="CriticalSection.h" />
     <ClInclude Include="EventMessageHandler.h" />
+    <ClInclude Include="Failures.h" />
+    <ClInclude Include="FailuresMessageHandler.h" />
+    <ClInclude Include="Folder.h" />
+    <ClInclude Include="http.h" />
+    <ClInclude Include="HTTPException.h" />
+    <ClInclude Include="HTTPRequest.h" />
+    <ClInclude Include="HTTPRequestQueue.h" />
+    <ClInclude Include="HTTPResponse.h" />
+    <ClInclude Include="HTTPService.h" />
+    <ClInclude Include="HTTPURL.h" />
+    <ClInclude Include="IGCAircraft.h" />
+    <ClInclude Include="IGCFile.h" />
+    <ClInclude Include="IgcMessageHandler.h" />
+    <ClInclude Include="JSONWriter.h" />
+    <ClInclude Include="MessageHandler.h" />
     <ClInclude Include="MessageThread.h" />
     <ClInclude Include="P3DEventCommand.h" />
+    <ClInclude Include="P3DInstallationDirectory.h" />
+    <ClInclude Include="PositionMessageHandler.h" />
+    <ClInclude Include="QuitHandler.h" />
+    <ClInclude Include="RecordMessageHandler.h" />
+    <ClInclude Include="RESTAPI.h" />
+    <ClInclude Include="ScenarioMessageHandler.h" />
+    <ClInclude Include="SimState.h" />
+    <ClInclude Include="Simulator.h" />
+    <ClInclude Include="Spline.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="ThermalMessageHandler.h" />
     <ClInclude Include="Thread.h" />
+    <ClInclude Include="Trace.h" />
+    <ClInclude Include="TrafficMessageHandler.h" />
+    <ClInclude Include="WeatherMessageHandler.h" />
+    <ClInclude Include="WideConverter.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\jsoncpp\json_reader.cpp" />
+    <ClCompile Include="..\jsoncpp\json_value.cpp" />
+    <ClCompile Include="..\jsoncpp\json_writer.cpp" />
     <ClCompile Include="..\P3DCommon\IndexedList.cpp" />
     <ClCompile Include="..\P3DCommon\Network.cpp" />
     <ClCompile Include="..\P3DCommon\P3DCommon.cpp" />
     <ClCompile Include="..\P3DCommon\Prepar3D.cpp" />
-    <ClCompile Include="..\P3DCommon\SimObjectData.cpp" />
-    <ClCompile Include="..\P3DCommon\SimObjectDataRequest.cpp" />
-    <ClCompile Include="..\P3DCommon\SimObjectDataRequestList.cpp" />
-    <ClCompile Include="..\P3DCommon\TCPClient.cpp" />
-    <ClCompile Include="..\P3DCommon\UDPClient.cpp" />
     <ClCompile Include="AIObject.cpp" />
+    <ClCompile Include="APIParameters.cpp" />
+    <ClCompile Include="APIThread.cpp" />
+    <ClCompile Include="CommandInterpreter.cpp" />
+    <ClCompile Include="CriticalSection.cpp" />
+    <ClCompile Include="Extension.cpp" />
+    <ClCompile Include="Failures.cpp" />
+    <ClCompile Include="FailuresMessageHandler.cpp" />
+    <ClCompile Include="Folder.cpp" />
+    <ClCompile Include="HTTPException.cpp" />
+    <ClCompile Include="HTTPRequest.cpp" />
+    <ClCompile Include="HTTPRequestQueue.cpp" />
+    <ClCompile Include="HTTPResponse.cpp" />
+    <ClCompile Include="HTTPService.cpp" />
+    <ClCompile Include="HTTPURL.cpp" />
+    <ClCompile Include="IGCAircraft.cpp" />
+    <ClCompile Include="IGCFile.cpp" />
+    <ClCompile Include="IgcMessageHandler.cpp" />
+    <ClCompile Include="JSONWriter.cpp" />
+    <ClCompile Include="MessageHandler.cpp" />
     <ClCompile Include="P3DControl.cpp" />
     <ClCompile Include="EventMessageHandler.cpp" />
     <ClCompile Include="MessageThread.cpp" />
     <ClCompile Include="P3DEventCommand.cpp" />
+    <ClCompile Include="P3DInstallationDirectory.cpp" />
+    <ClCompile Include="PositionMessageHandler.cpp" />
+    <ClCompile Include="QuitHandler.cpp" />
+    <ClCompile Include="RecordMessageHandler.cpp" />
+    <ClCompile Include="RESTAPI.cpp" />
+    <ClCompile Include="ScenarioMessageHandler.cpp" />
+    <ClCompile Include="SimState.cpp" />
+    <ClCompile Include="Simulator.cpp" />
+    <ClCompile Include="Spline.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ThermalMessageHandler.cpp" />
     <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="Trace.cpp" />
+    <ClCompile Include="TracePoint.cpp" />
+    <ClCompile Include="TrafficMessageHandler.cpp" />
+    <ClCompile Include="WeatherMessageHandler.cpp" />
+    <ClCompile Include="WideConverter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\jsoncpp\json_valueiterator.inl" />
     <None Include="ClassDiagram.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\P3DCommon\P3DCommon.vcxproj">
+      <Project>{863d5727-3e2e-4158-b8a3-6c943ca31c61}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

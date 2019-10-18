@@ -6,49 +6,26 @@
 #include "../P3DCommon/Network.h"
 
 
-class QuitHandler : public MessageHandler {
-private:
-	std::string name;
-	MessageThread* pmt;
 
-public:
-	QuitHandler(MessageThread* pmt);
-	virtual const std::string& getName();
-	virtual void run(const std::string& params);
-
-};
-
-QuitHandler::QuitHandler(MessageThread* pmt)
- : name("quit") 
+MessageThread::MessageThread(CommandInterpreter* interpreter, unsigned short port)
+	: pInterpreter(interpreter)
+	, port(port)
+	, quit(false)
+	, Thread(false)  // Don't start yet.
 {
-	assert(pmt != 0);
-	this->pmt = pmt;
-}
-
-const std::string& QuitHandler::getName() {
-	return name;
-}
-
-void QuitHandler::run(const std::string& params) {
-	pmt->stop();
-}
-
-MessageThread::MessageThread(unsigned short port)
-	: Thread(false)  // Don't start yet.
-{
-	this->port = port;
-	quitHandler = new QuitHandler(this);
-	add(quitHandler);
+	assert(interpreter);
+	assert(port != 0);
 }
 
 
 MessageThread::~MessageThread()
 {
-	delete quitHandler;
 }
 
 unsigned MessageThread::run()
 {
+	// Takes a single URL like string and splits it into path and params as if it had
+	// come from a HTTP request rather than a UDP packet.
 	UDPSocket socket;
 	socket.bind(port);
 	while (!quit) {
@@ -58,7 +35,7 @@ unsigned MessageThread::run()
 		std::string msg(buff);
 		std::string cmd;
 		std::string param;
-		size_t pos = msg.find(':');
+		size_t pos = msg.find('?');
 		if (pos == std::string::npos) {
 			cmd = msg;
 			param = "";
@@ -67,20 +44,19 @@ unsigned MessageThread::run()
 			param = msg.substr(pos + 1);
 		}
 
+		// Replace any pipe characters with slash to make early UDP messsages more webby
+		pos = cmd.find_first_of(cmd, '|');
+		while (pos != std::string::npos) {
+			cmd[pos] = '/';
+			pos = cmd.find_first_of('|', pos);
+		}
+
 		process(cmd, param);
 	}
 	return 0;
 }
 
-void MessageThread::add(MessageHandler * pHandler)
-{
-	handlers[pHandler->getName()] = pHandler;
-}
 
-void MessageThread::remove(MessageHandler * pHandler)
-{
-	handlers.erase(pHandler->getName());
-}
 
 void MessageThread::stop()
 {
@@ -89,16 +65,9 @@ void MessageThread::stop()
 
 void MessageThread::process(const std::string & cmd, const std::string & params)
 {
-	std::cout << "Processing " << cmd << ":" << params << std::endl;
-
-	Handlers::iterator pos = handlers.find(cmd);
-	if (pos != handlers.end()) {
-		MessageHandler* handler = pos->second;
-		handler->run(params);
-	}
-	else {
-		std::cout << "No command handler for " << cmd;
-	}
-	
+	std::string output;
+	pInterpreter->process(cmd, params, output);
+	// UDP has no back channel so just write output to stdout.
+	std::cout << output << std::endl;
 }
 

@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
 
 	data.setTransport(transport);
 
-	SimObjectDataRequest request(&sim, &data);
+	SimObjectDataRequest request(&sim, &data, &sim.userAircraft());
 
 	sim.DispatchLoop();
 

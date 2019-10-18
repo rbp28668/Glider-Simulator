@@ -1,20 +1,22 @@
 #pragma once
-#include "indexedlist.h"
-
+#include <map>
 class SimObjectDataRequest;
 
-class SimObjectDataRequestList :
-	public IndexedList
+// List of P3D data requests.
+class SimObjectDataRequestList 
 {
+	std::map<long, SimObjectDataRequest*> requests;
+
 public:
 
-	SimObjectDataRequest* operator [](int idx) { return (SimObjectDataRequest*)IndexedList::operator[](idx); }
-	size_t add(SimObjectDataRequest* pItem) { return IndexedList::add(pItem); }
-	//void remove(int idx) { return IndexedList::remove(idx); }
+	SimObjectDataRequest* operator [](long idx);
+	long add(SimObjectDataRequest* pItem, long idx);
+	void remove(int idx);
+
 	// Create SimConnect requests for each registered request.
 	void createRequests();
 
-	SimObjectDataRequestList(void);
-	~SimObjectDataRequestList(void);
+	SimObjectDataRequestList();
+	~SimObjectDataRequestList();
 };
 

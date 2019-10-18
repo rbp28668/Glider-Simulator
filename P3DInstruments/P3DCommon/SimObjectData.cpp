@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include<assert.h>
+#include <assert.h>
 #include <iostream>
 #include "SimObjectData.h"
 
@@ -13,6 +13,20 @@ SimObjectData::SimObjectData(Prepar3D* pTargetSim)
 	assert(pTargetSim != 0);
 }
 
+SimObjectData::SimObjectData(Prepar3D* pTargetSim, DataItem* pItems)
+	: pSim(pTargetSim)
+	, pdi(pItems)
+	, definitionId(definitionIndex++)
+{
+	assert(pTargetSim != 0);
+	assert(pItems);
+
+	count = 0; 
+	while(pdi[count].DatumName && pdi[count].UnitsName && pdi[count].DatumType){
+		++count;
+	}
+}
+
 SimObjectData::~SimObjectData(void)
 {
 	::SimConnect_ClearDataDefinition(pSim->getHandle(), definitionId);
@@ -23,22 +37,32 @@ void SimObjectData::createDefinition() {
 
 	for(int i=0; i<nItems; ++i) {
 		DataItem* pItem = items() + i;
-		if(pSim->isVerbose()) {
-			std::cout << "Creating data definition " << definitionId << " adding " << pItem->DatumName << " units " << pItem->UnitsName << std::endl;
-		}
 
 		HRESULT hr = ::SimConnect_AddToDataDefinition(pSim->getHandle(), definitionId, pItem->DatumName, pItem->UnitsName, pItem->DatumType); 
 		if(FAILED(hr)) {
 			std::cerr << "Failed to create data definition " << pItem->DatumName << " units " << pItem->UnitsName << std::endl;
 		}
+		else {
+			if (pSim->isVerbose()) {
+				std::cout << "Created data definition " << definitionId << " adding " << pItem->DatumName << " units " << pItem->UnitsName << std::endl;
+				pSim->showLastRequest("Add Data to Data Definition");
+			}
+		}
 	}
 }
 
-void SimObjectData::handle(SIMCONNECT_RECV_SIMOBJECT_DATA *pObjData){
+void SimObjectData::handle(SIMCONNECT_RECV_SIMOBJECT_DATA *pObjData, SimObject* pObject){
 	assert(pObjData != 0);
 	assert(pObjData->dwDefineID == definitionId);
+	assert(pObject);
+	
 	void *pData = (void*)&pObjData->dwData; 
-	onData(pData);
+	onData(pData, pObject);
+}
+
+// NOTE - big assumption that all the data items are double or other 64 bit value.
+void SimObjectData::send(void* pObjData, size_t dataSize, SIMCONNECT_OBJECT_ID objectId) {
+	HRESULT hr = ::SimConnect_SetDataOnSimObject(pSim->getHandle(), definitionId, objectId, 0, 0, (DWORD)dataSize, pObjData);
 }
 
 void SimObjectData::show(void* pData) {
@@ -63,3 +87,18 @@ void SimObjectData::show(void* pData) {
 		}
 	}
 }
+
+SimObjectData::DataItem* SimObjectData::items()
+{
+	return pdi;
+}
+
+int SimObjectData::itemCount()
+{
+	return count;
+}
+
+void SimObjectData::onData(void* pData, SimObject* pObject)
+{
+}
+

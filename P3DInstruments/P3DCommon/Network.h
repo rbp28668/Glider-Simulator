@@ -13,6 +13,7 @@ private:
 	WSADATA wsaData;
 };
 
+// Manage a UDP socket whether for transmit or receive.
 class UDPSocket
 {
 	WSASession session;
