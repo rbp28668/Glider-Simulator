@@ -19,8 +19,16 @@ bin/**
 *.res
 *.idb
 *.ilk
+*.enc
 
 ipch/*
+x64/*
+x64
+
+# code analysis
+*.pchast
+*.sarif
+*.nativecodeanalysis.*
 
 # Compiler logs
 *.tlog

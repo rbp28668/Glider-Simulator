@@ -33,18 +33,6 @@
     <ClInclude Include="..\P3DCommon\IndexedList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\P3DCommon\Prepar3D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\P3DCommon\SimObjectData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\P3DCommon\SimObjectDataRequest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\P3DCommon\SimObjectDataRequestList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\P3DCommon\UDPClient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -52,9 +40,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ElectronicVario.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\P3DCommon\Network.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -71,31 +56,13 @@
     <ClCompile Include="CondorUDP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\P3DCommon\Prepar3D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\SimObjectData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\SimObjectDataRequest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\SimObjectDataRequestList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\P3DCommon\IndexedList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\UDPClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MechanicalVario.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ElectronicVario.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\Network.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

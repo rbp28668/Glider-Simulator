@@ -1,5 +1,8 @@
 #pragma once
 #include <vector>
+
+// Class to store a list of items to allow them to be referenced by ID.
+// order is effectively random as it will reuse freed slots.
 class IndexedList
 {
 

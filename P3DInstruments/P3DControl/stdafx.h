@@ -8,6 +8,8 @@
 #pragma warning(disable : 4995)
 #define WIN32_LEAN_AND_MEAN // don't want winsock to be brought in by windows.h as we use winsock 2 for UDP
 
+#define __STDC_WANT_SECURE_LIB__  1 // allow strncpy_s etc.
+
 #include "targetver.h"
 
 #include <stdio.h>

@@ -24,18 +24,6 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\P3DInstruments\Prepar3D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\P3DInstruments\SimObjectData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\P3DInstruments\SimObjectDataRequest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\P3DInstruments\SimObjectDataRequestList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="LocationData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -54,12 +42,6 @@
     <ClInclude Include="TCPTransport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\P3DCommon\TCPClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\P3DCommon\UDPClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\P3DCommon\Network.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -72,18 +54,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LocationData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\Prepar3D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\SimObjectData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\SimObjectDataRequest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\SimObjectDataRequestList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\P3DCommon\IndexedList.cpp">
@@ -102,15 +72,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TCPTransport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\TCPClient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\UDPClient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\P3DCommon\Network.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

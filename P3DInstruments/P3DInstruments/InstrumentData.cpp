@@ -55,7 +55,7 @@ int InstrumentData::itemCount() {
 }
 
 
-void InstrumentData::onData(void *pData) {
+void InstrumentData::onData(void *pData, SimObject* pObject) {
 	data = *reinterpret_cast<Data*>(pData);
 	////printf("IAS %f Knots\n",data.airspeed);
 	//printf("Frequency: %16.16lx (%16.16lx)\n", data.comFrequency, data.comStatus);

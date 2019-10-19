@@ -1,6 +1,8 @@
 #pragma once
 #include <map>
 #include "../P3DCommon/Prepar3D.h"
+
+// Call basic P3D commands via client events.
 class P3DEventCommand
 {
 public:
@@ -32,11 +34,15 @@ public:
 		PAUSE_OFF,
 		SITUATION_SAVE,
 		SITUATION_RESET,
+		TOGGLE_AIRCRAFT_LABELS, 
 		EXIT,
 		ABORT,
 		SIM_RESET,
 		REFRESH_SCENERY,
 		CAPTURE_SCREENSHOT,
+		AUTORUDDER_TOGGLE, // TODO
+		FREEZE_ALTITUDE_TOGGLE, // TODO
+		FREEZE_ALTITUDE_SET, // TODO
 		SLEW_TOGGLE,	// Toggles slew on / off	Shared Cockpit(Pilot only)
 		SLEW_OF,		// Turns slew off	Shared Cockpit(Pilot only)
 		SLEW_ON,		// Turns slew on	Shared Cockpit(Pilot only)
@@ -79,8 +85,8 @@ public:
 
 	P3DEventCommand(Prepar3D* p3d);
 	~P3DEventCommand();
-	bool dispatchEvent(EventID event);
-	bool dispatchEvent(const std::string& eventName);
+	bool dispatchEvent(EventID event, DWORD  dwData);
+	bool dispatchEvent(const std::string& eventName, DWORD  dwData);
 
 
 };

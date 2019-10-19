@@ -45,7 +45,7 @@ public:
 	virtual DataItem* items();
 	virtual int itemCount();
 
-	virtual void onData(void *pData);
+	virtual void onData(void *pData, SimObject* pObject);
 
 	LocationData(Prepar3D*);
 	~LocationData(void);
