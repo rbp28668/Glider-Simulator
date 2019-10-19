@@ -125,6 +125,8 @@ namespace CGC_Sim_IOS
             }
         }
 
+        public bool IsPaused { get; set; } = false;
+
         public Metar CurrentMetar
         {
             get

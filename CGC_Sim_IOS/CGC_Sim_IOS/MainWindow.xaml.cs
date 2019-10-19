@@ -44,6 +44,10 @@ namespace CGC_Sim_IOS
         private Scenario selectedScenario = null;
         private bool p3DAlreadyRunning = false;
 
+        private bool simPausedOnStartingSlew = false;
+
+        private Thread closeWinchXDialog;
+
         const uint SIMCONNECT_OBJECT_ID_USER = 0;           // proxy value for User vehicle ObjectID
         const uint DATA = 0;
 
@@ -54,10 +58,13 @@ namespace CGC_Sim_IOS
             {
                 if (sim.SimConnection == null)
                 {
-                    if (sim.OpenSimConnection(handle))
+                    if (p3DAlreadyRunning)
                     {
-                        InitSimConnectionEvents();
-                        p3DAlreadyRunning = true;
+                        if (sim.OpenSimConnection(handle))
+                        {
+                            InitSimConnectionEvents();
+                            p3DAlreadyRunning = true;
+                        }
                     }
                 }
                 return sim.SimConnection;
@@ -85,6 +92,29 @@ namespace CGC_Sim_IOS
             if (handleSource != null)
             {
                 handleSource.RemoveHook(HandleSimConnectEvents);
+            }
+        }
+
+        private void closeWinchXDialogTask(object obj)
+        {
+            bool closed = false;
+            int loop = 0;
+            while (closed == false && loop < 10)
+            {
+                Process[] p = Process.GetProcessesByName("WinchX");
+                if (p.Count() > 0)
+                {
+                    // check that it's not the main WinchX! dialog showing
+                    if (!p[0].MainWindowTitle.Contains("!"))
+                    {
+                        SetForegroundWindow(p[0].MainWindowHandle);
+                        SendKeys.SendWait("N");
+                        Console.WriteLine("WinchX dialog closed");
+                    }
+                    closed = true;
+                }
+                Thread.Sleep(5000);
+                loop++;
             }
         }
 
@@ -252,11 +282,18 @@ namespace CGC_Sim_IOS
                     break;
                 case (uint)EVENTS.PAUSE:
                     if (recEvent.dwData == 1)
+                    {
                         Button_Pause.Content = "Run";
+                        sim.IsPaused = true;
+                        System.Console.WriteLine("Sim Paused");
+                    }
                     else
+                    {
                         Button_Pause.Content = "Pause";
+                        sim.IsPaused = false;
+                        System.Console.WriteLine("Sim Un-Paused");
+                    }
 
-                    System.Console.WriteLine("Sim Paused");
                     break;
             }
         }
@@ -297,17 +334,20 @@ namespace CGC_Sim_IOS
 
         private void LaunchP3D()
         {
-            sim.StartP3D(defaultScenario);
-            Thread.Sleep(10000);
-            Process[] p = Process.GetProcessesByName("WinchX");
-            if (p.Count() > 0)
+            Process[] p = Process.GetProcessesByName("Prepar3D");
+            if (p.Count() == 0)
             {
-                SetForegroundWindow(p[0].MainWindowHandle);
-                SendKeys.SendWait("N");
+                sim.StartP3D(defaultScenario);
+                closeWinchXDialog = new Thread(closeWinchXDialogTask);
+                closeWinchXDialog.Start();
+                p3DAlreadyRunning = true;
             }
-            sim.OpenSimConnection(handle);
-            InitSimConnectionEvents();
-            p3DAlreadyRunning = true;
+            if (!p3DAlreadyRunning)
+            {
+                closeWinchXDialog = new Thread(closeWinchXDialogTask);
+                closeWinchXDialog.Start();
+                p3DAlreadyRunning = true;
+            } 
         }
 
         private void Button_Launch_P3D_Click(object sender, RoutedEventArgs e)
@@ -408,12 +448,14 @@ namespace CGC_Sim_IOS
             if (handle == IntPtr.Zero)
             {
                 //AddHandler(FrameworkElement.MouseDownEvent, new MouseButtonEventHandler(Button_Slew_Left_MouseLeftButtonDown), true);
-               // AddHandler(FrameworkElement.MouseUpEvent, new MouseButtonEventHandler(Button_Slew_Left_MouseLeftButtonUp), true);
+                // AddHandler(FrameworkElement.MouseUpEvent, new MouseButtonEventHandler(Button_Slew_Left_MouseLeftButtonUp), true);
                 handle = new WindowInteropHelper(this).Handle; // Get handle of main WPF Window
                 handleSource = HwndSource.FromHwnd(handle); // Get source of handle in order to add event handlers to it
                 handleSource.AddHook(HandleSimConnectEvents);
                 BuildScenarioLists();
             }
+            LaunchP3D();
+
         }
 
         private void BuildScenarioLists()
@@ -514,6 +556,27 @@ namespace CGC_Sim_IOS
              SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
         }
 
+        public void SlewStart()
+        {
+            simPausedOnStartingSlew = sim.IsPaused;
+            if (simPausedOnStartingSlew)
+            {
+                SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
+            }
+            SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
+        }
+
+        public void SlewStop()
+        {
+            if (simPausedOnStartingSlew)
+            {
+                SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
+                simPausedOnStartingSlew = false;
+            }
+            SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_FREEZE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
+            SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
+        }
+
         private void Button_Slew_Click(object sender, RoutedEventArgs e)
         {
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
@@ -521,72 +584,48 @@ namespace CGC_Sim_IOS
 
         private void Button_Slew_Left_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            //System.Console.WriteLine("Button_Slew_Left_PreviewMouseDown");
+            SlewStart();
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_LEFT, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
-        }
-
-        private void Button_Slew_Left_PreviewMouseUp(object sender, MouseButtonEventArgs e)
-        {
-           // SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_FREEZE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
         }
 
         private void Button_Slew_Forward_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            SlewStart();
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_AHEAD_PLUS, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
-        }
-
-        private void Button_Slew_Forward_PreviewMouseUp(object sender, MouseButtonEventArgs e)
-        {
-            //SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_FREEZE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
         }
 
         private void Button_Slew_Right_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            SlewStart();
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_RIGHT, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
         }
 
-        private void Button_Slew_Right_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        private void Button_Slew_Backwards_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-           // SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_FREEZE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
-        }
-
-         private void Button_Slew_Backwards_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
+            SlewStart();
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_AHEAD_MINUS, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
-        }
-
-        private void Button_Slew_Backwards_PreviewMouseUp(object sender, MouseButtonEventArgs e)
-        {
-            //SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_FREEZE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
         }
 
         private void Button_Slew_Freeze_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_FREEZE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
-        }
-
-        private void Button_Slew_Freeze_PreviewMouseUp(object sender, MouseButtonEventArgs e)
-        {
-
+            SlewStop();
         }
 
         private void Button_Slew_Rotate_Leftt_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
+            SlewStart();
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_HEADING_PLUS, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
-        }
-
-        private void Button_Slew_Rotate_Left_PreviewMouseUp(object sender, MouseButtonEventArgs e)
-        {
-
         }
 
         private void Button_Slew_Up_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            SlewStart();
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_ALTIT_UP_SLOW, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
         }
 
         private void Button_Slew_Down_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            SlewStart();
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_ALTIT_DN_SLOW, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
         }
 
@@ -642,6 +681,36 @@ namespace CGC_Sim_IOS
             get { return System.Text.Encoding.UTF8; }
         }
     }
+
+    //class SlewPauser : Object
+    //{
+    //    private bool isPaused = false;
+
+    //    const uint SIMCONNECT_OBJECT_ID_USER = 0;           // proxy value for User vehicle ObjectID
+    //    const uint DATA = 0;
+    //    private Simulator Sim;
+
+    //    public SlewPauser(Simulator sim)
+    //    {
+    //        Sim = sim;
+    //        isPaused = Sim.IsPaused;
+    //        if (isPaused)
+    //        {
+    //            Sim.SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
+    //        }
+    //        Sim.SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
+    //    }
+
+    //    ~SlewPauser()
+    //    {
+    //        isPaused = Sim.IsPaused;
+    //        if (isPaused)
+    //        {
+    //            Sim.SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
+    //        }
+    //        Sim.SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
+    //    }
+    //}
 
  }
 

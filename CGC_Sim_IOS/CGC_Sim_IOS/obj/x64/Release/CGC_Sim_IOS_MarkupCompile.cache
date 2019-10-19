@@ -4,11 +4,11 @@
 winexe
 C#
 .cs
-C:\Users\richa\Documents\Development\Simulator\Glider-Simulator\CGC_Sim_IOS\CGC_Sim_IOS\obj\x64\Debug\
+C:\Users\richa\Documents\Development\Simulator\Glider-Simulator\CGC_Sim_IOS\CGC_Sim_IOS\obj\x64\Release\
 CGC_Sim_IOS
 none
 false
-DEBUG;TRACE
+TRACE
 C:\Users\richa\Documents\Development\Simulator\Glider-Simulator\CGC_Sim_IOS\CGC_Sim_IOS\App.xaml
 8-1682313908
 

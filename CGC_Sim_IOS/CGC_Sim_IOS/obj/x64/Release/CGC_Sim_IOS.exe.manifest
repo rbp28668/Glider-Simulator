@@ -42,14 +42,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="CGC_Sim_IOS.exe" size="923616">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="CGC_Sim_IOS.exe" size="609248">
       <assemblyIdentity name="CGC_Sim_IOS" version="1.0.0.0" language="neutral" processorArchitecture="amd64" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>FN6a7iV+uAP27R6Tvfsznm8mFKOs61csd8VMgeZhAlc=</dsig:DigestValue>
+        <dsig:DigestValue>MKi4JksB87GjZdLKMGBGCjccNHTZ3DOfC5icTlTV7rk=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
