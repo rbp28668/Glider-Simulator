@@ -48,7 +48,8 @@ void Prepar3D::connect(const char* appName)
 	int attemptCount = 0;
 	while (!connected) {
 		std::cout << "Connecting" << std::endl;
-		if (connected = SUCCEEDED(SimConnect_Open(&hSimConnect, appName, NULL, 0, 0, 0))) {
+		// Note SIMCONNECT_OPEN_CONFIGINDEX_LOCAL to force connection onto local machine irrespective of simconnect file.
+		if (connected = SUCCEEDED(::SimConnect_Open(&hSimConnect, appName, NULL, 0, 0, SIMCONNECT_OPEN_CONFIGINDEX_LOCAL))) {
 			showLastRequest("Connected to Prepar3D");
 			registerSystemEvents();
 			weatherStations().refresh(); // make sure global is initialised initially
@@ -249,41 +250,43 @@ void Prepar3D::handleWeatherObservation(SIMCONNECT_RECV* pData)
 	}
 }
 
-//void Prepar3D::handleExternalSimCreate(SIMCONNECT_RECV_EXTERNAL_SIM_CREATE* pData)
-//{
-//	extSim->create(pData);
-//	::SimConnect_SynchronousUnblock(hSimConnect);
-//	if (verbose) {
-//		std::cout << "External sim create " << pData->dwObjectID << std::endl;
-//	}
-//}
-//
-//void Prepar3D::handleExternalSimDestroy(SIMCONNECT_RECV_EXTERNAL_SIM_DESTROY* pData)
-//{
-//	extSim->destroy(pData);
-//	::SimConnect_SynchronousUnblock(hSimConnect);
-//}
-//
-//void Prepar3D::handleExternalSimSimulate(SIMCONNECT_RECV_EXTERNAL_SIM_SIMULATE* pData)
-//{
-//	extSim->simulate(pData);
-//	::SimConnect_SynchronousUnblock(hSimConnect);
-//	if (verbose) {
-//		std::cout << "External sim simulate " << pData->dwObjectID << std::endl;
-//	}
-//}
-//
-//void Prepar3D::handleExternalSimLocationChanged(SIMCONNECT_RECV_EXTERNAL_SIM_LOCATION_CHANGED* pData)
-//{
-//	extSim->locationChanged(pData);
-//	::SimConnect_SynchronousUnblock(hSimConnect);
-//}
-//
-//void Prepar3D::handleExternalSimEvent(SIMCONNECT_RECV_EXTERNAL_SIM_EVENT* pData)
-//{
-//	extSim->event(pData);
-//	::SimConnect_SynchronousUnblock(hSimConnect);
-//}
+#ifdef USE_EXTERNAL_SIM
+void Prepar3D::handleExternalSimCreate(SIMCONNECT_RECV_EXTERNAL_SIM_CREATE* pData)
+{
+	extSim->create(pData);
+	::SimConnect_SynchronousUnblock(hSimConnect);
+	if (verbose) {
+		std::cout << "External sim create " << pData->dwObjectID << std::endl;
+	}
+}
+
+void Prepar3D::handleExternalSimDestroy(SIMCONNECT_RECV_EXTERNAL_SIM_DESTROY* pData)
+{
+	extSim->destroy(pData);
+	::SimConnect_SynchronousUnblock(hSimConnect);
+}
+
+void Prepar3D::handleExternalSimSimulate(SIMCONNECT_RECV_EXTERNAL_SIM_SIMULATE* pData)
+{
+	extSim->simulate(pData);
+	::SimConnect_SynchronousUnblock(hSimConnect);
+	if (verbose) {
+		std::cout << "External sim simulate " << pData->dwObjectID << std::endl;
+	}
+}
+
+void Prepar3D::handleExternalSimLocationChanged(SIMCONNECT_RECV_EXTERNAL_SIM_LOCATION_CHANGED* pData)
+{
+	extSim->locationChanged(pData);
+	::SimConnect_SynchronousUnblock(hSimConnect);
+}
+
+void Prepar3D::handleExternalSimEvent(SIMCONNECT_RECV_EXTERNAL_SIM_EVENT* pData)
+{
+	extSim->event(pData);
+	::SimConnect_SynchronousUnblock(hSimConnect);
+}
+#endif
 
 void Prepar3D::showLastRequest(const char* name)
 {
@@ -317,6 +320,8 @@ void Prepar3D::DispatchCallback(SIMCONNECT_RECV* pData, DWORD cbData, void* pCon
 // OO version of the callback.
 void Prepar3D::Process(SIMCONNECT_RECV* pData, DWORD cbData)
 {
+	//std::cout << "Request type " << pData->dwID << std::endl;
+	
 	switch (pData->dwID)
 	{
 	case SIMCONNECT_RECV_ID_EXCEPTION:
@@ -350,7 +355,8 @@ void Prepar3D::Process(SIMCONNECT_RECV* pData, DWORD cbData)
 		handleWeatherObservation(pData);
 		break;
 
-	/*case SIMCONNECT_RECV_ID_EXTERNAL_SIM_CREATE:
+#ifdef USE_EXTERNAL_SIM
+	case SIMCONNECT_RECV_ID_EXTERNAL_SIM_CREATE:
 		handleExternalSimCreate((SIMCONNECT_RECV_EXTERNAL_SIM_CREATE*)pData);
 		break;
 
@@ -369,7 +375,7 @@ void Prepar3D::Process(SIMCONNECT_RECV* pData, DWORD cbData)
 	case SIMCONNECT_RECV_ID_EXTERNAL_SIM_EVENT:
 		handleExternalSimEvent((SIMCONNECT_RECV_EXTERNAL_SIM_EVENT*)pData);
 		break;
-	*/
+#endif
 
 	case SIMCONNECT_RECV_ID_QUIT:
 		std::cout << "Sim quit" << std::endl;
@@ -426,7 +432,9 @@ SimObject* Prepar3D::lookupSimObject(DWORD dwObjectId)
 
 void Prepar3D::unregisterSimObject(DWORD dwObjectId)
 {
-	simObjects.remove(dwObjectId);
+	if(dwObjectId != userAc.id()){
+		simObjects.remove(dwObjectId);
+	}
 }
 
 

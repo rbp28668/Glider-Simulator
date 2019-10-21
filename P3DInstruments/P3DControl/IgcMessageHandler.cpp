@@ -9,8 +9,9 @@
 #include "Folder.h"
 #include "JSONWriter.h"
 
-IgcMessageHandler::IgcMessageHandler(Prepar3D* p3d) :
-	MessageHandler(p3d, "igc")
+IgcMessageHandler::IgcMessageHandler(Prepar3D* p3d) 
+	: MessageHandler(p3d, "igc")
+	, fr(p3d)
 {
 
 }
@@ -28,11 +29,12 @@ void IgcMessageHandler::run(const std::string& cmd, const APIParameters& params,
 	else if (cmd == "traffic") {
 		std::string file = params.getString("igc");
 		std::string type = params.getString("type");
+		bool restart = params.getBool("restart");
 		if (file.empty() || type.empty()) {
 			reportFailure("Must supply igc and type parameters to launch traffic", 0, output);
 		}
 		else {
-			launchIgcTraffic(file, type, output);
+			launchIgcTraffic(file, type, restart, output);
 		}
 	}
 	else if (cmd == "replay") {
@@ -43,6 +45,39 @@ void IgcMessageHandler::run(const std::string& cmd, const APIParameters& params,
 		}
 		else {
 			replayIgcFile(file, type, output);
+		}
+	}
+	else if (cmd == "clear") {
+		clearIgcTraffic(output);
+	}
+	else if (cmd == "start") {
+		if (!fr.running()) {
+			fr.setInterval(params.getInt("interval", 4));
+			fr.setP1(params.getString("p1"));
+			fr.setP2(params.getString("p2"));
+			fr.setGliderType(params.getString("glider_type"));
+			fr.setRegistration(params.getString("registration"));
+			fr.setCompetitionClass(params.getString("competition_class"));
+			fr.setCompetitionId(params.getString("competition_id"));
+
+			// E:\Users\rbp28668\Documents\Prepar3D v4 Files
+			DocumentDirectory documents;
+			Directory igcFolder = documents.sub(Prepar3D::DOCUMENTS).sub("igc");
+			fr.start(igcFolder);
+			reportSuccess(output);
+		}
+		else {
+			reportFailure("Flight recorder is already running",0,output);
+		}
+
+	}
+	else if (cmd == "stop") {
+		if (fr.running()) {
+			fr.stop();
+			reportSuccess(output);
+		}
+		else {
+			reportFailure("Flight recorder is not running", 0, output);
 		}
 	}
 	else {
@@ -83,7 +118,7 @@ void IgcMessageHandler::listAvailableIGCFiles(const std::string& filter, std::st
 	//reportSuccess(output);
 }
 
-void IgcMessageHandler::launchIgcTraffic(const std::string& file, const std::string& type, std::string& output)
+void IgcMessageHandler::launchIgcTraffic(const std::string& file, const std::string& type, bool restart, std::string& output)
 {
 	IGCFile igc;
 
@@ -95,6 +130,7 @@ void IgcMessageHandler::launchIgcTraffic(const std::string& file, const std::str
 		igc.parse((const char*)f);
 
 		AIIGCAircraft* aircraft = new AIIGCAircraft(p3d, &igc, type.c_str());
+		aircraft->setRestartOnFinish(restart);
 		p3d->externalSim().startAIVehicle(aircraft, "");
 		reportSuccess(output);
 	}
@@ -123,3 +159,11 @@ void IgcMessageHandler::replayIgcFile(const std::string& file, const std::string
 	}
 
 }
+
+// Clears all the external sim traffic. Not just IGC.
+void IgcMessageHandler::clearIgcTraffic(std::string& output)
+{
+	p3d->externalSim().clear();
+	reportSuccess(output);
+}
+

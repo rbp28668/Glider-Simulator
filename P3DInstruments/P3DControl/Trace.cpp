@@ -116,6 +116,10 @@ Position Trace::positionAtTime(double t)
 
 			// Note that ayr should be in metres per sec per sec.
 			last.bank = atan2(ayr,9.81); // 
+
+			// Pitch - vertical speed in feet per sec c.f. speed in kts
+			double speed = last.speed * 6076.12 / 3600;  // now in feet per second
+			last.pitch = -atan2(dzdt, speed);
 		}
 		else { // assume level on ground
 			last.pitch = 0;

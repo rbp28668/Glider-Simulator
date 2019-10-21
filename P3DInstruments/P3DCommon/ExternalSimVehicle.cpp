@@ -7,6 +7,13 @@
 
 
 
+void ExternalSimVehicle::restart()
+{
+	::QueryPerformanceCounter(&t0);
+}
+
+// Get how long the external vehicle has been running for
+// (in real time)
 double ExternalSimVehicle::runTime() const
 {
 	LARGE_INTEGER now;
@@ -15,11 +22,13 @@ double ExternalSimVehicle::runTime() const
 	return dt / frequency;
 }
 
+// Creates a data request for this vehicle.
 void ExternalSimVehicle::createInputRequest(SimObjectData* pData)
 {
 	pInputRequest = new SimObjectDataRequest(p3d, pData, this, SIMCONNECT_PERIOD_VISUAL_FRAME);
 }
 
+// Get the container or aircraft type name.
 const char* ExternalSimVehicle::containerName()
 {
 	return pszContainer;
@@ -29,6 +38,7 @@ ExternalSimVehicle::ExternalSimVehicle(Prepar3D* p3d, const char* containerName)
 	: pszContainer(containerName)
 	, SimObject(p3d)
 	, pInputRequest(0)
+	, shouldRestartOnFinish(false)
 {
 	setName(containerName);
 
@@ -44,7 +54,10 @@ ExternalSimVehicle::~ExternalSimVehicle()
 {
 	if (pInputRequest) {
 		delete pInputRequest;
+		pInputRequest = 0;
 	}
+
+	p3d->externalSim().destroy(this);
 }
 
 

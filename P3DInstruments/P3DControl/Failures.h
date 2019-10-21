@@ -16,6 +16,13 @@ public:
 		int electrical;
 		int pitot;
 		int turn_coordinator;
+		Data() : airspeed(OK), altimeter(OK), electrical(OK), pitot(OK), turn_coordinator(OK) {}
+		Data(const Data& other) 
+			: airspeed(other.airspeed)
+			, altimeter(other.altimeter)
+			, electrical(other.electrical)
+			, pitot(other.pitot)
+			, turn_coordinator(other.turn_coordinator) {}
 	};
 
 private:

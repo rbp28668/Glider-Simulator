@@ -163,6 +163,7 @@
     <ClInclude Include="CommandInterpreter.h" />
     <ClInclude Include="CriticalSection.h" />
     <ClInclude Include="EventMessageHandler.h" />
+    <ClInclude Include="Extension.h" />
     <ClInclude Include="Failures.h" />
     <ClInclude Include="FailuresMessageHandler.h" />
     <ClInclude Include="Folder.h" />
@@ -175,6 +176,7 @@
     <ClInclude Include="HTTPURL.h" />
     <ClInclude Include="IGCAircraft.h" />
     <ClInclude Include="IGCFile.h" />
+    <ClInclude Include="IGCFlightRecorder.h" />
     <ClInclude Include="IgcMessageHandler.h" />
     <ClInclude Include="JSONWriter.h" />
     <ClInclude Include="MessageHandler.h" />
@@ -194,6 +196,7 @@
     <ClInclude Include="ThermalMessageHandler.h" />
     <ClInclude Include="Thread.h" />
     <ClInclude Include="Trace.h" />
+    <ClInclude Include="TracePoint.h" />
     <ClInclude Include="TrafficMessageHandler.h" />
     <ClInclude Include="WeatherMessageHandler.h" />
     <ClInclude Include="WideConverter.h" />
@@ -223,6 +226,7 @@
     <ClCompile Include="HTTPURL.cpp" />
     <ClCompile Include="IGCAircraft.cpp" />
     <ClCompile Include="IGCFile.cpp" />
+    <ClCompile Include="IGCFlightRecorder.cpp" />
     <ClCompile Include="IgcMessageHandler.cpp" />
     <ClCompile Include="JSONWriter.cpp" />
     <ClCompile Include="MessageHandler.cpp" />

@@ -7,19 +7,19 @@ Extension::Extension(std::string typeCode, int start, int finish)
 	, finish(finish) {
 }
 
-std::string Extension::getTypeCode() {
+std::string Extension::getTypeCode() const {
 	return typeCode;
 }
 
-int Extension::getStart() {
+int Extension::getStart() const {
 	return start;
 }
 
-int Extension::getFinish() {
+int Extension::getFinish() const {
 	return finish;
 }
 
-int Extension::length() {
+int Extension::length() const{
 	return 1 + finish - start;
 }
 

@@ -1,0 +1,10 @@
+E:\Git\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\obj\Debug\P3DWebApiDriverDemo.csprojAssemblyReference.cache
+E:\Git\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\obj\Debug\P3DWebApiDriverDemo.csproj.CoreCompileInputs.cache
+E:\Git\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\bin\Debug\P3DWebApiDriverDemo.exe.config
+E:\Git\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\bin\Debug\P3DWebApiDriverDemo.exe
+E:\Git\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\bin\Debug\P3DWebApiDriverDemo.pdb
+E:\Git\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\obj\Debug\P3DWebApiDriverDemo.exe
+E:\Git\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\obj\Debug\P3DWebApiDriverDemo.pdb
+E:\Git\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\bin\Debug\Newtonsoft.Json.dll
+E:\Git\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\bin\Debug\Newtonsoft.Json.xml
+E:\Git\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\obj\Debug\P3DWebApiDriverDemo.csproj.CopyComplete
