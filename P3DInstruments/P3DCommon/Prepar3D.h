@@ -3,6 +3,12 @@
 #include "stdafx.h"
 #include <SimConnect.h>
 #include <vector>
+
+// So far haven't been able to get a callback with external sim.
+// Needs further investigation so in the meantime, keep using
+// triggering from a data request.
+// #define USE_EXTERNAL_SIM
+
 #include "SimObject.h"
 #include "SimObjectList.h"
 #include "SimObjectDataRequestList.h"
@@ -11,6 +17,8 @@
 
 class SimObjectDataRequest;
 class ExternalSim;
+
+
 
 // Encapsulate the core P3D interface.
 class Prepar3D
@@ -59,11 +67,14 @@ class Prepar3D
 	void handleSimObjectDataByType(SIMCONNECT_RECV* pData);
 	void handleAssignedObjectId(SIMCONNECT_RECV* pData);
 	void handleWeatherObservation(SIMCONNECT_RECV* pData);
-	//void handleExternalSimCreate(SIMCONNECT_RECV_EXTERNAL_SIM_CREATE* pData);
-	//void handleExternalSimDestroy(SIMCONNECT_RECV_EXTERNAL_SIM_DESTROY* pData);
-	//void handleExternalSimSimulate(SIMCONNECT_RECV_EXTERNAL_SIM_SIMULATE* pData);
-	//void handleExternalSimLocationChanged(SIMCONNECT_RECV_EXTERNAL_SIM_LOCATION_CHANGED* pData);
-	//void handleExternalSimEvent(SIMCONNECT_RECV_EXTERNAL_SIM_EVENT* pData);
+	
+#ifdef USE_EXTERNAL_SIM
+	void handleExternalSimCreate(SIMCONNECT_RECV_EXTERNAL_SIM_CREATE* pData);
+	void handleExternalSimDestroy(SIMCONNECT_RECV_EXTERNAL_SIM_DESTROY* pData);
+	void handleExternalSimSimulate(SIMCONNECT_RECV_EXTERNAL_SIM_SIMULATE* pData);
+	void handleExternalSimLocationChanged(SIMCONNECT_RECV_EXTERNAL_SIM_LOCATION_CHANGED* pData);
+	void handleExternalSimEvent(SIMCONNECT_RECV_EXTERNAL_SIM_EVENT* pData);
+#endif
 
 
 public:

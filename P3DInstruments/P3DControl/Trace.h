@@ -16,11 +16,11 @@ struct Point {
 };
 
 struct Position {
-	double lat;
-	double lon;
+	double lat;		// degrees
+	double lon;		// degrees
 	double alt;
-	double pitch;
-	double bank;
+	double pitch;  // radians
+	double bank;   // radians
 	double speed;
 	double heading;
 	double vwx; // world speed in EW direction

@@ -2,8 +2,10 @@
 #include <string>
 #include <list>
 #include <iostream>
+#include <iomanip>
 #include <exception>
 #include <ctime>
+#include <assert.h>
 #include "Extension.h"
 #include "TracePoint.h"
 
@@ -156,5 +158,73 @@ int TracePoint::getEngineNoiseLevel() const {
 
 int TracePoint::getIas() const {
 	return ias;
+}
+
+void TracePoint::write(std::ostream& os, const std::list<Extension>& extensions) const
+{
+	os << "B";
+
+	// Time
+	tm t;
+	gmtime_s(&t , &when );
+	os << std::setw(2) << std::setfill('0') << t.tm_hour;
+	os << std::setw(2) << std::setfill('0') << t.tm_min;
+	os << std::setw(2) << std::setfill('0') << t.tm_sec;
+
+	// Northings
+	char NS = (northings > 0) ? 'N' : 'S';
+	double lat = northings;
+	if (lat < 0) lat = -lat;
+	int degrees = (int)floor(lat);
+	lat -= degrees;
+	lat *= 60;  // now in minutes.
+	int minutes = (int)floor(lat * 1000);
+	
+	os << std::setw(2) << std::setfill('0') << degrees;
+	os << std::setw(5) << std::setfill('0') << minutes;
+	os << NS;
+
+	// Eastings
+	char EW = (eastings > 0) ? 'E' : 'W';
+	double lng = eastings;
+	if (lng < 0) lng = -lng;
+	degrees = (int)floor(lng);
+	lng -= degrees;
+	lng *= 60; // to minutes
+	minutes = (int)floor(lng * 1000);
+
+	os << std::setw(3) << std::setfill('0') << degrees;
+	os << std::setw(5) << std::setfill('0') << minutes;
+	os << EW;
+
+	// Altitude
+	os << 'A';
+	os << std::setw(5) << std::setfill('0') << (int)altBaro;
+	os << std::setw(5) << std::setfill('0') << (int)altGps;
+
+
+#ifndef NDEBUG
+	int pos = 0;
+#endif
+
+	for (auto it = extensions.begin(); it != extensions.end(); ++it) {
+#ifndef NDEBUG
+		// Implicit assumption that the extensions are in order by position on the line
+		// Check it:
+		assert(pos < it->getStart());
+		pos = it->getFinish();
+#endif
+		if (it->getTypeCode() == "FXA") { // fix accuracy
+			os << std::setw(it->length()) << std::setfill('0') << fixAccuracy;
+		} else if (it->getTypeCode() == "SIU") { // Satellites in use
+			os << std::setw(it->length()) << std::setfill('0') << satellitesInUse;
+		} else if (it->getTypeCode() == "ENL") { // Environmental Noise Level
+			os << std::setw(it->length()) << std::setfill('0') << engineNoiseLevel;
+		} else if(it->getTypeCode() == "MOP") { // Method of propulsion
+			os << std::setw(it->length()) << std::setfill('0') << 0;
+		}
+	}
+
+	os << std::endl;
 }
 

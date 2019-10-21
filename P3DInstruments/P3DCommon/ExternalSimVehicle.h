@@ -17,13 +17,19 @@ protected:
 	SimObjectDataRequest* pInputRequest; // input request to get data to drive the object.
 	LARGE_INTEGER t0;    // when this started.
 	double frequency; // of timer in ticks per second.
+	bool shouldRestartOnFinish;
+
 
 public:
 
+	bool restartOnFinish() const { return shouldRestartOnFinish; }
+	void setRestartOnFinish(bool restart) { shouldRestartOnFinish = restart; }
+
+	void restart();
 	double runTime() const;
 
-	// Called to run one round of simulation
-	virtual void simulate(const SimInputData& inputData, SimOutputData& outputData, double t) = 0;
+	// Called to run one round of simulation.  Returns false when simulation finished.
+	virtual bool simulate(const SimInputData& inputData, SimOutputData& outputData, double t) = 0;
 
 	// Create the input request with the external sim input data.
 	// This drives the external sim with a data packet per frame.

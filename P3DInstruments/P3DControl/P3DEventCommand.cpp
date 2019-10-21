@@ -52,9 +52,15 @@ void P3DEventCommand::setupEvents() {
 	mapEvent(REFRESH_SCENERY, "REFRESH_SCENERY");
 	mapEvent(CAPTURE_SCREENSHOT, "CAPTURE_SCREENSHOT");
 	mapEvent(AUTORUDDER_TOGGLE, "AUTORUDDER_TOGGLE");
-	mapEvent(FREEZE_ALTITUDE_TOGGLE, "FREEZE_ALTITUDE_TOGGLE");
-	mapEvent(FREEZE_ALTITUDE_SET, "FREEZE_ALTITUDE_SET");
-	mapEvent(SLEW_TOGGLE, "SLEW_TOGGLE"); // Toggles slew on / off	Shared Cockpit(Pilot only)
+	mapEvent(FREEZE_LATITUDE_LONGITUDE_TOGGLE, "FREEZE_LATITUDE_LONGITUDE_TOGGLE"); //Turns the freezing of the lat/lon position of the aircraft (either user or AI controlled) on or off. 
+	mapEvent(FREEZE_LATITUDE_LONGITUDE_SET, "FREEZE_LATITUDE_LONGITUDE_SET");	// 	Freezes the lat/lon position of the aircraft.
+	mapEvent(FREEZE_ALTITUDE_TOGGLE, "FREEZE_ALTITUDE_TOGGLE");					//	Turns the freezing of the altitude of the aircraft on or off.
+	mapEvent(FREEZE_ALTITUDE_SET, "FREEZE_ALTITUDE_SET");						// Freezes the altitude of the aircraft..
+	mapEvent(FREEZE_ATTITUDE_TOGGLE, "FREEZE_ATTITUDE_TOGGLE");					// Turns the freezing of the attitude (pitch, bank and heading) of the aircraft on or off.
+	mapEvent(FREEZE_ATTITUDE_SET, "FREEZE_ATTITUDE_SET");						// Freezes the attitude (pitch, bank and heading) of the aircraft.
+	mapEvent(POSITION_FREEZE_USER, "POSITION_FREEZE_USER");						// Toggles the position freeze (Lat/Lon, Altitude and Attitude) of the controlled SimObject.
+	mapEvent(POSITION_FREEZE_ALL, "POSITION_FREEZE_ALL");						// Toggles the position freeze(Lat / Lon, Altitudeand Attitude) of all SimObjects.
+	mapEvent(SLEW_TOGGLE, "SLEW_TOGGLE");										// Toggles slew on / off	Shared Cockpit(Pilot only)
 	mapEvent(SLEW_OF, "SLEW_OFF"); // 	Turns slew off	Shared Cockpit(Pilot only)
 	mapEvent(SLEW_ON, "SLEW_ON"); // 	Turns slew on	Shared Cockpit(Pilot only)
 	mapEvent(SLEW_SET, "SLEW_SET"); // 	Sets slew on / off(1, 0)	Shared Cockpit(Pilot only)
@@ -96,7 +102,7 @@ bool P3DEventCommand::dispatchEvent(EventID event, DWORD  dwData)
 	// SimConnect_MapClientEventToSimEvent for your key event definitions(along with the extra functions involved in this process) and use SimConnect_TransmitClientEvent to trigger that event.
 	// See http://www.prepar3d.com/SDKv4/sdk/references/variables/event_ids.html for event IDs
 
-	HRESULT hr = SimConnect_TransmitClientEvent(p3d->getHandle(), SIMCONNECT_OBJECT_ID_USER, event, dwData, SIMCONNECT_GROUP_PRIORITY_HIGHEST, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
+	HRESULT hr = ::SimConnect_TransmitClientEvent(p3d->getHandle(), SIMCONNECT_OBJECT_ID_USER, event, dwData, SIMCONNECT_GROUP_PRIORITY_HIGHEST, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
 	return hr != S_OK;
 }
 

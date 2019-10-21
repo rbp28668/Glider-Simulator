@@ -4,6 +4,7 @@
 #include <list>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 #include <algorithm>
 #include <ctype.h>
 #include "IGCFile.h"
@@ -22,6 +23,13 @@ static std::string trim(const std::string& str)
 
 
 IGCFile::IGCFile() {
+	time(&date);  // default to now
+
+	// Add standard extensions for fix accuracy and satellites in use
+	//I023638FXA3940SIU
+	extensions.push_back(Extension("FXA",36,38));
+	extensions.push_back(Extension("SIU", 39, 40));
+
 }
 
 
@@ -221,6 +229,11 @@ void IGCFile::setTrace(const TraceList& trace) {
 	this->trace = trace;
 }
 
+IGCFile::ExtensionList& IGCFile::getExtensions()
+{
+	return extensions;
+}
+
 
 void IGCFile::parse(const char* path) {
 	std::ifstream ifs(path);
@@ -234,6 +247,9 @@ void IGCFile::parse(const char* path) {
 }
 
 void IGCFile::parse(std::istream& is) {
+
+	// Remove default extensions as file should define them.
+	extensions.clear();
 
 	std::string line;
 	while (!is.eof()) {
@@ -274,6 +290,7 @@ void IGCFile::parse(std::istream& is) {
 	}
 
 }
+
 
 
 /**
@@ -353,4 +370,74 @@ void IGCFile::parseTaskRecord(std::string line) {
 	// TODO Auto-generated method stub
 }
 
+
+void IGCFile::write(std::ostream& os)
+{
+	// Logger ID
+	if (!loggerId.empty()) os << "A" << loggerId << std::endl;
+
+	// Date e.g. HFDTE170515  date as DDMMYY
+	tm t;
+	gmtime_s(&t, &date);
+	os << "HFDTE"
+		<< std::setw(2) << std::setfill('0') << t.tm_mday
+		<< std::setw(2) << std::setfill('0') << t.tm_mon + 1
+		<< std::setw(2) << std::setfill('0') << (t.tm_year) % 100
+		<< std::endl;
+
+
+	// Fix accuracy e.g. HFFXA500
+	os << "HFFXA" << fixAccuracy << std::endl;
+
+	// HFPLTPilotincharge : Bruce Porteous
+	if (!p1.empty()) os << "HFPLTPilotincharge:" << p1 << std::endl;
+
+	//HPCM2Crew2 :
+	if (!p2.empty()) os << "HPCM2Crew2:" << p2 << std::endl;
+
+	//HFGTYGliderType:LS - 7
+	if (!gliderType.empty()) os << "HFGTYGliderType:" << gliderType << std::endl;
+
+	//HFGIDGliderID : G - DFOG
+	if (!registration.empty()) os << "HFGIDGliderID:" << registration << std::endl;
+
+	//HFDTM100GPSDatum : WGS84
+	if (!datum.empty()) os << "HFDTM100GPSDatum:" << datum << std::endl;
+
+	//HFRFWFirmwareVersion : Flarm - IGC06.01
+	if (!loggerFirmware.empty()) os << "HFRFWFirmwareVersion:" << loggerFirmware << std::endl;
+
+	//HFRHWHardwareVersion : LXN - Flarm - IGC
+	if (!loggerHardware.empty()) os << "HFRHWHardwareVersion:" << loggerHardware << std::endl;
+
+	//HFFTYFRType : LXN Red Box Flarm
+	if (!loggerType.empty()) os << "HFFTYFRType" << loggerType << std::endl;
+
+	//HFGPSu - blox : TIM - LP, 16, 8191
+	if (!gpsType.empty()) os << "HFGPSu-blox" << gpsType << std::endl;
+
+	//HFPRSPressAltSensor : Intersema MS5534B, 8191
+	if (!pressureSensor.empty()) os << "HFPRSPressAltSensor:" << pressureSensor << std::endl;
+
+	//HFCCLCompetitionClass : Standard
+	if (!competitionClass.empty()) os << "HFCCLCompetitionClass:" << competitionClass << std::endl;
+
+	//HFCIDCompetitionID : 952
+	if (!competitionId.empty()) os << "HFCIDCompetitionID:" << competitionId << std::endl;
+
+	// Extension records
+	// I023638FXA3940SIU
+	if (!extensions.empty()) {
+		os << "I" << std::setw(2) << std::setfill('0') << extensions.size();
+		for (auto it = extensions.begin(); it != extensions.end(); ++it) {
+			os << std::setw(2) << std::setfill('0') << it->getStart()
+				<< std::setw(2) << std::setfill('0') << it->getFinish()
+				<< it->getTypeCode();
+
+		}
+		os << std::endl;
+	}
+
+	// Ignore "C" task declaration records
+}
 

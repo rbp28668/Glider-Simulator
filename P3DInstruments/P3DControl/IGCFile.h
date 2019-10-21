@@ -1,9 +1,11 @@
+#pragma once
 #include "stdafx.h"
 #include <string>
 #include <vector>
 #include <list>
 #include <iostream>
 #include <ctype.h>
+#include <time.h>
 #include "Extension.h"
 #include "TracePoint.h"
 
@@ -11,6 +13,7 @@ class IGCFile {
 
 public:
 	using TraceList = std::vector<TracePoint>;
+	using ExtensionList = std::list<Extension>;
 
 private:
 	// final Map<String,String> flightInfo = new HashMap<String,String>();
@@ -31,8 +34,6 @@ private:
 	std::string competitionClass; //HFCCLCompetitionClass:Standard
 	std::string competitionId; //HFCIDCompetitionID:952
 
-	using TraceList = std::vector<TracePoint>;
-	using ExtensionList = std::list<Extension>;
 
 	TraceList trace;
 	ExtensionList extensions;
@@ -76,11 +77,15 @@ public:
 	std::string getCompetitionId() const;
 	void setCompetitionId(std::string competitionId);
 
-	TraceList& IGCFile::getTrace();
+	TraceList& getTrace();
 	void setTrace(const TraceList& trace);
+
+	ExtensionList& getExtensions();
 
 	void parse(const char* path);
 	void parse(std::istream& is);
+
+	void write(std::ostream& os);
 };
 
 
