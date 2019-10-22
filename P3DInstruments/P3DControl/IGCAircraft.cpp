@@ -16,16 +16,20 @@ public:
 
 Point IGCTraceConverter::valueAt(size_t position) const
 {
+	// Note IGC files work in metres but the sim works in feet
+	// so altitude converted below so we don't need to convert
+	// all the time.
 	TracePoint p = points[position];
 	Point point;
 	point.when = p.getWhen();
 	point.x = p.getEastings();
 	point.y = p.getNorthings();
-	point.z = p.getAltBaro();
+	point.z = p.getAltBaro() * 3.28084; // to feet
 	return point;
 }
 
 // Just sometimes the preprocessor is a bit of a nuisance...
+// See numeric_limits below.
 #ifdef max
 #undef max
 #endif
@@ -49,7 +53,7 @@ double IGCAircraft::getBaseAltitude(IGCFile* igc)
 		}
 	}
 
-	return minAlt;
+	return minAlt * 3.28084; // Convert to feet
 }
 
 IGCAircraft::IGCAircraft(IGCFile* igc)
@@ -57,12 +61,11 @@ IGCAircraft::IGCAircraft(IGCFile* igc)
 {
 	IGCTraceConverter convert(igc);
 	trace.build(convert);
-
 	baseAltitude = getBaseAltitude(igc);
-
 }
 
-void IGCAircraft::simulate(const SimInputData& inputData, SimOutputData& outputData, double t)
+// Simulate the aircraft at time t.  True if still running, false if complete.
+bool IGCAircraft::simulate(const SimInputData& inputData, SimOutputData& outputData, double t)
 {
 	double PI = 3.1415926535897926364338;
 
@@ -87,6 +90,8 @@ void IGCAircraft::simulate(const SimInputData& inputData, SimOutputData& outputD
 	outputData.verticalSpeed = 0; // p.vwz;
 
 	//std::cout << "Lat: " << p.lat << "Long: " << p.lon << "Alt (feet)" << p.alt << std::endl;
+
+	return !trace.complete(t);
 }
 
 SIMCONNECT_DATA_INITPOSITION IGCAircraft::initialPosition()
@@ -105,20 +110,28 @@ SIMCONNECT_DATA_INITPOSITION IGCAircraft::initialPosition()
 }
 
 
+/*
+UserIGCAircraft
+*/
+
 UserIGCAircraft::UserIGCAircraft(Prepar3D* p3d,IGCFile* igc, const char* containerName)
 	: ExternalSimVehicle(p3d, containerName)
 	, IGCAircraft(igc)
 {
 }
 
-void UserIGCAircraft::simulate(const SimInputData& inputData, SimOutputData& outputData, double t)
+bool UserIGCAircraft::simulate(const SimInputData& inputData, SimOutputData& outputData, double t)
 {
-	IGCAircraft::simulate(inputData, outputData, t);
+	return IGCAircraft::simulate(inputData, outputData, t);
 }
 
 UserIGCAircraft::~UserIGCAircraft()
 {
 }
+
+/*
+AIIGCAircraft
+*/
 
 AIIGCAircraft::AIIGCAircraft(Prepar3D* p3d, IGCFile* igc, const char* containerName)
 	: AIExternalSimVehicle(p3d, containerName)
@@ -126,9 +139,9 @@ AIIGCAircraft::AIIGCAircraft(Prepar3D* p3d, IGCFile* igc, const char* containerN
 {
 }
 
-void AIIGCAircraft::simulate(const SimInputData& inputData, SimOutputData& outputData, double t)
+bool AIIGCAircraft::simulate(const SimInputData& inputData, SimOutputData& outputData, double t)
 {
-	IGCAircraft::simulate(inputData, outputData, t);
+	return IGCAircraft::simulate(inputData, outputData, t);
 }
 
 SIMCONNECT_DATA_INITPOSITION AIIGCAircraft::initialPosition()

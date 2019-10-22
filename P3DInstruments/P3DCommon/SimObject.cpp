@@ -24,8 +24,11 @@ void SimObject::onCreate()
 SimObject::~SimObject()
 {
 	// Kill off in P3D first so we don't get events for dead objects.
-	::SimConnect_AIRemoveObject(p3d->getHandle(), objectId, p3d->nextRequestId());
-	p3d->unregisterSimObject(objectId);
+	if (objectId != SIMCONNECT_OBJECT_ID_USER) {
+		::SimConnect_AIRemoveObject(p3d->getHandle(), objectId, p3d->nextRequestId());
+		p3d->unregisterSimObject(objectId);
+	}
+
 	p3d = 0;
 }
 

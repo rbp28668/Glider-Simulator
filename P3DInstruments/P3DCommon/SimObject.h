@@ -4,6 +4,7 @@
 
 class Prepar3D;
 
+// Class to keep track of a sim object created by the client code.
 class SimObject
 {
 	DWORD objectId;

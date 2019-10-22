@@ -40,9 +40,15 @@ public:
 		SIM_RESET,
 		REFRESH_SCENERY,
 		CAPTURE_SCREENSHOT,
-		AUTORUDDER_TOGGLE, // TODO
-		FREEZE_ALTITUDE_TOGGLE, // TODO
-		FREEZE_ALTITUDE_SET, // TODO
+		AUTORUDDER_TOGGLE, 
+		FREEZE_LATITUDE_LONGITUDE_TOGGLE, //Turns the freezing of the lat/lon position of the aircraft (either user or AI controlled) on or off. 
+		FREEZE_LATITUDE_LONGITUDE_SET, // 	Freezes the lat/lon position of the aircraft.
+		FREEZE_ALTITUDE_TOGGLE, //	Turns the freezing of the altitude of the aircraft on or off.
+		FREEZE_ALTITUDE_SET, // Freezes the altitude of the aircraft..
+		FREEZE_ATTITUDE_TOGGLE, // Turns the freezing of the attitude (pitch, bank and heading) of the aircraft on or off.
+		FREEZE_ATTITUDE_SET, // Freezes the attitude (pitch, bank and heading) of the aircraft.
+		POSITION_FREEZE_USER, // Toggles the position freeze (Lat/Lon, Altitude and Attitude) of the controlled SimObject.
+		POSITION_FREEZE_ALL, // Toggles the position freeze(Lat / Lon, Altitudeand Attitude) of all SimObjects.
 		SLEW_TOGGLE,	// Toggles slew on / off	Shared Cockpit(Pilot only)
 		SLEW_OF,		// Turns slew off	Shared Cockpit(Pilot only)
 		SLEW_ON,		// Turns slew on	Shared Cockpit(Pilot only)

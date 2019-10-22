@@ -1,3 +1,4 @@
+#pragma once
 #include "stdafx.h"
 #include <string>
 #include <list>
@@ -37,5 +38,6 @@ public:
 	int getEngineNoiseLevel() const;
 	int getIas() const;
 
+	void write(std::ostream& os, const std::list<Extension>& extensions) const;
 };
 

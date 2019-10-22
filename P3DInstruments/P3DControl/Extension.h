@@ -13,9 +13,9 @@ public:
 	using ListType = std::vector<Extension>;
 
 	Extension(std::string typeCode, int start, int finish);
-	std::string getTypeCode();
-	int getStart();
-	int getFinish();
-	int length();
+	std::string getTypeCode() const;
+	int getStart() const;
+	int getFinish() const;
+	int length() const;
 };
 

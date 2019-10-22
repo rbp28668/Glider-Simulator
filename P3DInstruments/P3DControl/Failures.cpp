@@ -28,6 +28,7 @@ void Failures::onData(void* pvData)
 
 Failures::Failures(Prepar3D* pSim)
 	: SimObjectData(pSim)
+	, data()
 {
 	createDefinition();
 }
