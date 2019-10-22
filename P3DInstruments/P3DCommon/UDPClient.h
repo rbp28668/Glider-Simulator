@@ -4,6 +4,7 @@
 #include <string>
 #include "Network.h"
 
+// Class for a UDP network client- fire and forget.
 class UDPClient
 {
 	// Socket related

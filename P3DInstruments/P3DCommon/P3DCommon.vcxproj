@@ -22,34 +22,34 @@
     <ProjectGuid>{863D5727-3E2E-4158-B8A3-6C943CA31C61}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>P3DCommon</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -152,27 +152,39 @@
     <None Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ExternalSim.h" />
+    <ClInclude Include="ExternalSimVehicle.h" />
     <ClInclude Include="IndexedList.h" />
+    <ClInclude Include="Metar.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="P3DCommon.h" />
     <ClInclude Include="Prepar3D.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="SimObject.h" />
     <ClInclude Include="SimObjectData.h" />
     <ClInclude Include="SimObjectDataRequest.h" />
     <ClInclude Include="SimObjectDataRequestList.h" />
+    <ClInclude Include="SimObjectList.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TCPClient.h" />
     <ClInclude Include="UDPClient.h" />
+    <ClInclude Include="WeatherStation.h" />
+    <ClInclude Include="WeatherStations.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ExternalSim.cpp" />
+    <ClCompile Include="ExternalSimVehicle.cpp" />
     <ClCompile Include="IndexedList.cpp" />
+    <ClCompile Include="Metar.cpp" />
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="P3DCommon.cpp" />
     <ClCompile Include="Prepar3D.cpp" />
+    <ClCompile Include="SimObject.cpp" />
     <ClCompile Include="SimObjectData.cpp" />
     <ClCompile Include="SimObjectDataRequest.cpp" />
     <ClCompile Include="SimObjectDataRequestList.cpp" />
+    <ClCompile Include="SimObjectList.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -181,6 +193,8 @@
     </ClCompile>
     <ClCompile Include="TCPClient.cpp" />
     <ClCompile Include="UDPClient.cpp" />
+    <ClCompile Include="WeatherStation.cpp" />
+    <ClCompile Include="WeatherStations.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="P3DCommon.rc" />

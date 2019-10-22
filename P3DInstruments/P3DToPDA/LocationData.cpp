@@ -38,7 +38,7 @@ int LocationData::itemCount() {
 	return sizeof(dataItems)/sizeof(dataItems[0]);
 }
 
-void LocationData::onData(void *pData) {
+void LocationData::onData(void *pData, SimObject* pObject) {
 
 	struct Data data = *reinterpret_cast<Data*>(pData);
 	if(getSim()->isVerbose()) {
@@ -91,6 +91,7 @@ void LocationData::onData(void *pData) {
 LocationData::LocationData(Prepar3D* pSim)
 	: SimObjectData(pSim)
 	, pNMEA(0)
+	, pTransport(0)
 {
 	createDefinition();
 }

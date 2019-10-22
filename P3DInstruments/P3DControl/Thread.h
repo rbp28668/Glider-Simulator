@@ -1,4 +1,6 @@
 #pragma once
+
+// Class to abstract a win32 thread.
 class Thread
 {
 private:

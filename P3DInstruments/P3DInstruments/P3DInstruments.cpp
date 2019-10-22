@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 	sim.setVerbose(verbose);
 
 	InstrumentData data(&sim);
-	SimObjectDataRequest request(&sim, &data);
+	SimObjectDataRequest request(&sim, &data, &sim.userAircraft());
 
 	CondorUDP udp(host, port);
 	data.setInstruments(&udp);

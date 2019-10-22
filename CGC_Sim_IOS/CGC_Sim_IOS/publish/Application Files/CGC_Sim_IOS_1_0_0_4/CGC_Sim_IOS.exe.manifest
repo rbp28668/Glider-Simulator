@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
+  <asmv1:assemblyIdentity name="CGC_Sim_IOS.exe" version="1.0.0.4" publicKeyToken="2e6576a44c1c62c9" language="neutral" processorArchitecture="amd64" type="win32" />
+  <application />
+  <entryPoint>
+    <assemblyIdentity name="CGC_Sim_IOS" version="1.0.0.0" language="neutral" processorArchitecture="amd64" />
+    <commandLine file="CGC_Sim_IOS.exe" parameters="" />
+  </entryPoint>
+  <trustInfo>
+    <security>
+      <applicationRequestMinimum>
+        <PermissionSet Unrestricted="true" ID="Custom" SameSite="site" />
+        <defaultAssemblyRequest permissionSetReference="Custom" />
+      </applicationRequestMinimum>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!--
+          UAC Manifest Options
+          If you want to change the Windows User Account Control level replace the
+          requestedExecutionLevel node with one of the following.
+
+        <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
+        <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
+        <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
+
+         If you want to utilize File and Registry Virtualization for backward
+         compatibility then delete the requestedExecutionLevel node.
+    -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <dependency>
+    <dependentOS>
+      <osVersionInfo>
+        <os majorVersion="5" minorVersion="1" buildNumber="2600" servicePackMajor="0" />
+      </osVersionInfo>
+    </dependentOS>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
+      <assemblyIdentity name="Microsoft.Windows.CommonLanguageRuntime" version="4.0.30319.0" />
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="CGC_Sim_IOS.exe" size="600544">
+      <assemblyIdentity name="CGC_Sim_IOS" version="1.0.0.0" language="neutral" processorArchitecture="amd64" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>xSO4UgZgqWeocJaKWnaCas+YQXptvqJ4zpM4Je6rYtI=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="LockheedMartin.Prepar3D.SimConnect.dll" size="326144">
+      <assemblyIdentity name="LockheedMartin.Prepar3D.SimConnect" version="4.5.0.0" language="neutral" processorArchitecture="amd64" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>5/AguaDfpdehUEeVRbOEYQDStg2RhOAx8eJ3u1y95pE=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <file name="CGC_Sim_IOS.exe.config" size="189">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>R+Wg8QGvQVHX8T0ta/qbhH1bXkqY0fRnS3wBV3J0bN8=</dsig:DigestValue>
+    </hash>
+  </file>
+<publisherIdentity name="CN=DESKTOP-BSDNGEM\richa" issuerKeyHash="dd7fa9d87717e8b82469a2be035bdce1d17fc976" /><Signature Id="StrongNameSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>iy3wEXS7qQHoOo7H82xCApegEQ1jgFmoajpz3/YspO4=</DigestValue></Reference></SignedInfo><SignatureValue>FbB8uCxz+DOF7VTPB0c9HpA7oAS50/77FGn3MDJM/22L4Pu0BBgtMxMLTgUUhSB1TOk33BJ/pwHO1mcBmoBZJVnYfxcdKe/Xu3squ3MzXiNnkKgIZ0eOqXUEdj/4UHdgLP5lqTSxG4e8rRFWJQhVbjwlHsS6bzxUk44srllcDoQ=</SignatureValue><KeyInfo Id="StrongNameKeyInfo"><KeyValue><RSAKeyValue><Modulus>0FajD4lN1cyxKKHov4KYYcCo1vonijtPJJT0eC0aAZbvULHm+ZkzUVh+3FE1BdPxbAstlpCOieAWaACp7mGJR9d49TFTRJ9ryDUYLA35g/GEr+Na/PNveHkH6pJugqJBCGtM3FWI/wkUyAJDPj3CSquWiYqqvuVOBoEzV6ToYCU=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><msrel:RelData xmlns:msrel="http://schemas.microsoft.com/windows/rel/2005/reldata"><r:license xmlns:r="urn:mpeg:mpeg21:2003:01-REL-R-NS" xmlns:as="http://schemas.microsoft.com/windows/pki/2005/Authenticode"><r:grant><as:ManifestInformation Hash="eea42cf6df733a6aa85980630d11a09702426cf3c78e3ae801a9bb7411f02d8b" Description="" Url=""><as:assemblyIdentity name="CGC_Sim_IOS.exe" version="1.0.0.4" publicKeyToken="2e6576a44c1c62c9" language="neutral" processorArchitecture="amd64" type="win32" /></as:ManifestInformation><as:SignedBy /><as:AuthenticodePublisher><as:X509SubjectName>CN=DESKTOP-BSDNGEM\richa</as:X509SubjectName></as:AuthenticodePublisher></r:grant><r:issuer><Signature Id="AuthenticodeSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>m46gjMPRRHtKtMfrxxtctKIEG7v3tFilV5bTVwmkvAg=</DigestValue></Reference></SignedInfo><SignatureValue>VhnhsiT5AwPrHack+jX34mBF6oiCt5bvhZ9b3RoeNZ2hZEigv4JXv7HCZKQuEBlp9AyINHXCx3V2ILjMTKuGVdYC6wW3j5h+Iy6Tr1lt9DNm+3HZqLN4tWndHCCHpjHg2zR90snjVh95XkX8JNfRBXUQnyjUHFzEXrPhBzDZL4Y=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>0FajD4lN1cyxKKHov4KYYcCo1vonijtPJJT0eC0aAZbvULHm+ZkzUVh+3FE1BdPxbAstlpCOieAWaACp7mGJR9d49TFTRJ9ryDUYLA35g/GEr+Na/PNveHkH6pJugqJBCGtM3FWI/wkUyAJDPj3CSquWiYqqvuVOBoEzV6ToYCU=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIB7TCCAVagAwIBAgIQXOaaBK22WZRNeRzUekXWmzANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDHioARABFAFMASwBUAE8AUAAtAEIAUwBEAE4ARwBFAE0AXAByAGkAYwBoAGEwHhcNMTkxMDA0MTU0OTE0WhcNMjAxMDAzMjE0OTE0WjA1MTMwMQYDVQQDHioARABFAFMASwBUAE8AUAAtAEIAUwBEAE4ARwBFAE0AXAByAGkAYwBoAGEwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBANBWow+JTdXMsSih6L+CmGHAqNb6J4o7TySU9HgtGgGW71Cx5vmZM1FYftxRNQXT8WwLLZaQjongFmgAqe5hiUfXePUxU0Sfa8g1GCwN+YPxhK/jWvzzb3h5B+qSboKiQQhrTNxViP8JFMgCQz49wkqrlomKqr7lTgaBM1ek6GAlAgMBAAEwDQYJKoZIhvcNAQELBQADgYEAIHRufGIv+G7LBUGXB67jJfSrMabFodN7m+O5SzO/4AqpuwXbBXmZQjbvSHxZOWfoA5A4OzPDZw9FBABYhmtY0kJtJ7ceI39D60f+p3IsNZktRQ498qwCeKaizaINUY9JiJRSrIaQK5D6qDdgqz2GyQ4eL5XHcFe39Udx3agbmf8=</X509Certificate></X509Data></KeyInfo></Signature></r:issuer></r:license></msrel:RelData></KeyInfo></Signature></asmv1:assembly>
