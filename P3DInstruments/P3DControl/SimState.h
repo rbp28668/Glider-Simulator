@@ -38,6 +38,7 @@ private:
 		~Buffer();
 		void add(const Data& data);
 		Data& back(int n);
+		Data& rewind(int n);
 	};
 
 	Buffer buffer;
@@ -55,5 +56,6 @@ public:
 	void update(const Data& data, FIELDS fields = FIELDS::ALL);
 	int historyLength();
 	Data history(int n);
+	Data rewindTo(int n);
 };
 
