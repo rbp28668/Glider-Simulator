@@ -84,3 +84,9 @@ x64
 # solution user options
 *.suo  
 *.tlog  # build log
+
+CGC_Sim_IOS/CGC_Sim_IOS/publish/
+
+CGC_Sim_IOS/CGC_Sim_IOS/bin/
+
+
