@@ -19,6 +19,7 @@ public:
 
 	void show(std::string& output);
 	void available(std::string& output);
+	void set(int count, std::string& output);
 	void back(int count, std::string& output);
 	void load(const std::string& file, std::string& output);
 	void save(const std::string& file, const std::string& title, const std::string& description, std::string& output);

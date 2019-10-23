@@ -106,6 +106,13 @@ SimState::Data SimState::history(int n)
 	return d;
 }
 
+SimState::Data SimState::rewindTo(int n)
+{
+	CriticalSection::Lock lock(csData);
+	Data d = buffer.back(n);  // copy operation in lock scope
+	return d;
+}
+
 SimState::Data::Data()
 {
 	Latitude = 0;
@@ -150,9 +157,23 @@ SimState::Data& SimState::Buffer::back(int n)
 	int pos = head - n;
 	if (pos < 0) pos += len;
 	
+	return buffer[pos];
+}
+
+SimState::Data& SimState::Buffer::rewind(int n)
+{
+	CriticalSection::Lock lock(cs);
+
+	if (n > count) n = count; // can't go back more than we have data.
+
+	// Go back N items
+	int pos = head - n;
+	if (pos < 0) pos += len;
+
 	// Reset buffer to where we go back to.
 	head = (pos + 1) % len;
 	count -= n;
 
 	return buffer[pos];
 }
+

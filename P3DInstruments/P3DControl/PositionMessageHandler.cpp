@@ -63,7 +63,11 @@ void PositionMessageHandler::run(const std::string& cmd, const APIParameters& pa
 	else if (cmd == "available") {
 		available(output);
 	}
-	else if (cmd == "back") {
+	else if (cmd == "set") { // go back to point (0 to available) and reset the buffer.
+		int count = params.getInt("count", 10); // default to 10s if nothing given.
+		set(count, output);
+	}
+	else if (cmd == "back") {  // Go back to point (0 to available) without resetting buffer.
 		int count = params.getInt("count", 10); // default to 10s if nothing given.
 		back(count, output);
 	}
@@ -121,6 +125,15 @@ void PositionMessageHandler::available(std::string& output)
 	json.add("length", len);
 }
 
+// Resets buffer to point and set aircraft to point.
+void PositionMessageHandler::set(int count, std::string& output)
+{
+	SimState::Data data = pSim->getState()->rewindTo(count);
+	pSim->getState()->update(data);
+	reportSuccess(output);
+}
+
+// Puts aircraft to point.
 void PositionMessageHandler::back(int count, std::string& output)
 {
 	SimState::Data data = pSim->getState()->history(count);
