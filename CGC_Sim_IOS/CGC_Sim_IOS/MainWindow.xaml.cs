@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -443,10 +443,6 @@ namespace CGC_Sim_IOS
 
         private void Button_Test_Click(object sender, RoutedEventArgs e)
         {
-            simRest.CMD_Pause();
-            //Console.WriteLine($"Created at {url}");
-            //var url = simRest.CMD_Pause();
-           // Console.WriteLine($"Created at {url}");
             //HRESULT hr = SimConnect_TransmitClientEvent(p3d->getHandle(), SIMCONNECT_OBJECT_ID_USER, event, 0, SIMCONNECT_GROUP_PRIORITY_HIGHEST, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
         }
 
@@ -716,34 +712,6 @@ namespace CGC_Sim_IOS
         {
             SimConnection.FlightLoad("Temp");
         }
-
-        #region PositionRewind
-
-        private void RewindConfigure(bool paused)
-        {
-            Button_Position_Back.IsEnabled = paused;
-            Button_Position_Forward.IsEnabled = paused;
-            Slider_Position_Rewind.IsEnabled = paused;
-            if (paused)
-            {
-                simRest.CMD_Position_Enable();
-            }
-        }
-
-
-        private void Button_Position_Back_Click(object sender, RoutedEventArgs e)
-        {
-            simRest.CMD_Position_Back();
-
-        }
-
-        private void Button_Position_Forward_Click(object sender, RoutedEventArgs e)
-        {
-            simRest.CMD_Position_Forward();
-        }
-
-        #endregion
-
     }
 
 
