@@ -109,7 +109,7 @@ SimState::Data SimState::history(int n)
 SimState::Data SimState::rewindTo(int n)
 {
 	CriticalSection::Lock lock(csData);
-	Data d = buffer.back(n);  // copy operation in lock scope
+	Data d = buffer.rewind(n);  // copy operation in lock scope
 	return d;
 }
 
@@ -171,7 +171,7 @@ SimState::Data& SimState::Buffer::rewind(int n)
 	if (pos < 0) pos += len;
 
 	// Reset buffer to where we go back to.
-	head = (pos + 1) % len;
+	head = ((size_t)pos + 1) % len;
 	count -= n;
 
 	return buffer[pos];
