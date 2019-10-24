@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,6 +21,8 @@ using System.Collections;
 using System.IO;
 using System.Windows.Interop;
 using System.Threading;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace CGC_Sim_IOS
 {
@@ -30,10 +32,28 @@ namespace CGC_Sim_IOS
     public partial class MainWindow : Window
     {
 
+
         [DllImport("user32.dll")]
         static extern bool SetForegroundWindow(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
+        public enum GWL
+        {
+            GWL_WNDPROC = (-4),
+            GWL_HINSTANCE = (-6),
+            GWL_HWNDPARENT = (-8),
+            GWL_STYLE = (-16),
+            GWL_EXSTYLE = (-20),
+            GWL_USERDATA = (-21),
+            GWL_ID = (-12)
+        }
+
+        const int WS_MINIMIZE = 0x20000000;
         private Simulator sim = new Simulator();
+        private SimRestConnection simRest = new SimRestConnection();
 
         private List<Scenario> Scenarios = new List<Scenario>();
         private List<String> Scenario_Airfields = new List<String>();
@@ -46,11 +66,10 @@ namespace CGC_Sim_IOS
 
         private bool simPausedOnStartingSlew = false;
 
-        private Thread closeWinchXDialog;
-
         const uint SIMCONNECT_OBJECT_ID_USER = 0;           // proxy value for User vehicle ObjectID
         const uint DATA = 0;
 
+        const int SW_SHOWMINNOACTIVE = 7;
 
         public SimConnect SimConnection
         {
@@ -115,6 +134,63 @@ namespace CGC_Sim_IOS
                 }
                 Thread.Sleep(5000);
                 loop++;
+            }
+        }
+
+        private void minimiseTask(object obj)
+        {
+            string processName = (string)obj;
+            int loop = 0;
+            int numToMinimise = 1;
+            if (processName == "P3DInstruments")
+            {
+                numToMinimise++;
+            }
+            while (numToMinimise > 0 && loop < 10)
+            {
+                Process[] pArray = Process.GetProcessesByName(processName);
+                foreach(Process p in pArray)
+                {
+                    var handle = p.MainWindowHandle;
+                    // Check if Window is already
+                    int style = GetWindowLong(p.MainWindowHandle, (int)GWL.GWL_STYLE);
+                    if (!((style & WS_MINIMIZE) == WS_MINIMIZE))
+                    {
+                        //It's not minimized
+                        ShowWindow(handle, SW_SHOWMINNOACTIVE);
+                        Console.WriteLine(processName + " minimised");
+                        numToMinimise--;
+                    }
+                 }
+                Thread.Sleep(5000);
+                loop++;
+            }
+            Console.WriteLine(processName + " exiting");
+        }
+
+        private void LaunchP3D()
+        {
+            Process[] p = Process.GetProcessesByName("Prepar3D");
+            if (p.Count() == 0)
+            {
+                sim.StartP3D(defaultScenario);
+            }
+
+            if (!p3DAlreadyRunning)
+            {
+                Thread closeWinchXDialog = new Thread(closeWinchXDialogTask);
+                closeWinchXDialog.Start();
+
+                Thread minimiseP3DControl = new Thread(minimiseTask);
+                minimiseP3DControl.Start("P3DControl");
+
+                Thread minimiseP3DInstruments1 = new Thread(minimiseTask);
+                minimiseP3DInstruments1.Start("P3DInstruments");
+
+                Thread minimiseP3DToPDA = new Thread(minimiseTask);
+                minimiseP3DToPDA.Start("P3DToPDA");
+
+                p3DAlreadyRunning = true;
             }
         }
 
@@ -293,7 +369,7 @@ namespace CGC_Sim_IOS
                         sim.IsPaused = false;
                         System.Console.WriteLine("Sim Un-Paused");
                     }
-
+                    RewindConfigure(sim.IsPaused);
                     break;
             }
         }
@@ -332,24 +408,7 @@ namespace CGC_Sim_IOS
 
         #endregion
 
-        private void LaunchP3D()
-        {
-            Process[] p = Process.GetProcessesByName("Prepar3D");
-            if (p.Count() == 0)
-            {
-                sim.StartP3D(defaultScenario);
-                closeWinchXDialog = new Thread(closeWinchXDialogTask);
-                closeWinchXDialog.Start();
-                p3DAlreadyRunning = true;
-            }
-            if (!p3DAlreadyRunning)
-            {
-                closeWinchXDialog = new Thread(closeWinchXDialogTask);
-                closeWinchXDialog.Start();
-                p3DAlreadyRunning = true;
-            } 
-        }
-
+ 
         private void Button_Launch_P3D_Click(object sender, RoutedEventArgs e)
         {
             LaunchP3D();
