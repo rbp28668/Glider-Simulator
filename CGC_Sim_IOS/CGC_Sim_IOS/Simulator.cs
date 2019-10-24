@@ -4,7 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
+
 using LockheedMartin.Prepar3D.SimConnect;
+using System.Net;
 //using System.Runtime.InteropServices;
 
 namespace CGC_Sim_IOS
@@ -743,5 +748,141 @@ namespace CGC_Sim_IOS
             }
         }
     }
+
+    #region RESTAPI
+
+
+    class SimRestConnection
+    {
+        HttpClient client = new HttpClient();
+
+        #region Constructor / Destructor
+
+        public SimRestConnection()
+        {
+            // Update port # in the following line.
+            //client.BaseAddress = new Uri("http://localhost/p3dapi/");
+            //client.DefaultRequestHeaders.Accept.Clear();
+            //client.DefaultRequestHeaders.Accept.Add(
+            //    new MediaTypeWithQualityHeaderValue("application/json"));
+        }
+
+        public async Task RunCmdAsync(string[] args)
+        {
+            if (args.Length < 2)
+            {
+                Console.WriteLine("Need to supply at least the command and its sub-command");
+                return;
+            }
+
+            // Call asynchronous network methods in a try/catch block to handle exceptions.
+            try
+            {
+                // This just builds up the full URL from bits on the command line as a convenience.
+                string url = "http://localhost/p3dapi/";
+                int index = 0;
+                url += args[index++];
+                url += "/";
+                url += args[index++];
+
+                if (args.Length > 2)
+                {
+                    url += "?";
+                    url += WebUtility.UrlEncode(args[index++]);
+                }
+
+                while (index < args.Length)
+                {
+                    url += "&";
+                    url += WebUtility.UrlEncode(args[index++]);
+                }
+
+                // Should have a complete URL with all the parameters
+                Console.WriteLine(url);
+
+
+                string responseBody = await Run(url);//.Result;
+
+                Console.WriteLine(responseBody);
+
+                parseResult(responseBody);
+
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine("\nException Caught!");
+                Console.WriteLine("Message :{0} ", e.Message);
+            }
+        }
+
+        void parseResult(string json)
+        {
+            dynamic data = JsonConvert.DeserializeObject(json);
+            bool isOK = data.status == "OK";
+            if (isOK)
+            {
+                // do something creative here....
+            }
+        }
+
+        // This is the key bit that actually calls the web API - assuming it's
+        // given a properly formed url that matches the web api.
+        // Note async nature.
+        async Task<string> Run(string url)
+        {
+            HttpResponseMessage response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            string responseBody = await response.Content.ReadAsStringAsync();
+            // Above three lines can be replaced with new helper method below
+            // string responseBody = await client.GetStringAsync(uri);
+            return responseBody;
+        }
+
+        public void CMD_Pause()
+        {
+
+            //string[] cmd = { "cmd", "pause_toggle"};
+            //RunCmdAsync(cmd);
+            ////RunAsync().GetAwaiter().GetResult();
+            //string[] cmd2 = { "scenario", "list" };
+            //RunCmdAsync(cmd2);
+            //string[] cmd3 = { "position", "up?feet=2000" };
+            //RunCmdAsync(cmd3);
+            string[] cmd3 = { "traffic", "launch" };
+            RunCmdAsync(cmd3);
+        }
+
+        public void CMD_Position_Back()
+        {
+            string[] cmd3 = { "position", "back?count=10" };
+            RunCmdAsync(cmd3);
+        }
+
+        public void CMD_Position_Forward()
+        {
+            string[] cmd3 = { "position", "back?count=-10" };
+            RunCmdAsync(cmd3);
+        }
+
+        public async void CMD_Position_Enable()
+        {
+            string[] cmd3 = { "position", "available" };
+            await RunCmdAsync(cmd3);
+        }
+
+
+        ~SimRestConnection()
+        {
+           
+        }
+
+
+        #endregion
+
+
+    }
+
+
+    #endregion
+
 }
- 
