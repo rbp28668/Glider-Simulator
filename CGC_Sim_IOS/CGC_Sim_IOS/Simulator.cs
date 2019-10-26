@@ -5,6 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using LockheedMartin.Prepar3D.SimConnect;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
+
+
 //using System.Runtime.InteropServices;
 
 namespace CGC_Sim_IOS
@@ -52,7 +58,6 @@ namespace CGC_Sim_IOS
         SITUATION_RESET,
         SITUATION_SAVE,
     }
-
 
     enum GROUP_IDS
     {
@@ -186,7 +191,7 @@ namespace CGC_Sim_IOS
                 else
                 {
                     string args = "-fxml: " + initialScenario;
-                    Process proc = Process.Start(start.FileName,args,null,null,null);
+                    Process proc = Process.Start(start.FileName, args, null, null, null);
                 }
             }
         }
@@ -244,12 +249,12 @@ namespace CGC_Sim_IOS
 
 
         #endregion
-      
+
     }
 
     class MetarElement
     {
-        
+
         public MetarElementType ElementType { get; set; }
 
         public string ElementTypeStr()
@@ -375,7 +380,7 @@ namespace CGC_Sim_IOS
             }
         }
 
-        public MetarWind(MetarElementType value, string str,  string units) : base(value, str)
+        public MetarWind(MetarElementType value, string str, string units) : base(value, str)
         {
             // parse the str for speed and direction
             Direction = (int)Convert.ToInt32((str.Substring(0, 3)));
@@ -387,12 +392,12 @@ namespace CGC_Sim_IOS
             if ((i == 5) || (i == 6))
             {
                 // has gusts
-                Gust = (int)Convert.ToInt32((str.Substring(i + 1,2)));
+                Gust = (int)Convert.ToInt32((str.Substring(i + 1, 2)));
                 Console.WriteLine("Gusts {0}", Gust);
             }
 
             i = str.IndexOf("&");
-            if ( i >= 0)
+            if (i >= 0)
             {
                 Extension = str.Substring(i);
             }
@@ -400,7 +405,7 @@ namespace CGC_Sim_IOS
 
         }
 
-        public MetarWind(MetarElementType value, string str, int Speed, int Direction) : base (value, str)
+        public MetarWind(MetarElementType value, string str, int Speed, int Direction) : base(value, str)
         {
 
         }
@@ -458,9 +463,9 @@ namespace CGC_Sim_IOS
                 int i = value.IndexOf("&");
                 if (i >= 0)
                 {
-                    extensions.Add(value.Substring(0,2));
-                    extensions.Add(value.Substring(2, value.Length-4));
-                    extensions.Add(value.Substring(value.Length-2));
+                    extensions.Add(value.Substring(0, 2));
+                    extensions.Add(value.Substring(2, value.Length - 4));
+                    extensions.Add(value.Substring(value.Length - 2));
                 }
             }
         }
@@ -738,10 +743,165 @@ namespace CGC_Sim_IOS
                             }
                         }
                     }
-//                    System.Console.WriteLine("Index {0} ", index);
+                    //                    System.Console.WriteLine("Index {0} ", index);
                 }
             }
         }
     }
+
+
+    class SimRestConnection
+    {
+        HttpClient client = new HttpClient();
+
+        public SimRestConnection()
+        {
+            // Update port # in the following line. 
+            //client.BaseAddress = new Uri("http://localhost/p3dapi/"); 
+            //client.DefaultRequestHeaders.Accept.Clear(); 
+            //client.DefaultRequestHeaders.Accept.Add( 
+            //    new MediaTypeWithQualityHeaderValue("application/json")); 
+        }
+
+        public async Task<dynamic> RunCmdAsync(string[] args)
+        {
+            string responseBody = "";
+            dynamic response = null; ;
+            if (args.Length < 2)
+            {
+                Console.WriteLine("Need to supply at least the command and its sub-command");
+                return response;
+            }
+
+            // Call asynchronous network methods in a try/catch block to handle exceptions. 
+            try
+            {
+                // This just builds up the full URL from bits on the command line as a convenience. 
+                string url = "http://localhost/p3dapi/";
+                int index = 0;
+                url += args[index++];
+                url += "/";
+                url += args[index++];
+
+                if (args.Length > 2)
+                {
+                    url += "?";
+                    url += WebUtility.UrlEncode(args[index++]);
+                }
+
+                while (index < args.Length)
+                {
+                    url += "&";
+                    url += WebUtility.UrlEncode(args[index++]);
+                }
+
+                // Should have a complete URL with all the parameters 
+                Console.WriteLine(url);
+
+
+                responseBody = await Run(url);//.Result; 
+
+                Console.WriteLine(responseBody);
+
+                response = parseResult(responseBody);
+
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine("\nException Caught!");
+                Console.WriteLine("Message :{0} ", e.Message);
+            }
+            return response;
+        }
+
+        dynamic parseResult(string json)
+        {
+            dynamic data = JsonConvert.DeserializeObject(json);
+            bool isOK = data.status == "OK";
+            if (isOK)
+            {
+                // do something creative here.... 
+            }
+            return data;
+            
+        }
+
+        // This is the key bit that actually calls the web API - assuming it's 
+        // given a properly formed url that matches the web api. 
+        // Note async nature. 
+        async Task<string> Run(string url)
+        {
+            HttpResponseMessage response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            string responseBody = await response.Content.ReadAsStringAsync();
+            // Above three lines can be replaced with new helper method below 
+            // string responseBody = await client.GetStringAsync(uri); 
+            return responseBody;
+        }
+
+        public void CMD_Pause()
+        {
+
+            //string[] cmd = { "cmd", "pause_toggle"}; 
+            //RunCmdAsync(cmd); 
+            ////RunAsync().GetAwaiter().GetResult(); 
+            //string[] cmd2 = { "scenario", "list" }; 
+            //RunCmdAsync(cmd2); 
+            //string[] cmd3 = { "position", "up?feet=2000" }; 
+            //RunCmdAsync(cmd3); 
+            string[] cmd3 = { "traffic", "launch" };
+            RunCmdAsync(cmd3);
+        }
+
+        public void CMD_Position_Back(int count=10)
+        {
+            string[] cmd3 = { "position", "back?count="+count.ToString() };
+            RunCmdAsync(cmd3);
+        }
+
+        public void CMD_Position_Set(int count = 1)
+        {
+            string[] cmd3 = { "position", "set?count=" + count.ToString() };
+            RunCmdAsync(cmd3);
+        }
+
+        public async Task<int> CMD_Position_Available()
+        {
+            int length = 0;
+            try
+            {
+                string[] cmd3 = { "position", "available" };
+                dynamic response = await RunCmdAsync(cmd3);
+                Newtonsoft.Json.Linq.JObject jRep = response;
+                if (jRep.Count > 0)
+                {
+                    string val1 = (string)jRep["status"];
+                    length = (int)jRep["length"];
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+            return length;
+        }
+
+        public void CMD_Position_Clear_History()
+        {
+            int length = 0;
+            try
+            {
+                string[] cmd3 = { "position", "clear" };
+                RunCmdAsync(cmd3);
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+
+        ~SimRestConnection()
+        {
+
+        }
+    }
 }
- 
