@@ -104,7 +104,10 @@ namespace CGC_Sim_IOS
         {
             InitializeComponent();
             outputter = new TextBoxOutputter(TestBox);
- //           Console.SetOut(outputter);
+#if (DEBUG)
+#else
+            Console.SetOut(outputter);
+#endif
 
         }
 
@@ -205,7 +208,7 @@ namespace CGC_Sim_IOS
         //        SetForegroundWindow(p[0].MainWindowHandle);
         //}
 
-        #region P3D Events
+#region P3D Events
 
         private IntPtr HandleSimConnectEvents(IntPtr hWnd, int message, IntPtr wParam, IntPtr lParam, ref bool isHandled)
         {
@@ -410,7 +413,7 @@ namespace CGC_Sim_IOS
             System.Console.WriteLine("Get Weather Data: " + sim.CurrentMetar.MetarString);
         }
 
-        #endregion
+#endregion
 
  
         private void Button_Launch_P3D_Click(object sender, RoutedEventArgs e)
@@ -447,6 +450,7 @@ namespace CGC_Sim_IOS
 
         private void Button_Test_Click(object sender, RoutedEventArgs e)
         {
+            simRest.CMD_Pause();
             //HRESULT hr = SimConnect_TransmitClientEvent(p3d->getHandle(), SIMCONNECT_OBJECT_ID_USER, event, 0, SIMCONNECT_GROUP_PRIORITY_HIGHEST, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
         }
 
