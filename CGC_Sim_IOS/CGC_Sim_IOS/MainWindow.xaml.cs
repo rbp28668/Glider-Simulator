@@ -54,6 +54,8 @@ namespace CGC_Sim_IOS
         const int WS_MINIMIZE = 0x20000000;
         private Simulator sim = new Simulator();
         private SimRestConnection simRest = new SimRestConnection();
+        private int rewindCount = 1;
+        private bool rewindActive = false;
 
         private List<Scenario> Scenarios = new List<Scenario>();
         private List<String> Scenario_Airfields = new List<String>();
@@ -280,9 +282,7 @@ namespace CGC_Sim_IOS
                     SimConnection.MapClientEventToSimEvent(EVENTS.TOW_PLANE_RELEASE, "TOW_PLANE_RELEASE");
                     SimConnection.MapClientEventToSimEvent(EVENTS.SITUATION_RESET, "SITUATION_RESET");
                     SimConnection.MapClientEventToSimEvent(EVENTS.SITUATION_SAVE, "SITUATION_SAVE");
-
-
-
+                    SimConnection.AddClientEventToNotificationGroup(GROUP_IDS.GROUP_1, EVENTS.SITUATION_RESET, false);
                 }
             }
             catch (Exception ex)
@@ -355,6 +355,10 @@ namespace CGC_Sim_IOS
 
                 case (uint)EVENTS.FOURSECS:
                     System.Console.WriteLine("4s tick");
+                    break;
+                case (uint)EVENTS.SITUATION_RESET:
+                    System.Console.WriteLine("Situation reset");
+                    Label_Rewind.Content = "";
                     break;
                 case (uint)EVENTS.PAUSE:
                     if (recEvent.dwData == 1)
@@ -486,7 +490,10 @@ namespace CGC_Sim_IOS
             {
                 String scenarioFileName = selectedScenario.FileName;
                 if (SimConnection != null)
+                {
+                    simRest.CMD_Position_Clear_History();
                     SimConnection.FlightLoad(scenarioFileName);
+                }
             }
 
         }
@@ -695,11 +702,13 @@ namespace CGC_Sim_IOS
 
         private void Button_Release_Aerotow_Click(object sender, RoutedEventArgs e)
         {
+            simRest.CMD_Position_Clear_History();
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.TOW_PLANE_RELEASE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
         }
 
         private void Button_Reset_Flight_Click(object sender, RoutedEventArgs e)
         {
+            simRest.CMD_Position_Clear_History();
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SITUATION_RESET, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
         }
 
@@ -710,7 +719,92 @@ namespace CGC_Sim_IOS
 
         private void Button_Recall_Snapshot_Click(object sender, RoutedEventArgs e)
         {
+            simRest.CMD_Position_Clear_History();
             SimConnection.FlightLoad("Temp");
+        }
+
+#region PositionRewind 
+
+        private async void RewindConfigure(bool paused)
+        {
+            try
+            {
+                if (paused == false && rewindCount != 1)
+                {
+                    // user has rewound the position
+                    simRest.CMD_Position_Set(rewindCount);
+                    Label_Rewind.Content = "";
+                }
+                Button_Position_Back.IsEnabled = paused;
+                Button_Position_Forward.IsEnabled = paused;
+                Slider_Position_Rewind.IsEnabled = paused;
+                if (paused)
+                {
+                    int length = await simRest.CMD_Position_Available();
+                    rewindCount = 1;
+                    Slider_Position_Rewind.Value = 1;
+                    Slider_Position_Rewind.Minimum = 1;
+                    Slider_Position_Rewind.Maximum = length;
+                    Button_Position_Forward.IsEnabled = false;
+                    Label_Rewind.Content = "Rewind : " + (rewindCount - 1).ToString() + " seconds";
+
+                }
+            }
+            catch (Exception ex)
+            {
+                // We were unable to connect so let the user know why. 
+                System.Console.WriteLine("Rewind Configure\n\n{0}\n\n{1}",
+                                         ex.Message, ex.StackTrace);
+            }
+        }
+
+
+        private void Button_Position_Back_Click(object sender, RoutedEventArgs e)
+        {
+            rewindCount += 1;
+            if (rewindCount > (int)Slider_Position_Rewind.Maximum-1)
+            {
+                Button_Position_Back.IsEnabled = false;
+                rewindCount = (int)Slider_Position_Rewind.Maximum - 1;
+            }
+            Button_Position_Forward.IsEnabled = true;
+           // rewindCount = Math.Max(0, rewindCount);
+            Slider_Position_Rewind.Value = rewindCount;
+            simRest.CMD_Position_Back(rewindCount);
+        }
+
+        private void Button_Position_Forward_Click(object sender, RoutedEventArgs e)
+        {
+            rewindCount -= 1;
+            if (rewindCount<1)
+            {
+                Button_Position_Forward.IsEnabled = false;
+            }
+            Button_Position_Back.IsEnabled = true;
+            rewindCount = Math.Max(1, rewindCount);
+            Slider_Position_Rewind.Value = rewindCount;
+            simRest.CMD_Position_Back(rewindCount);
+        }
+
+#endregion
+
+        private void Slider_Position_Rewind_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (rewindCount != (int)e.NewValue)
+            {
+                rewindCount = (int)e.NewValue;
+                rewindActive = true;
+            }
+            Label_Rewind.Content = "Rewind : " + (rewindCount - 1).ToString() + " seconds";
+        }
+
+        private void Slider_Position_Rewind_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (rewindActive)
+            {
+                rewindActive = false;
+                simRest.CMD_Position_Back(rewindCount);
+            }
         }
     }
 
