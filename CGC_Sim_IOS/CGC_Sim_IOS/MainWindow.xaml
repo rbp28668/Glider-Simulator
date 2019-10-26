@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CGC_Sim_IOS"
         mc:Ignorable="d"
-        Title="MainWindow" Height="656.857" Width="844" SizeToContent="Manual" BorderBrush="IndianRed" Initialized="Window_Initialized" Activated="Window_Activated">
+        Title="MainWindow v1.01" Height="656.857" Width="844" SizeToContent="Manual" BorderBrush="IndianRed" Initialized="Window_Initialized" Activated="Window_Activated">
     <Grid Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Window}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Window}}}" HorizontalAlignment="Left" Margin="0,0,2.571,-1" VerticalAlignment="Top" RenderTransformOrigin="0.429,0.489" Background="#FF1E1E1E">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="350*"/>
@@ -17,15 +17,21 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="200*" MinWidth="200" MaxWidth="200"/>
                         <ColumnDefinition Width="200*" MinWidth="200" MaxWidth="200"/>
+                        <ColumnDefinition Width="200*" MinWidth="200" MaxWidth="200"/>
                         <ColumnDefinition Width="10*"/>
                     </Grid.ColumnDefinitions>
                     <Button x:Name="Button_Pause" Content="Toggle Pause" Height="25" Margin="25,30,0,0" Click="Button_Pause_Click" Width="160" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                    <Button x:Name="Button_Slew" Content="Slew" Height="25" Margin="49.857,30,0,0" VerticalAlignment="Top" Click="Button_Slew_Click" Grid.Column="1" Width="160"/>
-                    <Button x:Name="Button_Request_Aerotow" Content="Request Aerotow" Height="25" Margin="25,120,0,0" VerticalAlignment="Top" Click="Button_Request_Aerotow_Click" Width="160" HorizontalAlignment="Left"/>
-                    <Button x:Name="Button_Release_Aerotow" Content="Release Aerotow" Height="25" Margin="49.857,120,0,0" VerticalAlignment="Top" Click="Button_Release_Aerotow_Click" Grid.Column="1" Width="160" HorizontalAlignment="Left"/>
-                    <Button x:Name="Button_Reset_Flight" Content="Reset Flight" HorizontalAlignment="Left" Height="25" Margin="25,165,0,0" VerticalAlignment="Top" Width="160" RenderTransformOrigin="0.562,2" Click="Button_Reset_Flight_Click"/>
-                    <Button x:Name="Button_Save_Snapshot" Content="Save Snapshot" HorizontalAlignment="Left" Height="25" Margin="25,205,0,0" VerticalAlignment="Top" Width="160" Click="Button_Save_Snapshot_Click"/>
-                    <Button x:Name="Button_Recall_Snapshot" Content="Recall Snapshot" HorizontalAlignment="Left" Height="25" Margin="49.857,205,0,0" VerticalAlignment="Top" Width="160" Click="Button_Recall_Snapshot_Click" Grid.Column="1"/>
+                    <Button x:Name="Button_Request_Aerotow" Content="Request Aerotow" Height="25" Margin="25,146,0,0" VerticalAlignment="Top" Click="Button_Request_Aerotow_Click" Width="160" HorizontalAlignment="Left"/>
+                    <Button x:Name="Button_Release_Aerotow" Content="Release Aerotow" Height="25" Margin="20,146,0,0" VerticalAlignment="Top" Click="Button_Release_Aerotow_Click" Grid.Column="1" Width="160" HorizontalAlignment="Left" RenderTransformOrigin="0.534,2.024"/>
+                    <Button x:Name="Button_Reset_Flight" Content="Reset Flight" HorizontalAlignment="Left" Height="25" Margin="25,205,0,0" VerticalAlignment="Top" Width="160" RenderTransformOrigin="0.562,2" Click="Button_Reset_Flight_Click"/>
+                    <Button x:Name="Button_Save_Snapshot" Content="Save Snapshot" HorizontalAlignment="Left" Height="25" Margin="20,205,0,0" VerticalAlignment="Top" Width="160" Click="Button_Save_Snapshot_Click" Grid.Column="1"/>
+                    <Button x:Name="Button_Recall_Snapshot" Content="Recall Snapshot" HorizontalAlignment="Left" Height="25" Margin="20,205,0,0" VerticalAlignment="Top" Width="160" Click="Button_Recall_Snapshot_Click" Grid.Column="2"/>
+                    <Border x:Name="Border_Rewind" BorderBrush="Gray" BorderThickness="3" Grid.ColumnSpan="3" Grid.Column="1" HorizontalAlignment="Left" Height="90" Margin="10,10,0,0" VerticalAlignment="Top" Width="605">
+                        <Label x:Name="Label_Rewind" Content="" HorizontalAlignment="Left" Height="25" Margin="7.143,52.143,0,0" VerticalAlignment="Top" Width="214"/>
+                    </Border>
+                    <Button x:Name="Button_Position_Forward" Content="&lt;&lt;&lt;" Grid.Column="1" HorizontalAlignment="Left" Height="25" Margin="20,30,0,0" VerticalAlignment="Top" Width="70" Click="Button_Position_Forward_Click" RenderTransformOrigin="0.506,-1.192"/>
+                    <Button x:Name="Button_Position_Back" Content="&gt;&gt;&gt;" Grid.Column="1" HorizontalAlignment="Left" Height="25" Margin="110,30,0,0" VerticalAlignment="Top" Width="70" RenderTransformOrigin="1.25,0.408" Click="Button_Position_Back_Click"/>
+                    <Slider x:Name="Slider_Position_Rewind" Grid.ColumnSpan="2" Grid.Column="2" HorizontalAlignment="Left" Height="24" Margin="10,31,0,0" VerticalAlignment="Top" Width="380" ValueChanged="Slider_Position_Rewind_ValueChanged" PreviewMouseUp="Slider_Position_Rewind_PreviewMouseUp"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Scenarios" Background="Black" FontSize="14">
@@ -71,6 +77,7 @@
                     <Button x:Name="Button_Slew_Up" FontFamily="Segoe UI Symbol" Content="&#xE110;" Margin="20,10" FontSize="36" PreviewMouseDown="Button_Slew_Up_PreviewMouseDown" Grid.Column="5" Grid.Row="1" Width="60" Height="60"/>
                     <Button x:Name="Button_Slew_Down" FontFamily="Segoe UI Symbol" Content="&#xE1FD;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.5,0.676" PreviewMouseDown="Button_Slew_Down_PreviewMouseDown" Grid.Column="5" Grid.Row="3" Width="60" Height="60"/>
                     <Button x:Name="Button_Slew_Freeze_Copy" FontFamily="Segoe UI Symbol" Content="&#xE10A;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.5,0.676" PreviewMouseDown="Button_Slew_Freeze_PreviewMouseDown" FontWeight="Bold" Grid.Column="5" Grid.Row="2" Width="60" Height="60"/>
+                    <Button x:Name="Button_Slew" Content="Slew" Height="25" Margin="0,31.4,0,0" VerticalAlignment="Top" Click="Button_Slew_Click" Grid.Column="1" Grid.Row="4"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Weather" Name="TabWeather" Background="Black" FontSize="14">
