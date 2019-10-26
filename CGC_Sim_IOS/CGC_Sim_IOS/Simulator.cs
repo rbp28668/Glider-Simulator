@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -864,6 +864,27 @@ namespace CGC_Sim_IOS
             string[] cmd3 = { "position", "set?count=" + count.ToString() };
             RunCmdAsync(cmd3);
         }
+
+        public async Task<int> CMD_Position_Is_OnGround()
+        {
+            int onGround = 0;
+            try
+            {
+                string[] cmd3 = { "position", "current" };
+                dynamic response = await RunCmdAsync(cmd3);
+                Newtonsoft.Json.Linq.JObject jRep = response;
+                if (jRep.Count > 0)
+                {
+                    string val1 = (string)jRep["status"];
+                    onGround = (int)jRep["current"]["on_ground"];
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+            return onGround;
+        }
+
 
         public async Task<int> CMD_Position_Available()
         {

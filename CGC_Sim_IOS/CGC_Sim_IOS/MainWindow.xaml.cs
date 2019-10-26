@@ -57,6 +57,11 @@ namespace CGC_Sim_IOS
         private int rewindCount = 1;
         private bool rewindActive = false;
 
+        private bool statusOnGround = true;
+        private bool statusAerotowRequested = false;
+        private bool statusWinchLaunchRequested = false;
+        private int statusAerotowAbandon = 0;
+
         private List<Scenario> Scenarios = new List<Scenario>();
         private List<String> Scenario_Airfields = new List<String>();
         private List<Scenario> Scenarios_For_Airfield = new List<Scenario>();
@@ -118,6 +123,8 @@ namespace CGC_Sim_IOS
                 handleSource.RemoveHook(HandleSimConnectEvents);
             }
         }
+       
+        #region CGCWindows
 
         private void closeWinchXDialogTask(object obj)
         {
@@ -137,7 +144,7 @@ namespace CGC_Sim_IOS
                     }
                     closed = true;
                 }
-                Thread.Sleep(5000);
+                Thread.Sleep(2000);
                 loop++;
             }
         }
@@ -167,11 +174,13 @@ namespace CGC_Sim_IOS
                         numToMinimise--;
                     }
                  }
-                Thread.Sleep(5000);
+                Thread.Sleep(2000);
                 loop++;
             }
             Console.WriteLine(processName + " exiting");
         }
+
+        #endregion
 
         private void LaunchP3D()
         {
@@ -199,14 +208,6 @@ namespace CGC_Sim_IOS
             }
         }
 
-        //void ActivateApp(string processName)
-        //{
-        //    Process[] p = Process.GetProcessesByName(processName);
-
-        //    // Activate the first application we find with this name
-        //    if (p.Count() > 0)
-        //        SetForegroundWindow(p[0].MainWindowHandle);
-        //}
 
 #region P3D Events
 
@@ -261,7 +262,7 @@ namespace CGC_Sim_IOS
                     SimConnection.SubscribeToSystemEvent(EVENTS.PAUSE, "Pause");
 
                     // Initially turn the events off 
-                    SimConnection.SetSystemEventState(EVENTS.FOURSECS, SIMCONNECT_STATE.OFF);
+                    SimConnection.SetSystemEventState(EVENTS.FOURSECS, SIMCONNECT_STATE.ON);
                     SimConnection.SetSystemEventState(EVENTS.SIMSTART, SIMCONNECT_STATE.ON);
                     SimConnection.SetSystemEventState(EVENTS.SIMSTOP, SIMCONNECT_STATE.ON);
 
@@ -281,11 +282,17 @@ namespace CGC_Sim_IOS
                     SimConnection.MapClientEventToSimEvent(EVENTS.SLEW_ALTIT_UP_SLOW, "SLEW_ALTIT_UP_SLOW");
                     SimConnection.MapClientEventToSimEvent(EVENTS.SLEW_ALTIT_DN_SLOW, "SLEW_ALTIT_DN_SLOW");
                     SimConnection.MapClientEventToSimEvent(EVENTS.SLEW_ALTIT_UP_FAST, "SLEW_ALTIT_UP_FAST");
+
                     SimConnection.MapClientEventToSimEvent(EVENTS.TOW_PLANE_REQUEST, "TOW_PLANE_REQUEST");
+                    SimConnection.AddClientEventToNotificationGroup(GROUP_IDS.GROUP_1, EVENTS.TOW_PLANE_REQUEST, false);
+
                     SimConnection.MapClientEventToSimEvent(EVENTS.TOW_PLANE_RELEASE, "TOW_PLANE_RELEASE");
+                    SimConnection.AddClientEventToNotificationGroup(GROUP_IDS.GROUP_1, EVENTS.TOW_PLANE_RELEASE, false);
+
                     SimConnection.MapClientEventToSimEvent(EVENTS.SITUATION_RESET, "SITUATION_RESET");
-                    SimConnection.MapClientEventToSimEvent(EVENTS.SITUATION_SAVE, "SITUATION_SAVE");
                     SimConnection.AddClientEventToNotificationGroup(GROUP_IDS.GROUP_1, EVENTS.SITUATION_RESET, false);
+
+                    SimConnection.MapClientEventToSimEvent(EVENTS.SITUATION_SAVE, "SITUATION_SAVE");
                 }
             }
             catch (Exception ex)
@@ -344,7 +351,7 @@ namespace CGC_Sim_IOS
             System.Console.WriteLine("Exception received: " + data.dwException);
         }
 
-        void SimCon_OnRecvEvent(SimConnect sender, SIMCONNECT_RECV_EVENT recEvent)
+        async void SimCon_OnRecvEvent(SimConnect sender, SIMCONNECT_RECV_EVENT recEvent)
         {
             switch (recEvent.uEventID)
             {
@@ -358,10 +365,35 @@ namespace CGC_Sim_IOS
 
                 case (uint)EVENTS.FOURSECS:
                     System.Console.WriteLine("4s tick");
+                    // Check current aircraft position
+                    int val =  await simRest.CMD_Position_Is_OnGround();
+                    statusOnGround = (val == 1);
                     break;
                 case (uint)EVENTS.SITUATION_RESET:
                     System.Console.WriteLine("Situation reset");
                     Label_Rewind.Content = "";
+                    break;
+                case (uint)EVENTS.TOW_PLANE_RELEASE:
+                    System.Console.WriteLine("Tow plane release");
+                    //if (!statusWinchLaunchRequested && statusOnGround)
+                    //{
+                    //    statusWinchLaunchRequested = true;
+                    //}
+                    //else if (statusAerotowRequested && statusOnGround && statusAerotowAbandon > 0)
+                    //{
+                    //    SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.TOW_PLANE_RELEASE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
+                    //    statusAerotowAbandon--; 
+                    //}
+                    //else if (statusAerotowRequested && statusOnGround)
+                    //{
+                    //    statusAerotowRequested = false;
+                    //}
+                    break;
+                case (uint)EVENTS.TOW_PLANE_REQUEST:
+                    System.Console.WriteLine("Tow plane request");
+                    //statusAerotowRequested = true;
+                    //statusWinchLaunchRequested = false;
+                    //statusAerotowAbandon = 2;
                     break;
                 case (uint)EVENTS.PAUSE:
                     if (recEvent.dwData == 1)
@@ -379,6 +411,10 @@ namespace CGC_Sim_IOS
                     RewindConfigure(sim.IsPaused);
                     break;
             }
+            //Button_Request_Winch_Launch.IsEnabled = statusOnGround && !statusAerotowRequested && !statusWinchLaunchRequested;
+            //Button_Request_Aerotow.IsEnabled = statusOnGround && !statusAerotowRequested && !statusWinchLaunchRequested;
+            //Button_Release_Cable.IsEnabled = statusWinchLaunchRequested || statusAerotowRequested;
+
         }
 
 
@@ -453,6 +489,8 @@ namespace CGC_Sim_IOS
             simRest.CMD_Pause();
             //HRESULT hr = SimConnect_TransmitClientEvent(p3d->getHandle(), SIMCONNECT_OBJECT_ID_USER, event, 0, SIMCONNECT_GROUP_PRIORITY_HIGHEST, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
         }
+        
+        #region scenarios
 
         private void ComboAirfields_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -499,32 +537,6 @@ namespace CGC_Sim_IOS
                     SimConnection.FlightLoad(scenarioFileName);
                 }
             }
-
-        }
-
-        private void Button_Weather_Test_Click(object sender, RoutedEventArgs e)
-        {
-            if (SimConnection != null)
-                sim.WeatherRequest();
-        }
-
-        private void Window_Initialized(object sender, EventArgs e)
-        {
-        }
-
-        private void Window_Activated(object sender, EventArgs e)
-        {
-            // Called when window actual exists
-            if (handle == IntPtr.Zero)
-            {
-                //AddHandler(FrameworkElement.MouseDownEvent, new MouseButtonEventHandler(Button_Slew_Left_MouseLeftButtonDown), true);
-                // AddHandler(FrameworkElement.MouseUpEvent, new MouseButtonEventHandler(Button_Slew_Left_MouseLeftButtonUp), true);
-                handle = new WindowInteropHelper(this).Handle; // Get handle of main WPF Window
-                handleSource = HwndSource.FromHwnd(handle); // Get source of handle in order to add event handlers to it
-                handleSource.AddHook(HandleSimConnectEvents);
-                BuildScenarioLists();
-            }
-            LaunchP3D();
 
         }
 
@@ -582,7 +594,35 @@ namespace CGC_Sim_IOS
             comboAirfields.SelectedItem = defaultAirfield;
         }
 
-        private void Button_Set_Weather_Click(object sender, RoutedEventArgs e)
+
+        #endregion
+
+        #region weather
+
+        private void Button_Weather_Test_Click(object sender, RoutedEventArgs e)
+        {
+            if (SimConnection != null)
+                sim.WeatherRequest();
+        }
+
+        private void Window_Initialized(object sender, EventArgs e)
+        {
+        }
+
+        private void Window_Activated(object sender, EventArgs e)
+        {
+            // Called when window actual exists
+            if (handle == IntPtr.Zero)
+            {
+                handle = new WindowInteropHelper(this).Handle; // Get handle of main WPF Window
+                handleSource = HwndSource.FromHwnd(handle); // Get source of handle in order to add event handlers to it
+                handleSource.AddHook(HandleSimConnectEvents);
+                BuildScenarioLists();
+            }
+            LaunchP3D();
+        }
+
+         private void Button_Set_Weather_Click(object sender, RoutedEventArgs e)
         {
             sim.WeatherSetWind();
             Button_Set_Weather.IsEnabled = false;
@@ -608,6 +648,8 @@ namespace CGC_Sim_IOS
             Button_Set_Weather.IsEnabled = true;
         }
 
+        #endregion 
+
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             System.Windows.Controls.TabControl tabControl = sender as System.Windows.Controls.TabControl; // e.Source could have been used instead of sender as well
@@ -620,6 +662,8 @@ namespace CGC_Sim_IOS
                 }
             }
         }
+
+        #region slewing
 
         private void Button_Pause_Click(object sender, RoutedEventArgs e)
         {
@@ -699,12 +743,23 @@ namespace CGC_Sim_IOS
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_ALTIT_DN_SLOW, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
         }
 
+        #endregion
+
+        private void Button_Request_Winch_Click(object sender, RoutedEventArgs e)
+        {
+            simRest.CMD_Position_Clear_History();
+            //statusWinchLaunchRequested = true;
+            SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.TOW_PLANE_RELEASE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
+        }
+
         private void Button_Request_Aerotow_Click(object sender, RoutedEventArgs e)
         {
+            simRest.CMD_Position_Clear_History();
+            //statusAerotowRequested = true;
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.TOW_PLANE_REQUEST, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
         }
 
-        private void Button_Release_Aerotow_Click(object sender, RoutedEventArgs e)
+        private void Button_Release_Cable_Click(object sender, RoutedEventArgs e)
         {
             simRest.CMD_Position_Clear_History();
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.TOW_PLANE_RELEASE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
@@ -790,8 +845,6 @@ namespace CGC_Sim_IOS
             simRest.CMD_Position_Back(rewindCount);
         }
 
-#endregion
-
         private void Slider_Position_Rewind_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (rewindCount != (int)e.NewValue)
@@ -810,7 +863,10 @@ namespace CGC_Sim_IOS
                 simRest.CMD_Position_Back(rewindCount);
             }
         }
-    }
+
+        #endregion
+
+     }
 
 
 
@@ -838,36 +894,6 @@ namespace CGC_Sim_IOS
             get { return System.Text.Encoding.UTF8; }
         }
     }
-
-    //class SlewPauser : Object
-    //{
-    //    private bool isPaused = false;
-
-    //    const uint SIMCONNECT_OBJECT_ID_USER = 0;           // proxy value for User vehicle ObjectID
-    //    const uint DATA = 0;
-    //    private Simulator Sim;
-
-    //    public SlewPauser(Simulator sim)
-    //    {
-    //        Sim = sim;
-    //        isPaused = Sim.IsPaused;
-    //        if (isPaused)
-    //        {
-    //            Sim.SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
-    //        }
-    //        Sim.SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
-    //    }
-
-    //    ~SlewPauser()
-    //    {
-    //        isPaused = Sim.IsPaused;
-    //        if (isPaused)
-    //        {
-    //            Sim.SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
-    //        }
-    //        Sim.SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
-    //    }
-    //}
 
  }
 

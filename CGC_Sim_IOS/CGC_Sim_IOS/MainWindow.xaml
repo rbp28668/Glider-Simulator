@@ -21,8 +21,8 @@
                         <ColumnDefinition Width="10*"/>
                     </Grid.ColumnDefinitions>
                     <Button x:Name="Button_Pause" Content="Toggle Pause" Height="25" Margin="25,30,0,0" Click="Button_Pause_Click" Width="160" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                    <Button x:Name="Button_Request_Aerotow" Content="Request Aerotow" Height="25" Margin="25,146,0,0" VerticalAlignment="Top" Click="Button_Request_Aerotow_Click" Width="160" HorizontalAlignment="Left"/>
-                    <Button x:Name="Button_Release_Aerotow" Content="Release Aerotow" Height="25" Margin="20,146,0,0" VerticalAlignment="Top" Click="Button_Release_Aerotow_Click" Grid.Column="1" Width="160" HorizontalAlignment="Left" RenderTransformOrigin="0.534,2.024"/>
+                    <Button x:Name="Button_Request_Aerotow" Content="Request Aerotow" Height="25" Margin="20,146,0,0" VerticalAlignment="Top" Click="Button_Request_Aerotow_Click" Width="160" HorizontalAlignment="Left" Grid.Column="1"/>
+                    <Button x:Name="Button_Release_Cable" Content="Release Cable" Height="25" Margin="20,146,0,0" VerticalAlignment="Top" Click="Button_Release_Cable_Click" Grid.Column="2" Width="160" HorizontalAlignment="Left" RenderTransformOrigin="0.534,2.024"/>
                     <Button x:Name="Button_Reset_Flight" Content="Reset Flight" HorizontalAlignment="Left" Height="25" Margin="25,205,0,0" VerticalAlignment="Top" Width="160" RenderTransformOrigin="0.562,2" Click="Button_Reset_Flight_Click"/>
                     <Button x:Name="Button_Save_Snapshot" Content="Save Snapshot" HorizontalAlignment="Left" Height="25" Margin="20,205,0,0" VerticalAlignment="Top" Width="160" Click="Button_Save_Snapshot_Click" Grid.Column="1"/>
                     <Button x:Name="Button_Recall_Snapshot" Content="Recall Snapshot" HorizontalAlignment="Left" Height="25" Margin="20,205,0,0" VerticalAlignment="Top" Width="160" Click="Button_Recall_Snapshot_Click" Grid.Column="2"/>
@@ -32,6 +32,7 @@
                     <Button x:Name="Button_Position_Forward" Content="&lt;&lt;&lt;" Grid.Column="1" HorizontalAlignment="Left" Height="25" Margin="20,30,0,0" VerticalAlignment="Top" Width="70" Click="Button_Position_Forward_Click" RenderTransformOrigin="0.506,-1.192"/>
                     <Button x:Name="Button_Position_Back" Content="&gt;&gt;&gt;" Grid.Column="1" HorizontalAlignment="Left" Height="25" Margin="110,30,0,0" VerticalAlignment="Top" Width="70" RenderTransformOrigin="1.25,0.408" Click="Button_Position_Back_Click"/>
                     <Slider x:Name="Slider_Position_Rewind" Grid.ColumnSpan="2" Grid.Column="2" HorizontalAlignment="Left" Height="24" Margin="10,31,0,0" VerticalAlignment="Top" Width="380" ValueChanged="Slider_Position_Rewind_ValueChanged" PreviewMouseUp="Slider_Position_Rewind_PreviewMouseUp"/>
+                    <Button x:Name="Button_Request_Winch_Launch" Content="Request Winch Launch" Height="25" Margin="25,146,0,0" VerticalAlignment="Top" Click="Button_Request_Winch_Click" Width="160" HorizontalAlignment="Left"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Scenarios" Background="Black" FontSize="14">
