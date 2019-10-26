@@ -26,6 +26,7 @@ public:
 	void list(const std::string& filter, std::string& output);
 	void up(int feet, std::string& output);
 	void down(int feet, std::string& output);
+	void clearHistory(std::string& output);
 
 };
 

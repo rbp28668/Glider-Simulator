@@ -63,6 +63,9 @@ void PositionMessageHandler::run(const std::string& cmd, const APIParameters& pa
 	else if (cmd == "available") {
 		available(output);
 	}
+	else if (cmd == "clear") { // go back to point (0 to available) and reset the buffer.
+		clearHistory(output);
+	}
 	else if (cmd == "set") { // go back to point (0 to available) and reset the buffer.
 		int count = params.getInt("count", 10); // default to 10s if nothing given.
 		set(count, output);
@@ -140,6 +143,14 @@ void PositionMessageHandler::back(int count, std::string& output)
 	pSim->getState()->update(data);
 	reportSuccess(output);
 }
+
+void PositionMessageHandler::clearHistory(std::string& output)
+{
+	int count = pSim->getState()->historyLength();
+	SimState::Data data = pSim->getState()->rewindTo(count);
+	reportSuccess(output);
+}
+
 
 void PositionMessageHandler::load(const std::string& file, std::string& output)
 {
