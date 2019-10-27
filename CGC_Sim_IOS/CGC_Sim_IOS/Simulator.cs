@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -57,6 +57,7 @@ namespace CGC_Sim_IOS
         TOW_PLANE_RELEASE,
         SITUATION_RESET,
         SITUATION_SAVE,
+        FREEZE_LATITUDE_LONGITUDE_TOGGLE,
     }
 
     enum GROUP_IDS
@@ -842,27 +843,33 @@ namespace CGC_Sim_IOS
         public void CMD_Pause()
         {
 
-            //string[] cmd = { "cmd", "pause_toggle"}; 
-            //RunCmdAsync(cmd); 
+            string[] cmd = { "cmd", "pause_toggle"};
+            dynamic response = RunCmdAsync(cmd);
             ////RunAsync().GetAwaiter().GetResult(); 
             //string[] cmd2 = { "scenario", "list" }; 
             //RunCmdAsync(cmd2); 
             //string[] cmd3 = { "position", "up?feet=2000" }; 
             //RunCmdAsync(cmd3); 
-            string[] cmd3 = { "traffic", "launch" };
-            RunCmdAsync(cmd3);
+            //string[] cmd3 = { "traffic", "launch" };
+            //RunCmdAsync(cmd3);
+        }
+
+        public void CMD_Freeze_Lat_Long()
+        {
+            string[] cmd = { "cmd", "FREEZE_LATITUDE_LONGITUDE_SET" };
+            RunCmdAsync(cmd);
         }
 
         public void CMD_Position_Back(int count=10)
         {
-            string[] cmd3 = { "position", "back?count="+count.ToString() };
-            RunCmdAsync(cmd3);
+            string[] cmd = { "position", "back?count="+count.ToString() };
+            RunCmdAsync(cmd);
         }
 
         public void CMD_Position_Set(int count = 1)
         {
-            string[] cmd3 = { "position", "set?count=" + count.ToString() };
-            RunCmdAsync(cmd3);
+            string[] cmd = { "position", "set?count=" + count.ToString() };
+            RunCmdAsync(cmd);
         }
 
         public async Task<int> CMD_Position_Is_OnGround()
@@ -870,8 +877,8 @@ namespace CGC_Sim_IOS
             int onGround = 0;
             try
             {
-                string[] cmd3 = { "position", "current" };
-                dynamic response = await RunCmdAsync(cmd3);
+                string[] cmd = { "position", "current" };
+                dynamic response = await RunCmdAsync(cmd);
                 Newtonsoft.Json.Linq.JObject jRep = response;
                 if (jRep.Count > 0)
                 {
@@ -891,8 +898,8 @@ namespace CGC_Sim_IOS
             int length = 0;
             try
             {
-                string[] cmd3 = { "position", "available" };
-                dynamic response = await RunCmdAsync(cmd3);
+                string[] cmd = { "position", "available" };
+                dynamic response = await RunCmdAsync(cmd);
                 Newtonsoft.Json.Linq.JObject jRep = response;
                 if (jRep.Count > 0)
                 {
@@ -911,8 +918,8 @@ namespace CGC_Sim_IOS
             int length = 0;
             try
             {
-                string[] cmd3 = { "position", "clear" };
-                RunCmdAsync(cmd3);
+                string[] cmd = { "position", "clear" };
+                RunCmdAsync(cmd);
             }
             catch (Exception ex)
             {

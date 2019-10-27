@@ -61,6 +61,7 @@ namespace CGC_Sim_IOS
         private bool statusAerotowRequested = false;
         private bool statusWinchLaunchRequested = false;
         private int statusAerotowAbandon = 0;
+        private uint statusLatLongFrozen = 1;
 
         private List<Scenario> Scenarios = new List<Scenario>();
         private List<String> Scenario_Airfields = new List<String>();
@@ -243,6 +244,7 @@ namespace CGC_Sim_IOS
                 if (SimConnection != null)
                 {
                     // listen to connect and quit msgs 
+                    SimConnection.SetNotificationGroupPriority(GROUP_IDS.GROUP_1, SimConnect.SIMCONNECT_GROUP_PRIORITY_HIGHEST);
                     SimConnection.OnRecvOpen += new SimConnect.RecvOpenEventHandler(SimCon_OnRecvOpen);
                     SimConnection.OnRecvQuit += new SimConnect.RecvQuitEventHandler(SimCon_OnRecvQuit);
 
@@ -293,7 +295,11 @@ namespace CGC_Sim_IOS
                     SimConnection.AddClientEventToNotificationGroup(GROUP_IDS.GROUP_1, EVENTS.SITUATION_RESET, false);
 
                     SimConnection.MapClientEventToSimEvent(EVENTS.SITUATION_SAVE, "SITUATION_SAVE");
-                }
+
+                    SimConnection.MapClientEventToSimEvent(EVENTS.FREEZE_LATITUDE_LONGITUDE_TOGGLE, "FREEZE_LATITUDE_LONGITUDE_TOGGLE");
+                    SimConnection.AddClientEventToNotificationGroup(GROUP_IDS.GROUP_1, EVENTS.FREEZE_LATITUDE_LONGITUDE_TOGGLE, false);
+
+                 }
             }
             catch (Exception ex)
             {
@@ -375,26 +381,10 @@ namespace CGC_Sim_IOS
                     break;
                 case (uint)EVENTS.TOW_PLANE_RELEASE:
                     System.Console.WriteLine("Tow plane release");
-                    //if (!statusWinchLaunchRequested && statusOnGround)
-                    //{
-                    //    statusWinchLaunchRequested = true;
-                    //}
-                    //else if (statusAerotowRequested && statusOnGround && statusAerotowAbandon > 0)
-                    //{
-                    //    SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.TOW_PLANE_RELEASE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
-                    //    statusAerotowAbandon--; 
-                    //}
-                    //else if (statusAerotowRequested && statusOnGround)
-                    //{
-                    //    statusAerotowRequested = false;
-                    //}
                     break;
                 case (uint)EVENTS.TOW_PLANE_REQUEST:
                     System.Console.WriteLine("Tow plane request");
-                    //statusAerotowRequested = true;
-                    //statusWinchLaunchRequested = false;
-                    //statusAerotowAbandon = 2;
-                    break;
+                     break;
                 case (uint)EVENTS.PAUSE:
                     if (recEvent.dwData == 1)
                     {
@@ -410,6 +400,7 @@ namespace CGC_Sim_IOS
                     }
                     RewindConfigure(sim.IsPaused);
                     break;
+
             }
             //Button_Request_Winch_Launch.IsEnabled = statusOnGround && !statusAerotowRequested && !statusWinchLaunchRequested;
             //Button_Request_Aerotow.IsEnabled = statusOnGround && !statusAerotowRequested && !statusWinchLaunchRequested;
@@ -866,7 +857,37 @@ namespace CGC_Sim_IOS
 
         #endregion
 
-     }
+        private void Button_Freeze_Position_Click(object sender, RoutedEventArgs e)
+        {
+            SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.FREEZE_LATITUDE_LONGITUDE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
+        }
+
+        #region Failures
+
+        private void Button_Fail_ASI_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Button_Fail_Altimeter_Click(object sender, RoutedEventArgs e)
+        {
+            string[] cmd = { "position", "set?count=" + count.ToString() };
+            simRest.RunCmdAsync(cmd);
+
+        }
+
+        private void Button_Fail_Pitot_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Button_Fail_Electrical_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        #endregion
+    }
 
 
 
