@@ -73,6 +73,7 @@ namespace CGC_Sim_IOS
         private bool p3DAlreadyRunning = false;
 
         private bool simPausedOnStartingSlew = false;
+        private bool simSlewing = false;
 
         const uint SIMCONNECT_OBJECT_ID_USER = 0;           // proxy value for User vehicle ObjectID
         const uint DATA = 0;
@@ -119,6 +120,12 @@ namespace CGC_Sim_IOS
 
         ~MainWindow()
         {
+#if (DEBUG)
+#else
+            CloseSimConnection();
+            sim.KillP3D();
+            p3DAlreadyRunning = false;
+#endif 
             if (handleSource != null)
             {
                 handleSource.RemoveHook(HandleSimConnectEvents);
@@ -206,6 +213,12 @@ namespace CGC_Sim_IOS
                 minimiseP3DToPDA.Start("P3DToPDA");
 
                 p3DAlreadyRunning = true;
+                SimConnect temp = SimConnection;
+                // Toggling Pause twice is a bodge to update the Pause button without changing the state of Pause.
+                simRest.CMD_Pause();
+                Thread.Sleep(1000);
+                simRest.CMD_Pause();
+                UpdateFailureButtons();
             }
         }
 
@@ -262,7 +275,8 @@ namespace CGC_Sim_IOS
                     SimConnection.SubscribeToSystemEvent(EVENTS.SIMSTART, "SimStart");
                     SimConnection.SubscribeToSystemEvent(EVENTS.SIMSTOP, "SimStop");
                     SimConnection.SubscribeToSystemEvent(EVENTS.PAUSE, "Pause");
-
+                    SimConnection.SubscribeToSystemEvent(EVENTS.CRASH_RESET, "CrashReset");
+                    
                     // Initially turn the events off 
                     SimConnection.SetSystemEventState(EVENTS.FOURSECS, SIMCONNECT_STATE.ON);
                     SimConnection.SetSystemEventState(EVENTS.SIMSTART, SIMCONNECT_STATE.ON);
@@ -329,6 +343,7 @@ namespace CGC_Sim_IOS
                     SimConnection.UnsubscribeFromSystemEvent(EVENTS.SIMSTART);
                     SimConnection.UnsubscribeFromSystemEvent(EVENTS.SIMSTOP);
                     SimConnection.UnsubscribeFromSystemEvent(EVENTS.PAUSE);
+                    SimConnection.UnsubscribeFromSystemEvent(EVENTS.CRASH_RESET);
                     sim.CloseSimConnection();
                 }
             }
@@ -374,10 +389,16 @@ namespace CGC_Sim_IOS
                     // Check current aircraft position
                     int val =  await simRest.CMD_Position_Is_OnGround();
                     statusOnGround = (val == 1);
+                    UpdateFailureButtons();
                     break;
                 case (uint)EVENTS.SITUATION_RESET:
                     System.Console.WriteLine("Situation reset");
+                    ClearFailures();
                     Label_Rewind.Content = "";
+                    break;
+                case (uint)EVENTS.CRASH_RESET:
+                    System.Console.WriteLine("Crash reset");
+                    ClearFailures();
                     break;
                 case (uint)EVENTS.TOW_PLANE_RELEASE:
                     System.Console.WriteLine("Tow plane release");
@@ -402,10 +423,6 @@ namespace CGC_Sim_IOS
                     break;
 
             }
-            //Button_Request_Winch_Launch.IsEnabled = statusOnGround && !statusAerotowRequested && !statusWinchLaunchRequested;
-            //Button_Request_Aerotow.IsEnabled = statusOnGround && !statusAerotowRequested && !statusWinchLaunchRequested;
-            //Button_Release_Cable.IsEnabled = statusWinchLaunchRequested || statusAerotowRequested;
-
         }
 
 
@@ -417,12 +434,6 @@ namespace CGC_Sim_IOS
                 case DataRequestID.Weather_Data:
                     break;
                 case DataRequestID.Location_Data:
-                    //Struct1 s1 = (Struct1)data.dwData[0];
-
-                    //displayText("title: " + s1.title);
-                    //displayText("Lat:   " + s1.latitude);
-                    //displayText("Lon:   " + s1.longitude);
-                    //displayText("Alt:   " + s1.altitude);
                     break;
                 default:
                     System.Console.WriteLine("Unknown request ID: " + data.dwRequestID);
@@ -526,6 +537,7 @@ namespace CGC_Sim_IOS
                 {
                     simRest.CMD_Position_Clear_History();
                     SimConnection.FlightLoad(scenarioFileName);
+                    ClearFailures();
                 }
             }
 
@@ -663,16 +675,21 @@ namespace CGC_Sim_IOS
 
         public void SlewStart()
         {
-            simPausedOnStartingSlew = sim.IsPaused;
             if (simPausedOnStartingSlew)
             {
+                simPausedOnStartingSlew = sim.IsPaused;
                 SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
             }
-            SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
+            if (!simSlewing)
+            {
+                SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
+                simSlewing = true;
+            }
         }
 
         public void SlewStop()
         {
+            simSlewing = false;
             if (simPausedOnStartingSlew)
             {
                 SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
@@ -691,6 +708,7 @@ namespace CGC_Sim_IOS
         {
             SlewStart();
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_LEFT, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
+
         }
 
         private void Button_Slew_Forward_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -864,26 +882,55 @@ namespace CGC_Sim_IOS
 
         #region Failures
 
-        private void Button_Fail_ASI_Click(object sender, RoutedEventArgs e)
+        private void ClearFailures()
         {
-
-        }
-
-        private void Button_Fail_Altimeter_Click(object sender, RoutedEventArgs e)
-        {
-            string[] cmd = { "position", "set?count=" + count.ToString() };
+            string[] cmd = { "failures", "clear" };
             simRest.RunCmdAsync(cmd);
-
         }
 
-        private void Button_Fail_Pitot_Click(object sender, RoutedEventArgs e)
+        private async void UpdateFailureButtons()
         {
-
+            bool changed = await simRest.Get_Failure_States();
+            if (changed)
+            {
+                Button_Fail_ASI.Content = simRest.ASIFailed ? "Clear ASI" : "Fail ASI";
+                //Button_Fail_ASI.Background.SetCurrentValue()
+                Button_Fail_Altimeter.Content = simRest.AltimeterFailed ? "Clear Altimeter" : "Fail Altimeter";
+                Button_Fail_Pitot.Content = simRest.PitotFailed ? "Clear Pitot" : "Fail Pitot";
+                Button_Fail_Electrical.Content = simRest.ElectricsFailed ? "Clear Electrics" : "Fail Electrics";
+            }
         }
 
-        private void Button_Fail_Electrical_Click(object sender, RoutedEventArgs e)
+        private async void Button_Fail_ASI_Click(object sender, RoutedEventArgs e)
         {
+            string mode = simRest.ASIFailed ? "false" : "true";
+            string[] cmd = { "failures", "airspeed?mode=" + mode };
+            await simRest.RunCmdAsync(cmd);
+            UpdateFailureButtons();
+        }
 
+        private async void Button_Fail_Altimeter_Click(object sender, RoutedEventArgs e)
+        {
+            string mode = simRest.AltimeterFailed ? "false" : "true";
+            string[] cmd = { "failures", "altimeter?mode="+mode };
+            await simRest.RunCmdAsync(cmd);
+            UpdateFailureButtons();
+        }
+
+        private async void Button_Fail_Pitot_Click(object sender, RoutedEventArgs e)
+        {
+            string mode = simRest.PitotFailed ? "false" : "true";
+            string[] cmd = { "failures", "pitot?mode=" + mode };
+            await simRest.RunCmdAsync(cmd);
+            UpdateFailureButtons();
+        }
+
+        private async void Button_Fail_Electrical_Click(object sender, RoutedEventArgs e)
+        {
+            string mode = simRest.ElectricsFailed ? "false" : "true";
+            string[] cmd = { "failures", "electrical?mode=" + mode };
+            await simRest.RunCmdAsync(cmd);
+            UpdateFailureButtons();
         }
 
         #endregion
