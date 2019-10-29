@@ -853,15 +853,17 @@ namespace CGC_Sim_IOS
                 if (args.Length > 2)
                 {
                     url += "?";
-                    url += WebUtility.UrlEncode(args[index++]);
+                    url += WebUtility.HtmlEncode(args[index++]);
                 }
 
                 while (index < args.Length)
                 {
                     url += "&";
-                    url += WebUtility.UrlEncode(args[index++]);
+                    //url += WebUtility.UrlEncode(args[index++]);
+                    url += WebUtility.HtmlEncode(args[index++]);
                 }
-
+                // replace spaces by %20
+                url = url.Replace(" ", "%20");
                 // Should have a complete URL with all the parameters 
                 Console.WriteLine(url);
 

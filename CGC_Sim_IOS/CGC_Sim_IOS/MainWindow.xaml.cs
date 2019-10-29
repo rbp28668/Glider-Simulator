@@ -75,6 +75,10 @@ namespace CGC_Sim_IOS
         private bool simPausedOnStartingSlew = false;
         private bool simSlewing = false;
 
+        private List<String> Traffic_Aircraft = new List<String>();
+        private string traffic_Aircraft = "";
+
+
         const uint SIMCONNECT_OBJECT_ID_USER = 0;           // proxy value for User vehicle ObjectID
         const uint DATA = 0;
 
@@ -621,6 +625,7 @@ namespace CGC_Sim_IOS
                 handleSource = HwndSource.FromHwnd(handle); // Get source of handle in order to add event handlers to it
                 handleSource.AddHook(HandleSimConnectEvents);
                 BuildScenarioLists();
+                BuildAircraftList();
             }
             LaunchP3D();
         }
@@ -675,7 +680,7 @@ namespace CGC_Sim_IOS
 
         public void SlewStart()
         {
-            if (simPausedOnStartingSlew)
+            if (!simPausedOnStartingSlew && sim.IsPaused)
             {
                 simPausedOnStartingSlew = sim.IsPaused;
                 SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
@@ -904,7 +909,7 @@ namespace CGC_Sim_IOS
         private async void Button_Fail_ASI_Click(object sender, RoutedEventArgs e)
         {
             string mode = simRest.ASIFailed ? "false" : "true";
-            string[] cmd = { "failures", "airspeed?mode=" + mode };
+            string[] cmd = { "failures", "airspeed","mode=" + mode };
             await simRest.RunCmdAsync(cmd);
             UpdateFailureButtons();
         }
@@ -912,7 +917,7 @@ namespace CGC_Sim_IOS
         private async void Button_Fail_Altimeter_Click(object sender, RoutedEventArgs e)
         {
             string mode = simRest.AltimeterFailed ? "false" : "true";
-            string[] cmd = { "failures", "altimeter?mode="+mode };
+            string[] cmd = { "failures", "altimeter", "mode=" + mode };
             await simRest.RunCmdAsync(cmd);
             UpdateFailureButtons();
         }
@@ -920,7 +925,7 @@ namespace CGC_Sim_IOS
         private async void Button_Fail_Pitot_Click(object sender, RoutedEventArgs e)
         {
             string mode = simRest.PitotFailed ? "false" : "true";
-            string[] cmd = { "failures", "pitot?mode=" + mode };
+            string[] cmd = { "failures", "pitot", "mode=" + mode };
             await simRest.RunCmdAsync(cmd);
             UpdateFailureButtons();
         }
@@ -928,12 +933,55 @@ namespace CGC_Sim_IOS
         private async void Button_Fail_Electrical_Click(object sender, RoutedEventArgs e)
         {
             string mode = simRest.ElectricsFailed ? "false" : "true";
-            string[] cmd = { "failures", "electrical?mode=" + mode };
+            string[] cmd = { "failures", "electrical", "mode=" + mode };
             await simRest.RunCmdAsync(cmd);
             UpdateFailureButtons();
         }
 
         #endregion
+
+        private async void BuildAircraftList()
+        {
+            try
+            {
+                Traffic_Aircraft.Clear();
+                string[] cmd = { "traffic", "aircraft" };
+                dynamic response = await simRest.RunCmdAsync(cmd);
+                Newtonsoft.Json.Linq.JObject jRep = response;
+                if (jRep.Count > 0)
+                {
+                    string val1 = (string)jRep["status"];
+                    Newtonsoft.Json.Linq.JToken jToken = jRep["aircraft"];
+                    //var aircraft = jToken["title"];
+                    var aircraftTypes = jToken.Children();
+                    foreach (var item in aircraftTypes)
+                    {
+                        string type = (string)item["title"];
+                        Traffic_Aircraft.Add(type);
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+            comboTrafficAircraft.ItemsSource = Traffic_Aircraft;
+            comboTrafficAircraft.SelectedIndex = 0;
+        }
+
+        private async void Button_Traffic_Launch_Click(object sender, RoutedEventArgs e)
+        {
+            //string[] cmd = { "traffic", "launch" };
+            string[] cmd = { "traffic", "launch", "name=" + traffic_Aircraft, "range=1", "speed=210","relative_height=0"};
+
+            dynamic response = await simRest.RunCmdAsync(cmd);
+
+        }
+
+        private void ComboTrafficAircraft_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            traffic_Aircraft = e.AddedItems[0].ToString();
+        }
     }
 
 

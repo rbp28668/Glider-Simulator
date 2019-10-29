@@ -85,6 +85,19 @@
                     <Button x:Name="Button_Slew" Content="Slew" Height="25" Margin="0,31.4,0,0" VerticalAlignment="Top" Click="Button_Slew_Click" Grid.Column="1" Grid.Row="4"/>
                 </Grid>
             </TabItem>
+            <TabItem Header="Traffic" Background="Black" FontSize="14" RenderTransformOrigin="-1.373,0.407" Margin="-0.571,0,-0.429,-0.429">
+                <Grid Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Grid}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Grid}}}" HorizontalAlignment="Left" VerticalAlignment="Top" Background="#FF1E1E1E" OpacityMask="Black" Margin="0,-1,0,-384.286">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
+                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
+                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
+                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
+                        <ColumnDefinition Width="100*" MinWidth="100"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="Button_Traffic_Launch" Content="Launch Traffic" HorizontalAlignment="Left" Height="25" Margin="10,51,0,0" VerticalAlignment="Top" Width="130" Click="Button_Traffic_Launch_Click"/>
+                    <ComboBox x:Name="comboTrafficAircraft" Grid.ColumnSpan="2" Grid.Column="1" HorizontalAlignment="Left" Height="25" Margin="9.6,51,0,0" VerticalAlignment="Top" Width="235" SelectionChanged="ComboTrafficAircraft_SelectionChanged"/>
+                </Grid>
+            </TabItem>
             <TabItem Header="Weather" Name="TabWeather" Background="Black" FontSize="14">
                 <Grid Background="#FF1E1E1E" OpacityMask="Black" Margin="0,0,-116.857,-8.286">
                     <Grid.ColumnDefinitions>
