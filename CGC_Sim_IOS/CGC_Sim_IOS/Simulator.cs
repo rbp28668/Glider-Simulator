@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -38,6 +38,7 @@ namespace CGC_Sim_IOS
         PAUSE_TOGGLE, //set pause
         ABORT, //Quit without message
         CLOCK, //Hours of Local Time
+        CRASH_RESET,
         SLEW,
         SLEW_FREEZE,
         SLEW_LEFT,
@@ -754,6 +755,66 @@ namespace CGC_Sim_IOS
     class SimRestConnection
     {
         HttpClient client = new HttpClient();
+        private bool failedAltimeter = false;
+        private bool failedASI = false;
+        private bool failedPitot = false;
+        private bool failedElectrics = false;
+        private bool failedTurnCord = false;
+
+        #region Public Properties
+
+        public bool AltimeterFailed
+        {
+            get
+            {
+                return failedAltimeter;
+            }
+
+            set
+            {
+
+            }
+        }
+        public bool ASIFailed
+        {
+            get
+            {
+                return failedASI;
+            }
+
+            set
+            {
+
+            }
+        }
+
+        public bool ElectricsFailed
+        {
+            get
+            {
+                return failedElectrics;
+            }
+
+            set
+            {
+
+            }
+        }
+
+        public bool PitotFailed
+        {
+            get
+            {
+                return failedPitot;
+            }
+
+            set
+            {
+
+            }
+        }
+
+        #endregion
 
         public SimRestConnection()
         {
@@ -762,6 +823,11 @@ namespace CGC_Sim_IOS
             //client.DefaultRequestHeaders.Accept.Clear(); 
             //client.DefaultRequestHeaders.Accept.Add( 
             //    new MediaTypeWithQualityHeaderValue("application/json")); 
+        }
+
+        ~SimRestConnection()
+        {
+
         }
 
         public async Task<dynamic> RunCmdAsync(string[] args)
@@ -926,10 +992,30 @@ namespace CGC_Sim_IOS
             }
         }
 
-
-        ~SimRestConnection()
+        public async Task<bool> Get_Failure_States()
         {
-
+            bool changed = false;
+            try
+            {
+                string[] cmd = { "failures", "current" };
+                dynamic response = await RunCmdAsync(cmd);
+                Newtonsoft.Json.Linq.JObject jRep = response;
+                if (jRep.Count > 0)
+                {
+                    string val1 = (string)jRep["status"];
+                    failedAltimeter = (bool)jRep["altimeter"];
+                    failedASI = (bool)jRep["airspeed"];
+                    failedPitot = (bool)jRep["pitot"];
+                    failedElectrics = (bool)jRep["electrical"];
+                    failedTurnCord = (bool)jRep["turn_coordinator"];
+                    changed = true;
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+            return changed;
         }
+
     }
 }
