@@ -69,6 +69,13 @@ namespace CGC_Sim_IOS
         private string defaultScenario = "";
         private string defaultAirfield = "";
 
+        private List<TrafficSpeed> trafficSpeeds = new List<TrafficSpeed>();
+        private List<TrafficRange> trafficRanges = new List<TrafficRange>();
+        private List<TrafficHeight> trafficHeights = new List<TrafficHeight>();
+        private List<TrafficHeading> trafficHeadings = new List<TrafficHeading>();
+
+
+
         private Scenario selectedScenario = null;
         private bool p3DAlreadyRunning = false;
 
@@ -115,6 +122,40 @@ namespace CGC_Sim_IOS
         {
             InitializeComponent();
             outputter = new TextBoxOutputter(TestBox);
+            trafficSpeeds.Add(new TrafficSpeed(50));
+            trafficSpeeds.Add(new TrafficSpeed(75));
+            trafficSpeeds.Add(new TrafficSpeed(100));
+            trafficSpeeds.Add(new TrafficSpeed(150));
+            trafficSpeeds.Add(new TrafficSpeed(200));
+            trafficSpeeds.Add(new TrafficSpeed(300));
+            trafficSpeeds.Add(new TrafficSpeed(400));
+
+            trafficRanges.Add(new TrafficRange(0.25f));
+            trafficRanges.Add(new TrafficRange(0.5f));
+            trafficRanges.Add(new TrafficRange(0.75f));
+            for (float range=1; range <=10; range++)
+            {
+                trafficRanges.Add(new TrafficRange(range));
+            }
+
+            trafficHeights.Add(new TrafficHeight(1000));
+            trafficHeights.Add(new TrafficHeight(500));
+            trafficHeights.Add(new TrafficHeight(250));
+            trafficHeights.Add(new TrafficHeight(100));
+            trafficHeights.Add(new TrafficHeight(50));
+            trafficHeights.Add(new TrafficHeight(0));
+            trafficHeights.Add(new TrafficHeight(-50));
+            trafficHeights.Add(new TrafficHeight(-100));
+            trafficHeights.Add(new TrafficHeight(-250));
+            trafficHeights.Add(new TrafficHeight(-500));
+            trafficHeights.Add(new TrafficHeight(-1000));
+
+            for (int heading = -90; heading <= 90; heading += 10)
+            {
+                trafficHeadings.Add(new TrafficHeading(heading));
+            }
+            
+
 #if (DEBUG)
 #else
             Console.SetOut(outputter);
@@ -599,6 +640,27 @@ namespace CGC_Sim_IOS
             }
             comboAirfields.ItemsSource = Scenario_Airfields;
             comboAirfields.SelectedItem = defaultAirfield;
+
+            comboTrafficSpeed.ItemsSource = trafficSpeeds;
+            comboTrafficSpeed.DisplayMemberPath = "Description";
+            comboTrafficSpeed.SelectedValuePath = "Speed";
+            comboTrafficSpeed.SelectedIndex = 3;
+
+            comboTrafficRange.ItemsSource = trafficRanges;
+            comboTrafficRange.DisplayMemberPath = "Description";
+            comboTrafficRange.SelectedValuePath = "Range";
+            comboTrafficRange.SelectedIndex = 2;
+
+            comboTrafficHeight.ItemsSource = trafficHeights;
+            comboTrafficHeight.DisplayMemberPath = "Description";
+            comboTrafficHeight.SelectedValuePath = "RelativeHeight";
+            comboTrafficHeight.SelectedIndex = 5;
+
+            comboTrafficRelativeHeading.ItemsSource = trafficHeadings;
+            comboTrafficRelativeHeading.DisplayMemberPath = "Description";
+            comboTrafficRelativeHeading.SelectedValuePath = "RelativeHeight";
+            comboTrafficRelativeHeading.SelectedIndex = 5;
+
         }
 
 
@@ -971,16 +1033,24 @@ namespace CGC_Sim_IOS
 
         private async void Button_Traffic_Launch_Click(object sender, RoutedEventArgs e)
         {
-            //string[] cmd = { "traffic", "launch" };
-            string[] cmd = { "traffic", "launch", "name=" + traffic_Aircraft, "range=1", "speed=210","relative_height=0"};
+            string traffic_Aircraft = (string)comboTrafficAircraft.SelectedItem;
+            TrafficSpeed speed = (TrafficSpeed)comboTrafficSpeed.SelectedItem;
+            TrafficRange range = (TrafficRange)comboTrafficRange.SelectedItem;
+            TrafficHeight height = (TrafficHeight)comboTrafficHeight.SelectedItem;
+            TrafficHeading heading = (TrafficHeading)comboTrafficRelativeHeading.SelectedItem;
+
+            string[] cmd = { "traffic", "launch", "name=" + traffic_Aircraft,
+                "range=" + range.Distance.ToString(),
+                "speed=" + speed.Speed.ToString(),
+                "relative_height="  + height.RelativeHeight.ToString(),
+                "bearing=" + heading.RelativeHeading.ToString() };
 
             dynamic response = await simRest.RunCmdAsync(cmd);
-
         }
 
         private void ComboTrafficAircraft_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            traffic_Aircraft = e.AddedItems[0].ToString();
+            //traffic_Aircraft = e.AddedItems[0].ToString();
         }
     }
 
@@ -1011,5 +1081,61 @@ namespace CGC_Sim_IOS
         }
     }
 
- }
+    public class TrafficSpeed
+    {
+        public int Speed { get; set; }
+
+        public string Description { get; set; }
+
+        public TrafficSpeed(int speed)
+        {
+            Speed = speed;
+            Description = Speed.ToString() + " Knots";
+        }
+    }
+
+    public class TrafficRange
+    {
+        public float Distance { get; set; }
+
+        public string Description { get; set; }
+
+        public TrafficRange(float distance)
+        {
+            Distance = distance;
+            Description = distance.ToString() + " Miles";
+        }
+    }
+
+    public class TrafficHeight
+    {
+        public int RelativeHeight { get; set; }
+
+        public string Description { get; set; }
+
+        public TrafficHeight(int relHeight)
+        {
+            RelativeHeight = relHeight;
+            Description = relHeight.ToString() + " Feet";
+        }
+    }
+    public class TrafficHeading
+    {
+        public int RelativeHeading { get; set; }
+
+        public string Description { get; set; }
+
+        public TrafficHeading(int relHeading)
+        {
+            RelativeHeading = relHeading;
+            if (relHeading < 0)
+                Description = relHeading.ToString() + " Degrees (from the left)";
+            else if (relHeading == 0)
+                Description = "Head on";
+            else
+                Description = relHeading.ToString() + " Degrees (from the right)";
+        }
+    }
+
+}
 

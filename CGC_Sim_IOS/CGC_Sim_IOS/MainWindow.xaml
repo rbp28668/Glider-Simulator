@@ -94,8 +94,17 @@
                         <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
                         <ColumnDefinition Width="100*" MinWidth="100"/>
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="Button_Traffic_Launch" Content="Launch Traffic" HorizontalAlignment="Left" Height="25" Margin="10,51,0,0" VerticalAlignment="Top" Width="130" Click="Button_Traffic_Launch_Click"/>
+                    <Button x:Name="Button_Traffic_Launch" Content="Launch Traffic" HorizontalAlignment="Left" Height="25" Margin="9.6,316,0,0" VerticalAlignment="Top" Width="130" Click="Button_Traffic_Launch_Click" Grid.Column="1"/>
                     <ComboBox x:Name="comboTrafficAircraft" Grid.ColumnSpan="2" Grid.Column="1" HorizontalAlignment="Left" Height="25" Margin="9.6,51,0,0" VerticalAlignment="Top" Width="235" SelectionChanged="ComboTrafficAircraft_SelectionChanged"/>
+                    <ComboBox x:Name="comboTrafficSpeed" Grid.Column="1" HorizontalAlignment="Left" Height="25" Margin="9.6,91,0,0" VerticalAlignment="Top" Width="115"/>
+                    <Label Content="Aircraft:" HorizontalAlignment="Left" Height="25" Margin="20,51,0,0" VerticalAlignment="Top" Width="120"/>
+                    <Label Content="Speed:" HorizontalAlignment="Left" Height="25" Margin="20,91,0,0" VerticalAlignment="Top" Width="105"/>
+                    <Label Content="Range:" HorizontalAlignment="Left" Height="25" Margin="20,131,0,0" VerticalAlignment="Top" Width="105"/>
+                    <Label Content="Relative heading:" HorizontalAlignment="Left" Height="30" Margin="20,226,0,0" VerticalAlignment="Top" Width="105"/>
+                    <ComboBox x:Name="comboTrafficRange" Grid.Column="1" HorizontalAlignment="Left" Height="25" Margin="9.6,131,0,0" VerticalAlignment="Top" Width="115"/>
+                    <Label Content="Relative height:" HorizontalAlignment="Left" Height="25" Margin="20,176,0,0" VerticalAlignment="Top" Width="105" RenderTransformOrigin="0.573,0.992"/>
+                    <ComboBox x:Name="comboTrafficHeight" Grid.Column="1" HorizontalAlignment="Left" Height="25" Margin="9.6,176,0,0" VerticalAlignment="Top" Width="115"/>
+                    <ComboBox x:Name="comboTrafficRelativeHeading" Grid.Column="1" HorizontalAlignment="Left" Height="25" Margin="9.6,226,0,0" VerticalAlignment="Top" Width="235" Grid.ColumnSpan="2"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Weather" Name="TabWeather" Background="Black" FontSize="14">
