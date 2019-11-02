@@ -63,6 +63,9 @@ namespace CGC_Sim_IOS
         private int statusAerotowAbandon = 0;
         private uint statusLatLongFrozen = 1;
 
+        private float currentLatitude = 0.0f;
+        private float currentLongitude = 0.0f;
+
         private List<Scenario> Scenarios = new List<Scenario>();
         private List<String> Scenario_Airfields = new List<String>();
         private List<Scenario> Scenarios_For_Airfield = new List<Scenario>();
@@ -73,6 +76,9 @@ namespace CGC_Sim_IOS
         private List<TrafficRange> trafficRanges = new List<TrafficRange>();
         private List<TrafficHeight> trafficHeights = new List<TrafficHeight>();
         private List<TrafficHeading> trafficHeadings = new List<TrafficHeading>();
+        private List<WeatherTheme> weatherThemes = new List<WeatherTheme>();
+
+        
 
 
 
@@ -197,7 +203,7 @@ namespace CGC_Sim_IOS
                     }
                     closed = true;
                 }
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 loop++;
             }
         }
@@ -227,7 +233,7 @@ namespace CGC_Sim_IOS
                         numToMinimise--;
                     }
                  }
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 loop++;
             }
             Console.WriteLine(processName + " exiting");
@@ -264,11 +270,35 @@ namespace CGC_Sim_IOS
                 Thread.Sleep(1000);
                 simRest.CMD_Pause();
                 UpdateFailureButtons();
+
+                comboTrafficSpeed.ItemsSource = trafficSpeeds;
+                comboTrafficSpeed.DisplayMemberPath = "Description";
+                comboTrafficSpeed.SelectedValuePath = "Speed";
+                comboTrafficSpeed.SelectedIndex = 3;
+
+                comboTrafficRange.ItemsSource = trafficRanges;
+                comboTrafficRange.DisplayMemberPath = "Description";
+                comboTrafficRange.SelectedValuePath = "Range";
+                comboTrafficRange.SelectedIndex = 2;
+
+                comboTrafficHeight.ItemsSource = trafficHeights;
+                comboTrafficHeight.DisplayMemberPath = "Description";
+                comboTrafficHeight.SelectedValuePath = "RelativeHeight";
+                comboTrafficHeight.SelectedIndex = 5;
+
+                comboTrafficRelativeHeading.ItemsSource = trafficHeadings;
+                comboTrafficRelativeHeading.DisplayMemberPath = "Description";
+                comboTrafficRelativeHeading.SelectedValuePath = "RelativeHeight";
+                comboTrafficRelativeHeading.SelectedIndex = 5;
+
+                BuildAircraftList();
+                BuildWeatherThemesList();
+
             }
         }
 
 
-#region P3D Events
+        #region P3D Events
 
         private IntPtr HandleSimConnectEvents(IntPtr hWnd, int message, IntPtr wParam, IntPtr lParam, ref bool isHandled)
         {
@@ -430,10 +460,26 @@ namespace CGC_Sim_IOS
                     break;
 
                 case (uint)EVENTS.FOURSECS:
-                    System.Console.WriteLine("4s tick");
+                    // System.Console.WriteLine("4s tick");
                     // Check current aircraft position
-                    int val =  await simRest.CMD_Position_Is_OnGround();
-                    statusOnGround = (val == 1);
+                    {
+                        try
+                        {
+                            string[] cmd = { "position", "current" };
+                            dynamic response = await simRest.RunCmdAsync(cmd);
+                            Newtonsoft.Json.Linq.JObject jRep = response;
+                            if (jRep.Count > 0)
+                            {
+                                string val1 = (string)jRep["status"];
+                                statusOnGround = (1 == (int)jRep["current"]["on_ground"]);
+                                currentLatitude = (float)jRep["current"]["latitude"];
+                                currentLongitude = (float)jRep["current"]["longitude"];
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+                    }
                     UpdateFailureButtons();
                     break;
                 case (uint)EVENTS.SITUATION_RESET:
@@ -641,27 +687,7 @@ namespace CGC_Sim_IOS
             comboAirfields.ItemsSource = Scenario_Airfields;
             comboAirfields.SelectedItem = defaultAirfield;
 
-            comboTrafficSpeed.ItemsSource = trafficSpeeds;
-            comboTrafficSpeed.DisplayMemberPath = "Description";
-            comboTrafficSpeed.SelectedValuePath = "Speed";
-            comboTrafficSpeed.SelectedIndex = 3;
-
-            comboTrafficRange.ItemsSource = trafficRanges;
-            comboTrafficRange.DisplayMemberPath = "Description";
-            comboTrafficRange.SelectedValuePath = "Range";
-            comboTrafficRange.SelectedIndex = 2;
-
-            comboTrafficHeight.ItemsSource = trafficHeights;
-            comboTrafficHeight.DisplayMemberPath = "Description";
-            comboTrafficHeight.SelectedValuePath = "RelativeHeight";
-            comboTrafficHeight.SelectedIndex = 5;
-
-            comboTrafficRelativeHeading.ItemsSource = trafficHeadings;
-            comboTrafficRelativeHeading.DisplayMemberPath = "Description";
-            comboTrafficRelativeHeading.SelectedValuePath = "RelativeHeight";
-            comboTrafficRelativeHeading.SelectedIndex = 5;
-
-        }
+         }
 
 
         #endregion
@@ -671,7 +697,7 @@ namespace CGC_Sim_IOS
         private void Button_Weather_Test_Click(object sender, RoutedEventArgs e)
         {
             if (SimConnection != null)
-                sim.WeatherRequest();
+                sim.WeatherRequest(currentLatitude, currentLongitude);
         }
 
         private void Window_Initialized(object sender, EventArgs e)
@@ -687,16 +713,65 @@ namespace CGC_Sim_IOS
                 handleSource = HwndSource.FromHwnd(handle); // Get source of handle in order to add event handlers to it
                 handleSource.AddHook(HandleSimConnectEvents);
                 BuildScenarioLists();
-                BuildAircraftList();
+                Button_Set_Weather_Theme.IsEnabled = false;
+
             }
             LaunchP3D();
         }
 
-         private void Button_Set_Weather_Click(object sender, RoutedEventArgs e)
+        private async void BuildWeatherThemesList()
+        {
+            try
+            {
+                weatherThemes.Clear();
+                string[] cmd = { "weather", "themes" };
+                dynamic response = await simRest.RunCmdAsync(cmd);
+                Newtonsoft.Json.Linq.JObject jRep = response;
+                if (jRep.Count > 0)
+                {
+                    string val1 = (string)jRep["status"];
+                    Newtonsoft.Json.Linq.JToken jToken = jRep["themes"];
+                    var themes = jToken.Children();
+                    foreach (var item in themes)
+                    {
+                        string name = (string)item["name"];
+                        string title = (string)item["title"];
+                        string description = (string)item["description"];
+                        WeatherTheme wItem = new WeatherTheme(name, title, description);
+                        weatherThemes.Add(wItem);
+                    }
+
+                }
+                listWeatherThemes.ItemsSource = weatherThemes;
+                listWeatherThemes.DisplayMemberPath = "Text";
+                listWeatherThemes.SelectedValuePath = "Name";
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        private void ListWeatherThemes_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Button_Set_Weather_Theme.IsEnabled = true;
+        }
+
+
+        private void Button_Set_Weather_Click(object sender, RoutedEventArgs e)
         {
             sim.WeatherSetWind();
             Button_Set_Weather.IsEnabled = false;
 
+        }
+
+        private async void Button_Set_Weather_Theme_Click(object sender, RoutedEventArgs e)
+        {
+            Button_Set_Weather_Theme.IsEnabled = false;
+            WeatherTheme theme = (WeatherTheme)listWeatherThemes.SelectedItem;
+            string[] cmd = { "weather", "theme", "name=" + theme.Name };
+            await simRest.RunCmdAsync(cmd);
+            //SimConnection.WeatherSetModeGlobal(); // comment this out to test stuff
+            sim.WeatherRequest(currentLatitude, currentLongitude);
         }
 
         private void UpdateWeatherControls(Metar metar)
@@ -728,14 +803,15 @@ namespace CGC_Sim_IOS
             {
                 if (SimConnection != null)
                 {
-                    sim.WeatherRequest();
+                    SimConnection.WeatherSetModeGlobal(); // comment this out to test stuff
+                    sim.WeatherRequest(currentLatitude, currentLongitude);
                 }
             }
         }
 
-        #region slewing
+    #region slewing
 
-        private void Button_Pause_Click(object sender, RoutedEventArgs e)
+    private void Button_Pause_Click(object sender, RoutedEventArgs e)
         {
              SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
         }
@@ -1052,7 +1128,8 @@ namespace CGC_Sim_IOS
         {
             //traffic_Aircraft = e.AddedItems[0].ToString();
         }
-    }
+
+      }
 
 
 
@@ -1119,6 +1196,7 @@ namespace CGC_Sim_IOS
             Description = relHeight.ToString() + " Feet";
         }
     }
+
     public class TrafficHeading
     {
         public int RelativeHeading { get; set; }
@@ -1134,6 +1212,25 @@ namespace CGC_Sim_IOS
                 Description = "Head on";
             else
                 Description = relHeading.ToString() + " Degrees (from the right)";
+        }
+    }
+
+    public class WeatherTheme
+    {
+        public string Name { get; set; }
+
+        public string Description { get; set; }
+        public string Title { get; set; }
+        public string Text
+        {
+            get { return Title + " : " + Description; }
+        }
+
+        public WeatherTheme(string name, string title, string description)
+        {
+            Name = name;
+            Title = title;
+            Description = description;
         }
     }
 

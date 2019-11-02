@@ -104,7 +104,7 @@
                     <ComboBox x:Name="comboTrafficRange" Grid.Column="1" HorizontalAlignment="Left" Height="25" Margin="9.6,131,0,0" VerticalAlignment="Top" Width="115"/>
                     <Label Content="Relative height:" HorizontalAlignment="Left" Height="25" Margin="20,176,0,0" VerticalAlignment="Top" Width="105" RenderTransformOrigin="0.573,0.992"/>
                     <ComboBox x:Name="comboTrafficHeight" Grid.Column="1" HorizontalAlignment="Left" Height="25" Margin="9.6,176,0,0" VerticalAlignment="Top" Width="115"/>
-                    <ComboBox x:Name="comboTrafficRelativeHeading" Grid.Column="1" HorizontalAlignment="Left" Height="25" Margin="9.6,226,0,0" VerticalAlignment="Top" Width="235" Grid.ColumnSpan="2"/>
+                    <ComboBox x:Name="comboTrafficRelativeHeading" Grid.Column="1" HorizontalAlignment="Left" Height="25" Margin="9.6,226,0,0" VerticalAlignment="Top" Width="115"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Weather" Name="TabWeather" Background="Black" FontSize="14">
@@ -121,14 +121,17 @@
                         <ColumnDefinition Width="238*"/>
                         <ColumnDefinition Width="392*"/>
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="Button_Set_Weather" Content="Set Weather" Grid.Column="8" HorizontalAlignment="Left" Height="25" Margin="25,30,0,0" VerticalAlignment="Top" IsEnabled="False" Width="135" Click="Button_Set_Weather_Click" RenderTransformOrigin="0.52,-0.171"/>
+                    <Button x:Name="Button_Set_Weather" Content="Set Wind" Grid.Column="2" HorizontalAlignment="Left" Height="25" Margin="31,30,0,0" VerticalAlignment="Top" IsEnabled="False" Width="135" Click="Button_Set_Weather_Click" RenderTransformOrigin="0.52,-0.171" Grid.ColumnSpan="5"/>
                     <Button x:Name="Button_Weather_Test" Content="Get Current Weather" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="135" Click="Button_Weather_Test_Click" Margin="25,616,0,0" Grid.Column="8"/>
-                    <Border BorderBrush="Gray" BorderThickness="3" HorizontalAlignment="Left" Height="370" Margin="20,205,0,0" VerticalAlignment="Top" Width="725" Grid.Column="2" Grid.ColumnSpan="8"/>
+                    <Border BorderBrush="Gray" BorderThickness="3" HorizontalAlignment="Left" Height="415" Margin="20,160,0,0" VerticalAlignment="Top" Width="725" Grid.Column="2" Grid.ColumnSpan="8">
+                        <ListBox x:Name="listWeatherThemes" HorizontalAlignment="Left" Height="309" Margin="16.8,67.8,0,0" VerticalAlignment="Top" Width="670" SelectionChanged="ListWeatherThemes_SelectionChanged"/>
+                    </Border>
                     <Label x:Name="lblWind_0" Content="Surface wind :" HorizontalAlignment="Left" Height="25" Margin="29,110,0,0" VerticalAlignment="Top" Width="105" Grid.ColumnSpan="7" RenderTransformOrigin="0.541,0.217"/>
                     <Slider x:Name="sldWind_0_Spd" Grid.Column="8" HorizontalAlignment="Left" Height="25" Margin="8,110,0,0" VerticalAlignment="Top" Width="220" Maximum="50" LargeChange="5" SmallChange="1" IsSnapToTickEnabled="True" ValueChanged="SldWind_0_Spd_ValueChanged"/>
                     <Slider x:Name="sldWind_0_Dir" Grid.Column="9" HorizontalAlignment="Left" Height="25" Margin="10,110,0,0" VerticalAlignment="Top" Width="220" Maximum="360" SmallChange="5" TickFrequency="5" LargeChange="15" IsSnapToTickEnabled="True" ValueChanged="SldWind_0_Dir_ValueChanged"/>
                     <Label x:Name="lblWind_0_Spd" Content="{Binding ElementName=sldWind_0_Spd, Path=Value}" ContentStringFormat=" {0}  knots" HorizontalAlignment="Left" Height="25" Margin="3,110,0,0" VerticalAlignment="Top" Width="65" Grid.Column="5" Grid.ColumnSpan="3"/>
                     <Label x:Name="lblWind_0_Dir" Content="{Binding ElementName=sldWind_0_Dir, Path=Value}" ContentStringFormat=" {0}  Degrees" HorizontalAlignment="Left" Margin="20,110,0,0" VerticalAlignment="Top" Height="25" Width="85" Grid.Column="7"/>
+                    <Button x:Name="Button_Set_Weather_Theme" Grid.ColumnSpan="2" Content="Set Weather Theme" Grid.Column="7" HorizontalAlignment="Left" Height="25" Margin="19,30,0,0" VerticalAlignment="Top" Width="130" Click="Button_Set_Weather_Theme_Click"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Debug" Background="Black" FontSize="14">

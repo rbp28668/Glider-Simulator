@@ -205,18 +205,16 @@ namespace CGC_Sim_IOS
             {
                 Process tempProc = Process.GetProcessById(proc.Id);
                 tempProc.CloseMainWindow();
-                tempProc.WaitForExit();
+                //tempProc.WaitForExit();
             }
 
         }
 
-        public void WeatherRequest()
+        public void WeatherRequest(float lat, float lng)
         {
             if (simConnection != null)
             {
                 simConnection.WeatherSetModeGlobal();
-                float lat = 0;
-                float lng = 0;
                 simConnection.WeatherRequestObservationAtNearestStation(DataRequestID.Weather_Data, lat, lng);
             }
         }
@@ -226,9 +224,12 @@ namespace CGC_Sim_IOS
             try
             {
                 string newMetar = CurrentMetar.MetarString;
-                System.Console.WriteLine("Put Weather Data: " + newMetar);
-                simConnection.WeatherSetModeGlobal();
+                string oldMetar = CurrentMetar.SetMetarString;
+                //System.Console.WriteLine("Put Orignal Weather Data: " + oldMetar);
                 //simConnection.WeatherSetModeCustom();
+                // simConnection.WeatherSetObservation(0, oldMetar);
+                simConnection.WeatherSetModeGlobal();
+                System.Console.WriteLine("Put New Weather Data: " + newMetar);
                 simConnection.WeatherSetObservation(0, newMetar);
             }
             catch (Exception ex)
@@ -350,7 +351,10 @@ namespace CGC_Sim_IOS
             }
             set
             {
-                subString = value;
+                if (ElementType == MetarElementType.Station_ID && value != "")
+                    subString = value.Substring(0, 4);
+                else
+                    subString = value;
             }
         }
 
@@ -480,6 +484,11 @@ namespace CGC_Sim_IOS
         private string builtMetarString = "";
         private List<string> currentMetarElements = new List<String>();
         private List<MetarElement> metarElements = new List<MetarElement>();
+
+        public string SetMetarString
+        {
+            get { return setMetarString; }
+        } 
 
         public string MetarString
         {
@@ -865,12 +874,12 @@ namespace CGC_Sim_IOS
                 // replace spaces by %20
                 url = url.Replace(" ", "%20");
                 // Should have a complete URL with all the parameters 
-                Console.WriteLine(url);
+                //Console.WriteLine(url);
 
 
                 responseBody = await Run(url);//.Result; 
 
-                Console.WriteLine(responseBody);
+                //Console.WriteLine(responseBody);
 
                 response = parseResult(responseBody);
 
@@ -938,26 +947,6 @@ namespace CGC_Sim_IOS
         {
             string[] cmd = { "position", "set?count=" + count.ToString() };
             RunCmdAsync(cmd);
-        }
-
-        public async Task<int> CMD_Position_Is_OnGround()
-        {
-            int onGround = 0;
-            try
-            {
-                string[] cmd = { "position", "current" };
-                dynamic response = await RunCmdAsync(cmd);
-                Newtonsoft.Json.Linq.JObject jRep = response;
-                if (jRep.Count > 0)
-                {
-                    string val1 = (string)jRep["status"];
-                    onGround = (int)jRep["current"]["on_ground"];
-                }
-            }
-            catch (Exception ex)
-            {
-            }
-            return onGround;
         }
 
 
