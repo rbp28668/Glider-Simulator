@@ -233,7 +233,7 @@ namespace CGC_Sim_IOS
                         numToMinimise--;
                     }
                  }
-                Thread.Sleep(5000);
+                Thread.Sleep(3000);
                 loop++;
             }
             Console.WriteLine(processName + " exiting");
@@ -265,36 +265,13 @@ namespace CGC_Sim_IOS
 
                 p3DAlreadyRunning = true;
                 SimConnect temp = SimConnection;
-                // Toggling Pause twice is a bodge to update the Pause button without changing the state of Pause.
-                Thread.Sleep(5000);
-                simRest.CMD_Pause();
-                Thread.Sleep(1000);
-                simRest.CMD_Pause();
+                // Toggling Pause twice is a bodge to update the Pause button without changing the state of Pause.                Thread.Sleep(5000);
+                //simRest.CMD_Pause();
+                //Thread.Sleep(1000);
+                //simRest.CMD_Pause();
                 UpdateFailureButtons();
 
-                comboTrafficSpeed.ItemsSource = trafficSpeeds;
-                comboTrafficSpeed.DisplayMemberPath = "Description";
-                comboTrafficSpeed.SelectedValuePath = "Speed";
-                comboTrafficSpeed.SelectedIndex = 3;
-
-                comboTrafficRange.ItemsSource = trafficRanges;
-                comboTrafficRange.DisplayMemberPath = "Description";
-                comboTrafficRange.SelectedValuePath = "Range";
-                comboTrafficRange.SelectedIndex = 2;
-
-                comboTrafficHeight.ItemsSource = trafficHeights;
-                comboTrafficHeight.DisplayMemberPath = "Description";
-                comboTrafficHeight.SelectedValuePath = "RelativeHeight";
-                comboTrafficHeight.SelectedIndex = 5;
-
-                comboTrafficRelativeHeading.ItemsSource = trafficHeadings;
-                comboTrafficRelativeHeading.DisplayMemberPath = "Description";
-                comboTrafficRelativeHeading.SelectedValuePath = "RelativeHeight";
-                comboTrafficRelativeHeading.SelectedIndex = 5;
-
-                BuildAircraftList();
-                BuildWeatherThemesList();
-
+ 
             }
         }
 
@@ -714,7 +691,6 @@ namespace CGC_Sim_IOS
                 handleSource = HwndSource.FromHwnd(handle); // Get source of handle in order to add event handlers to it
                 handleSource.AddHook(HandleSimConnectEvents);
                 BuildScenarioLists();
-                Button_Set_Weather_Theme.IsEnabled = false;
                 LaunchP3D();
             }
         }
@@ -753,7 +729,7 @@ namespace CGC_Sim_IOS
 
         private void ListWeatherThemes_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Button_Set_Weather_Theme.IsEnabled = true;
+            //Button_Set_Weather_Theme.IsEnabled = true;
         }
 
 
@@ -764,16 +740,6 @@ namespace CGC_Sim_IOS
 
         }
 
-        private async void Button_Set_Weather_Theme_Click(object sender, RoutedEventArgs e)
-        {
-            Button_Set_Weather_Theme.IsEnabled = false;
-            WeatherTheme theme = (WeatherTheme)listWeatherThemes.SelectedItem;
-            SimConnection.WeatherSetModeCustom();
-            string[] cmd = { "weather", "theme", "name=" + theme.Name };
-            await simRest.RunCmdAsync(cmd);
-            //SimConnection.WeatherSetModeGlobal(); // comment this out to test stuff
-            sim.WeatherRequest(currentLatitude, currentLongitude);
-        }
 
         private void UpdateWeatherControls(Metar metar)
         {
@@ -785,6 +751,12 @@ namespace CGC_Sim_IOS
         private void SldWind_0_Spd_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             sim.CurrentMetar.SurfaceWindSpeed = (int)e.NewValue;
+            Button_Set_Weather.IsEnabled = true;
+        }
+
+        private void SldWind_0_Gst_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            //sim.CurrentMetar.SurfaceWindSpeed = (int)e.NewValue;
             Button_Set_Weather.IsEnabled = true;
         }
 
@@ -804,15 +776,25 @@ namespace CGC_Sim_IOS
             {
                 if (SimConnection != null)
                 {
- //                   SimConnection.WeatherSetModeGlobal(); // comment this out to test stuff
+                    label_gust.Visibility = Visibility.Hidden;
+                    lblWind_0_Gst.Visibility = Visibility.Hidden;
+                    sldWind_0_Gst.Visibility = Visibility.Hidden;
                     sim.WeatherRequest(currentLatitude, currentLongitude);
+                    //BuildWeatherThemesList();
+                }
+            }
+            else if (item.Name == "TabTraffic")
+            {
+                if (SimConnection != null)
+                {
+                    InitialiseTrafficTab();
                 }
             }
         }
 
-    #region slewing
+        #region slewing
 
-    private void Button_Pause_Click(object sender, RoutedEventArgs e)
+        private void Button_Pause_Click(object sender, RoutedEventArgs e)
         {
              SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
         }
@@ -1078,6 +1060,34 @@ namespace CGC_Sim_IOS
         }
 
         #endregion
+
+        private void InitialiseTrafficTab()
+        {
+            if (Traffic_Aircraft.Count == 0)
+            {
+                comboTrafficSpeed.ItemsSource = trafficSpeeds;
+                comboTrafficSpeed.DisplayMemberPath = "Description";
+                comboTrafficSpeed.SelectedValuePath = "Speed";
+                comboTrafficSpeed.SelectedIndex = 3;
+
+                comboTrafficRange.ItemsSource = trafficRanges;
+                comboTrafficRange.DisplayMemberPath = "Description";
+                comboTrafficRange.SelectedValuePath = "Range";
+                comboTrafficRange.SelectedIndex = 2;
+
+                comboTrafficHeight.ItemsSource = trafficHeights;
+                comboTrafficHeight.DisplayMemberPath = "Description";
+                comboTrafficHeight.SelectedValuePath = "RelativeHeight";
+                comboTrafficHeight.SelectedIndex = 4;
+
+                comboTrafficRelativeHeading.ItemsSource = trafficHeadings;
+                comboTrafficRelativeHeading.DisplayMemberPath = "Description";
+                comboTrafficRelativeHeading.SelectedValuePath = "RelativeHeading";
+                comboTrafficRelativeHeading.SelectedIndex = 9;
+
+                BuildAircraftList();
+            }
+        }
 
         private async void BuildAircraftList()
         {
