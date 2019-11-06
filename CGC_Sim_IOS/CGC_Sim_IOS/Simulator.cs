@@ -214,8 +214,9 @@ namespace CGC_Sim_IOS
         {
             if (simConnection != null)
             {
-                simConnection.WeatherSetModeGlobal();
+                //simConnection.WeatherSetModeGlobal();
                 simConnection.WeatherRequestObservationAtNearestStation(DataRequestID.Weather_Data, lat, lng);
+                //simConnection.WeatherRequestObservationAtStation(DataRequestID.Weather_Data,"GLOB");
             }
         }
 
@@ -228,9 +229,13 @@ namespace CGC_Sim_IOS
                 //System.Console.WriteLine("Put Orignal Weather Data: " + oldMetar);
                 //simConnection.WeatherSetModeCustom();
                 // simConnection.WeatherSetObservation(0, oldMetar);
-                simConnection.WeatherSetModeGlobal();
+                //simConnection.WeatherSetModeGlobal();
                 System.Console.WriteLine("Put New Weather Data: " + newMetar);
                 simConnection.WeatherSetObservation(0, newMetar);
+//                simConnection.WeatherSetModeCustom();
+                /*  We need to set the same data at all the local metar stations !!!!!!!!!!!!!!!!!!!!!
+                 *  Check global again
+                 */
             }
             catch (Exception ex)
             {

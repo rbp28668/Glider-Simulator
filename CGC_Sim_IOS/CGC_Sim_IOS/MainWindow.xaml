@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CGC_Sim_IOS"
         mc:Ignorable="d"
-        Title="MainWindow v1.02" Height="656.857" Width="844" SizeToContent="Manual" BorderBrush="IndianRed" Initialized="Window_Initialized" Activated="Window_Activated">
+        Title="MainWindow v1.02" Height="656.857" Width="844" SizeToContent="Manual" BorderBrush="IndianRed" Initialized="Window_Initialized" Activated="Window_Activated" WindowState="Maximized">
     <Grid Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Window}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Window}}}" HorizontalAlignment="Left" Margin="0,0,2.571,-1" VerticalAlignment="Top" RenderTransformOrigin="0.429,0.489" Background="#FF1E1E1E">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="350*"/>
@@ -82,7 +82,6 @@
                     <Button x:Name="Button_Slew_Up" FontFamily="Segoe UI Symbol" Content="&#xE110;" Margin="20,10" FontSize="36" PreviewMouseDown="Button_Slew_Up_PreviewMouseDown" Grid.Column="5" Grid.Row="1" Width="60" Height="60"/>
                     <Button x:Name="Button_Slew_Down" FontFamily="Segoe UI Symbol" Content="&#xE1FD;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.5,0.676" PreviewMouseDown="Button_Slew_Down_PreviewMouseDown" Grid.Column="5" Grid.Row="3" Width="60" Height="60"/>
                     <Button x:Name="Button_Slew_Freeze_Copy" FontFamily="Segoe UI Symbol" Content="&#xE10A;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.5,0.676" PreviewMouseDown="Button_Slew_Freeze_PreviewMouseDown" FontWeight="Bold" Grid.Column="5" Grid.Row="2" Width="60" Height="60"/>
-                    <Button x:Name="Button_Slew" Content="Slew" Height="25" Margin="0,31.4,0,0" VerticalAlignment="Top" Click="Button_Slew_Click" Grid.Column="1" Grid.Row="4"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Traffic" Background="Black" FontSize="14" RenderTransformOrigin="-1.373,0.407" Margin="-0.571,0,-0.429,-0.429">
@@ -124,7 +123,7 @@
                     <Button x:Name="Button_Set_Weather" Content="Set Wind" Grid.Column="2" HorizontalAlignment="Left" Height="25" Margin="31,30,0,0" VerticalAlignment="Top" IsEnabled="False" Width="135" Click="Button_Set_Weather_Click" RenderTransformOrigin="0.52,-0.171" Grid.ColumnSpan="5"/>
                     <Button x:Name="Button_Weather_Test" Content="Get Current Weather" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="135" Click="Button_Weather_Test_Click" Margin="25,616,0,0" Grid.Column="8"/>
                     <Border BorderBrush="Gray" BorderThickness="3" HorizontalAlignment="Left" Height="415" Margin="20,160,0,0" VerticalAlignment="Top" Width="725" Grid.Column="2" Grid.ColumnSpan="8">
-                        <ListBox x:Name="listWeatherThemes" HorizontalAlignment="Left" Height="309" Margin="16.8,67.8,0,0" VerticalAlignment="Top" Width="670" SelectionChanged="ListWeatherThemes_SelectionChanged"/>
+                        <ListBox x:Name="listWeatherThemes" HorizontalAlignment="Left" Height="75" Margin="21.8,16.8,0,0" VerticalAlignment="Top" Width="670" SelectionChanged="ListWeatherThemes_SelectionChanged" RenderTransformOrigin="0.5,-0.059" Visibility="Hidden"/>
                     </Border>
                     <Label x:Name="lblWind_0" Content="Surface wind :" HorizontalAlignment="Left" Height="25" Margin="29,110,0,0" VerticalAlignment="Top" Width="105" Grid.ColumnSpan="7" RenderTransformOrigin="0.541,0.217"/>
                     <Slider x:Name="sldWind_0_Spd" Grid.Column="8" HorizontalAlignment="Left" Height="25" Margin="8,110,0,0" VerticalAlignment="Top" Width="220" Maximum="50" LargeChange="5" SmallChange="1" IsSnapToTickEnabled="True" ValueChanged="SldWind_0_Spd_ValueChanged"/>

@@ -266,6 +266,7 @@ namespace CGC_Sim_IOS
                 p3DAlreadyRunning = true;
                 SimConnect temp = SimConnection;
                 // Toggling Pause twice is a bodge to update the Pause button without changing the state of Pause.
+                Thread.Sleep(5000);
                 simRest.CMD_Pause();
                 Thread.Sleep(1000);
                 simRest.CMD_Pause();
@@ -714,9 +715,8 @@ namespace CGC_Sim_IOS
                 handleSource.AddHook(HandleSimConnectEvents);
                 BuildScenarioLists();
                 Button_Set_Weather_Theme.IsEnabled = false;
-
+                LaunchP3D();
             }
-            LaunchP3D();
         }
 
         private async void BuildWeatherThemesList()
@@ -768,6 +768,7 @@ namespace CGC_Sim_IOS
         {
             Button_Set_Weather_Theme.IsEnabled = false;
             WeatherTheme theme = (WeatherTheme)listWeatherThemes.SelectedItem;
+            SimConnection.WeatherSetModeCustom();
             string[] cmd = { "weather", "theme", "name=" + theme.Name };
             await simRest.RunCmdAsync(cmd);
             //SimConnection.WeatherSetModeGlobal(); // comment this out to test stuff
@@ -803,7 +804,7 @@ namespace CGC_Sim_IOS
             {
                 if (SimConnection != null)
                 {
-                    SimConnection.WeatherSetModeGlobal(); // comment this out to test stuff
+ //                   SimConnection.WeatherSetModeGlobal(); // comment this out to test stuff
                     sim.WeatherRequest(currentLatitude, currentLongitude);
                 }
             }
