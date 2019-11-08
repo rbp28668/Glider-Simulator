@@ -231,7 +231,7 @@ namespace CGC_Sim_IOS
                 // simConnection.WeatherSetObservation(0, oldMetar);
                 //simConnection.WeatherSetModeGlobal();
                 System.Console.WriteLine("Put New Weather Data: " + newMetar);
-                simConnection.WeatherSetObservation(0, newMetar);
+                simConnection.WeatherSetObservation(10, newMetar);
 //                simConnection.WeatherSetModeCustom();
                 /*  We need to set the same data at all the local metar stations !!!!!!!!!!!!!!!!!!!!!
                  *  Check global again

@@ -103,7 +103,7 @@ namespace CGC_Sim_IOS
             {
                 if (sim.SimConnection == null)
                 {
-                    if (p3DAlreadyRunning)
+                    if (!p3DAlreadyRunning)
                     {
                         if (sim.OpenSimConnection(handle))
                         {
@@ -233,7 +233,7 @@ namespace CGC_Sim_IOS
                         numToMinimise--;
                     }
                  }
-                Thread.Sleep(3000);
+                Thread.Sleep(5000);
                 loop++;
             }
             Console.WriteLine(processName + " exiting");
@@ -251,6 +251,7 @@ namespace CGC_Sim_IOS
 
             if (!p3DAlreadyRunning)
             {
+                //p3DAlreadyRunning = true;
                 Thread closeWinchXDialog = new Thread(closeWinchXDialogTask);
                 closeWinchXDialog.Start();
 
@@ -263,7 +264,6 @@ namespace CGC_Sim_IOS
                 Thread minimiseP3DToPDA = new Thread(minimiseTask);
                 minimiseP3DToPDA.Start("P3DToPDA");
 
-                p3DAlreadyRunning = true;
                 SimConnect temp = SimConnection;
                 // Toggling Pause twice is a bodge to update the Pause button without changing the state of Pause.                Thread.Sleep(5000);
                 //simRest.CMD_Pause();
@@ -337,8 +337,13 @@ namespace CGC_Sim_IOS
 
                     SimConnection.OnRecvSimobjectDataBytype += new SimConnect.RecvSimobjectDataBytypeEventHandler(SimCon_OnRecvSimobjectDataBytype);
                     SimConnection.MapClientEventToSimEvent(EVENTS.PAUSE_TOGGLE, "PAUSE_TOGGLE");
+
                     SimConnection.MapClientEventToSimEvent(EVENTS.SLEW, "SLEW_TOGGLE");
+                    SimConnection.AddClientEventToNotificationGroup(GROUP_IDS.GROUP_1, EVENTS.SLEW, false);
+
                     SimConnection.MapClientEventToSimEvent(EVENTS.SLEW_FREEZE, "SLEW_FREEZE");
+                    SimConnection.AddClientEventToNotificationGroup(GROUP_IDS.GROUP_1, EVENTS.SLEW_FREEZE, false);
+
                     SimConnection.MapClientEventToSimEvent(EVENTS.SLEW_LEFT, "SLEW_LEFT");
                     SimConnection.MapClientEventToSimEvent(EVENTS.SLEW_RIGHT, "SLEW_RIGHT");
                     SimConnection.MapClientEventToSimEvent(EVENTS.SLEW_AHEAD_PLUS, "SLEW_AHEAD_PLUS");
@@ -475,6 +480,12 @@ namespace CGC_Sim_IOS
                 case (uint)EVENTS.TOW_PLANE_REQUEST:
                     System.Console.WriteLine("Tow plane request");
                      break;
+                case (uint)EVENTS.SLEW:
+                    System.Console.WriteLine("Slew toggle");
+                    break;
+                case (uint)EVENTS.SLEW_FREEZE:
+                    System.Console.WriteLine("Slew freeze");
+                    break;
                 case (uint)EVENTS.PAUSE:
                     if (recEvent.dwData == 1)
                     {
@@ -823,7 +834,7 @@ namespace CGC_Sim_IOS
             }
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW_FREEZE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.SLEW, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
-        }
+    }
 
         private void Button_Slew_Click(object sender, RoutedEventArgs e)
         {
