@@ -66,6 +66,11 @@ namespace CGC_Sim_IOS
         private float currentLatitude = 0.0f;
         private float currentLongitude = 0.0f;
 
+        private Thread closeWinchXDialog = null;
+        private Thread minimiseP3DControl = null;
+        private Thread minimiseP3DInstruments1 = null;
+        private Thread minimiseP3DToPDA = null;
+
         private List<Scenario> Scenarios = new List<Scenario>();
         private List<String> Scenario_Airfields = new List<String>();
         private List<Scenario> Scenarios_For_Airfield = new List<Scenario>();
@@ -156,7 +161,7 @@ namespace CGC_Sim_IOS
             trafficHeights.Add(new TrafficHeight(-500));
             trafficHeights.Add(new TrafficHeight(-1000));
 
-            for (int heading = -90; heading <= 90; heading += 10)
+            for (int heading = -180; heading <= 180; heading += 10)
             {
                 trafficHeadings.Add(new TrafficHeading(heading));
             }
@@ -176,7 +181,8 @@ namespace CGC_Sim_IOS
             CloseSimConnection();
             sim.KillP3D();
             p3DAlreadyRunning = false;
-#endif 
+#endif
+
             if (handleSource != null)
             {
                 handleSource.RemoveHook(HandleSimConnectEvents);
@@ -188,8 +194,9 @@ namespace CGC_Sim_IOS
         private void closeWinchXDialogTask(object obj)
         {
             bool closed = false;
-            int loop = 0;
-            while (closed == false && loop < 10)
+            int loopCount = 0;
+            int time = 5000;
+            do
             {
                 Process[] p = Process.GetProcessesByName("WinchX");
                 if (p.Count() > 0)
@@ -202,10 +209,11 @@ namespace CGC_Sim_IOS
                         Console.WriteLine("WinchX dialog closed");
                     }
                     closed = true;
+                    time = 15000;
                 }
-                Thread.Sleep(5000);
-                loop++;
-            }
+                Thread.Sleep(time);
+                loopCount++;
+            } while (true);
         }
 
         private void minimiseTask(object obj)
@@ -252,16 +260,16 @@ namespace CGC_Sim_IOS
             if (!p3DAlreadyRunning)
             {
                 //p3DAlreadyRunning = true;
-                Thread closeWinchXDialog = new Thread(closeWinchXDialogTask);
+                closeWinchXDialog = new Thread(closeWinchXDialogTask);
                 closeWinchXDialog.Start();
 
-                Thread minimiseP3DControl = new Thread(minimiseTask);
+                minimiseP3DControl = new Thread(minimiseTask);
                 minimiseP3DControl.Start("P3DControl");
 
-                Thread minimiseP3DInstruments1 = new Thread(minimiseTask);
+                minimiseP3DInstruments1 = new Thread(minimiseTask);
                 minimiseP3DInstruments1.Start("P3DInstruments");
 
-                Thread minimiseP3DToPDA = new Thread(minimiseTask);
+                minimiseP3DToPDA = new Thread(minimiseTask);
                 minimiseP3DToPDA.Start("P3DToPDA");
 
                 SimConnect temp = SimConnection;
@@ -1094,7 +1102,7 @@ namespace CGC_Sim_IOS
                 comboTrafficRelativeHeading.ItemsSource = trafficHeadings;
                 comboTrafficRelativeHeading.DisplayMemberPath = "Description";
                 comboTrafficRelativeHeading.SelectedValuePath = "RelativeHeading";
-                comboTrafficRelativeHeading.SelectedIndex = 9;
+                comboTrafficRelativeHeading.SelectedIndex = 18;
 
                 BuildAircraftList();
             }
@@ -1151,7 +1159,14 @@ namespace CGC_Sim_IOS
             //traffic_Aircraft = e.AddedItems[0].ToString();
         }
 
-      }
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            closeWinchXDialog.Abort();
+            minimiseP3DControl.Abort();
+            minimiseP3DInstruments1.Abort();
+            minimiseP3DToPDA.Abort();
+        }
+    }
 
 
 
