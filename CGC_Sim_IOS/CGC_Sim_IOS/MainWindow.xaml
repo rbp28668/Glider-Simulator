@@ -53,37 +53,6 @@
                     <Button x:Name="Button_Load_Scenario" Content="Load" Grid.Column="3" HorizontalAlignment="Left" Height="40" Margin="399,42,0,0" VerticalAlignment="Top" Width="200" Click="Button_Load_Scenario_Click" IsEnabled="{Binding ElementName=listScenariosForAirField,Path=SelectedItems.Count}" Grid.ColumnSpan="2"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Slew" Background="Black" FontSize="20" RenderTransformOrigin="-1.373,0.407" Margin="-0.571,0,-0.429,-0.429">
-                <Grid Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Grid}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Grid}}}" HorizontalAlignment="Left" VerticalAlignment="Top" Background="#FF1E1E1E" OpacityMask="Black" Margin="0,-1,0,-384.286">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
-                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
-                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
-                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
-                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
-                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
-                        <ColumnDefinition Width="150*" MinWidth="150"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition MinHeight="50" MaxHeight ="50"/>
-                        <RowDefinition MinHeight="150" MaxHeight ="150"/>
-                        <RowDefinition MinHeight="150" MaxHeight ="150"/>
-                        <RowDefinition MinHeight="150" MaxHeight ="150"/>
-                        <RowDefinition MinHeight="150" MaxHeight ="150"/>
-                        <RowDefinition MinHeight="10"/>
-                    </Grid.RowDefinitions>
-                    <Button x:Name="Button_Slew_Forward" FontFamily="Segoe UI Symbol" Content="&#xE110;" Margin="20,10" FontSize="36" PreviewMouseDown="Button_Slew_Forward_PreviewMouseDown" Grid.Column="2" Grid.Row="1" Width="80" Height="80"/>
-                    <Button x:Name="Button_Slew_Backwards" FontFamily="Segoe UI Symbol" Content="&#xE1FD;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.5,0.676" PreviewMouseDown="Button_Slew_Backwards_PreviewMouseDown" Grid.Column="2" Grid.Row="3" Width="80" Height="80"/>
-                    <Button x:Name="Button_Slew_Right" FontFamily="Segoe UI Symbol" Content="&#xE111;" Margin="20,10" FontSize="36" RenderTransformOrigin="1,0.602" PreviewMouseDown="Button_Slew_Right_PreviewMouseDown" Grid.Column="3" Grid.Row="2" Width="80" Height="80"/>
-                    <Button x:Name="Button_Slew_Left" FontFamily="Segoe UI Symbol" Content="&#xE112;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.495,1.329" PreviewMouseDown="Button_Slew_Left_PreviewMouseDown" Grid.Row="2" Grid.Column="1" Width="80" Height="80"/>
-                    <Button x:Name="Button_Slew_Freeze" FontFamily="Segoe UI Symbol" Content="&#xE10A;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.5,0.676" PreviewMouseDown="Button_Slew_Freeze_PreviewMouseDown" FontWeight="Bold" Grid.Column="2" Grid.Row="2" Width="80" Height="80"/>
-                    <Button x:Name="Button_Slew_Rotate_Right" FontFamily="Segoe UI Symbol" Content="&#xE10D;" Margin="20,10" FontSize="36" PreviewMouseDown="Button_Slew_Right_PreviewMouseDown" RenderTransformOrigin="-0.833,0.5" Grid.Column="3" Grid.Row="1" Width="80" Height="80"/>
-                    <Button x:Name="Button_Slew_Rotate_Left" FontFamily="Segoe UI Symbol" Content="&#xE10E;" Margin="20,10" FontSize="36" PreviewMouseDown="Button_Slew_Left_PreviewMouseDown" RenderTransformOrigin="-0.833,0.5" Grid.Column="1" Grid.Row="1" Width="80" Height="80"/>
-                    <Button x:Name="Button_Slew_Up" FontFamily="Segoe UI Symbol" Content="&#xE110;" Margin="20,10" FontSize="36" PreviewMouseDown="Button_Slew_Up_PreviewMouseDown" Grid.Column="5" Grid.Row="1" Width="80" Height="80"/>
-                    <Button x:Name="Button_Slew_Down" FontFamily="Segoe UI Symbol" Content="&#xE1FD;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.5,0.676" PreviewMouseDown="Button_Slew_Down_PreviewMouseDown" Grid.Column="5" Grid.Row="3" Width="80" Height="80"/>
-                    <Button x:Name="Button_Slew_Freeze_Copy" FontFamily="Segoe UI Symbol" Content="&#xE10A;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.5,0.676" PreviewMouseDown="Button_Slew_Freeze_PreviewMouseDown" FontWeight="Bold" Grid.Column="5" Grid.Row="2" Width="80" Height="80"/>
-                </Grid>
-            </TabItem>
             <TabItem Header="Traffic" Name ="TabTraffic" Background="Black" FontSize="20" RenderTransformOrigin="-1.373,0.407" Margin="-0.571,0,-0.429,-0.429">
                 <Grid Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Grid}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Grid}}}" HorizontalAlignment="Left" VerticalAlignment="Top" Background="#FF1E1E1E" OpacityMask="Black" Margin="1,-1,-0.8,-384.286">
                     <Grid.ColumnDefinitions>
@@ -126,6 +95,37 @@
                     <Label Grid.ColumnSpan="3" Content="Surface wind direction:" HorizontalAlignment="Left" Height="40" Margin="35,102,0,0" VerticalAlignment="Top" Width="210"/>
                     <Label Content="Surface wind speed" HorizontalAlignment="Left" Height="40" Margin="35,162,0,0" VerticalAlignment="Top" Width="210" RenderTransformOrigin="0.966,0.608" Grid.Column="2"/>
                     <Label x:Name="label_gust" Content="Surface wind gusts" HorizontalAlignment="Left" Height="40" Margin="35,222,0,0" VerticalAlignment="Top" Width="210" RenderTransformOrigin="0.966,0.608" Grid.Column="2"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Slew" Background="Black" FontSize="20" RenderTransformOrigin="-1.373,0.407" Margin="-0.571,0,-0.429,-0.429">
+                <Grid Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Grid}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Grid}}}" HorizontalAlignment="Left" VerticalAlignment="Top" Background="#FF1E1E1E" OpacityMask="Black" Margin="0,-1,0,-384.286">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
+                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
+                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
+                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
+                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
+                        <ColumnDefinition Width="150*" MinWidth="150" MaxWidth="150"/>
+                        <ColumnDefinition Width="150*" MinWidth="150"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition MinHeight="50" MaxHeight ="50"/>
+                        <RowDefinition MinHeight="150" MaxHeight ="150"/>
+                        <RowDefinition MinHeight="150" MaxHeight ="150"/>
+                        <RowDefinition MinHeight="150" MaxHeight ="150"/>
+                        <RowDefinition MinHeight="150" MaxHeight ="150"/>
+                        <RowDefinition MinHeight="10"/>
+                    </Grid.RowDefinitions>
+                    <Button x:Name="Button_Slew_Forward" FontFamily="Segoe UI Symbol" Content="&#xE110;" Margin="20,10" FontSize="36" PreviewMouseDown="Button_Slew_Forward_PreviewMouseDown" Grid.Column="2" Grid.Row="1" Width="80" Height="80"/>
+                    <Button x:Name="Button_Slew_Backwards" FontFamily="Segoe UI Symbol" Content="&#xE1FD;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.5,0.676" PreviewMouseDown="Button_Slew_Backwards_PreviewMouseDown" Grid.Column="2" Grid.Row="3" Width="80" Height="80"/>
+                    <Button x:Name="Button_Slew_Right" FontFamily="Segoe UI Symbol" Content="&#xE111;" Margin="20,10" FontSize="36" RenderTransformOrigin="1,0.602" PreviewMouseDown="Button_Slew_Right_PreviewMouseDown" Grid.Column="3" Grid.Row="2" Width="80" Height="80"/>
+                    <Button x:Name="Button_Slew_Left" FontFamily="Segoe UI Symbol" Content="&#xE112;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.495,1.329" PreviewMouseDown="Button_Slew_Left_PreviewMouseDown" Grid.Row="2" Grid.Column="1" Width="80" Height="80"/>
+                    <Button x:Name="Button_Slew_Freeze" FontFamily="Segoe UI Symbol" Content="&#xE10A;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.5,0.676" PreviewMouseDown="Button_Slew_Freeze_PreviewMouseDown" FontWeight="Bold" Grid.Column="2" Grid.Row="2" Width="80" Height="80"/>
+                    <Button x:Name="Button_Slew_Rotate_Right" FontFamily="Segoe UI Symbol" Content="&#xE10D;" Margin="20,10" FontSize="36" PreviewMouseDown="Button_Slew_Right_PreviewMouseDown" RenderTransformOrigin="-0.833,0.5" Grid.Column="3" Grid.Row="1" Width="80" Height="80"/>
+                    <Button x:Name="Button_Slew_Rotate_Left" FontFamily="Segoe UI Symbol" Content="&#xE10E;" Margin="20,10" FontSize="36" PreviewMouseDown="Button_Slew_Left_PreviewMouseDown" RenderTransformOrigin="-0.833,0.5" Grid.Column="1" Grid.Row="1" Width="80" Height="80"/>
+                    <Button x:Name="Button_Slew_Up" FontFamily="Segoe UI Symbol" Content="&#xE110;" Margin="20,10" FontSize="36" PreviewMouseDown="Button_Slew_Up_PreviewMouseDown" Grid.Column="5" Grid.Row="1" Width="80" Height="80"/>
+                    <Button x:Name="Button_Slew_Down" FontFamily="Segoe UI Symbol" Content="&#xE1FD;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.5,0.676" PreviewMouseDown="Button_Slew_Down_PreviewMouseDown" Grid.Column="5" Grid.Row="3" Width="80" Height="80"/>
+                    <Button x:Name="Button_Slew_Freeze_Copy" FontFamily="Segoe UI Symbol" Content="&#xE10A;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.5,0.676" PreviewMouseDown="Button_Slew_Freeze_PreviewMouseDown" FontWeight="Bold" Grid.Column="5" Grid.Row="2" Width="80" Height="80"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Tools" Background="Black" FontSize="20">
