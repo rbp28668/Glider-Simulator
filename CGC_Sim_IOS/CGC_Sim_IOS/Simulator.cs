@@ -379,6 +379,8 @@ namespace CGC_Sim_IOS
         public int DepthInMeters { get; set; } = 3000;
         public string Units { get; set; } = "";
         private List<String> extensions = new List<String>();
+        public string Turbulance { get; set; } = "";
+        public string Shear { get; set; } = "";
 
         public string MetarString
         {
@@ -443,7 +445,7 @@ namespace CGC_Sim_IOS
             get
             {
                 string value = "";
-                if (extensions.Count == 3)
+                if (extensions.Count == 4)
                 {
                     value += extensions[0];
                     if (DepthInMeters > 0)
@@ -454,7 +456,10 @@ namespace CGC_Sim_IOS
                     {
                         value += extensions[1];
                     }
-                    value += extensions[2];
+                    //value += extensions[2];
+                    //value += extensions[3];
+                    value += Turbulance;
+                    value += Shear;
                 }
                 else
                 {
@@ -472,7 +477,12 @@ namespace CGC_Sim_IOS
                 {
                     extensions.Add(value.Substring(0, 2));
                     extensions.Add(value.Substring(2, value.Length - 4));
-                    extensions.Add(value.Substring(value.Length - 2));
+                    string turbulance = value.Substring(value.Length - 2, 1);
+                    extensions.Add(turbulance);
+                    string shear = value.Substring(value.Length - 3, 1);
+                    extensions.Add(shear);
+                    Turbulance = turbulance;
+                    Shear = shear;
                 }
             }
         }
@@ -537,36 +547,38 @@ namespace CGC_Sim_IOS
             }
         }
 
+        private MetarWind GetFirstMetarWindElement()
+        {
+            if (metarElements.Count > 0)
+            {
+                foreach (var item in metarElements)
+                {
+                    if (item.ElementType == MetarElementType.SurfaceWind)
+                    {
+                        MetarWind mwItem = (MetarWind)item;
+                        return mwItem;
+                    }
+                }
+            }
+            return null;
+        }
+
+
         public int SurfaceWindSpeed
         {
             get
             {
-                if (metarElements.Count > 0)
-                {
-                    foreach (var item in metarElements)
-                    {
-                        if (item.ElementType == MetarElementType.SurfaceWind)
-                        {
-                            MetarWind mwItem = (MetarWind)item;
-                            return mwItem.Speed;
-                        }
-                    }
-                }
-                return 0;
+                int speed = 0;
+                MetarWind mwItem = GetFirstMetarWindElement();
+                if (mwItem != null)
+                    speed = mwItem.Speed;
+                return speed;
             }
             set
             {
-                if (metarElements.Count > 0)
-                {
-                    foreach (var item in metarElements)
-                    {
-                        if (item.ElementType == MetarElementType.SurfaceWind)
-                        {
-                            MetarWind mwItem = (MetarWind)item;
-                            mwItem.Speed = value;
-                        }
-                    }
-                }
+                MetarWind mwItem = GetFirstMetarWindElement();
+                if (mwItem != null)
+                    mwItem.Speed = value;
             }
         }
 
@@ -574,32 +586,17 @@ namespace CGC_Sim_IOS
         {
             get
             {
-                if (metarElements.Count > 0)
-                {
-                    foreach (var item in metarElements)
-                    {
-                        if (item.ElementType == MetarElementType.SurfaceWind)
-                        {
-                            MetarWind mwItem = (MetarWind)item;
-                            return mwItem.Direction;
-                        }
-                    }
-                }
-                return 0;
+                int direction = 0;
+                MetarWind mwItem = GetFirstMetarWindElement();
+                if (mwItem != null)
+                    direction = mwItem.Direction;
+                return direction;
             }
             set
             {
-                if (metarElements.Count > 0)
-                {
-                    foreach (var item in metarElements)
-                    {
-                        if (item.ElementType == MetarElementType.SurfaceWind)
-                        {
-                            MetarWind mwItem = (MetarWind)item;
-                            mwItem.Direction = value;
-                        }
-                    }
-                }
+                MetarWind mwItem = GetFirstMetarWindElement();
+                if (mwItem != null)
+                    mwItem.Direction = value;
             }
         }
 
@@ -607,34 +604,38 @@ namespace CGC_Sim_IOS
         {
             get
             {
-                if (metarElements.Count > 0)
-                {
-                    foreach (var item in metarElements)
-                    {
-                        if (item.ElementType == MetarElementType.SurfaceWind)
-                        {
-                            MetarWind mwItem = (MetarWind)item;
-                            return mwItem.Gust;
-                        }
-                    }
-                }
-                return 0;
+                int gust = 0;
+                MetarWind mwItem = GetFirstMetarWindElement();
+                if (mwItem != null)
+                    gust = mwItem.Gust;
+                return gust;
             }
             set
             {
-                if (metarElements.Count > 0)
-                {
-                    foreach (var item in metarElements)
-                    {
-                        if (item.ElementType == MetarElementType.SurfaceWind)
-                        {
-                            MetarWind mwItem = (MetarWind)item;
-                            mwItem.Gust = value;
-                        }
-                    }
-                }
+                MetarWind mwItem = GetFirstMetarWindElement();
+                if (mwItem != null)
+                    mwItem.Gust = value;
             }
         }
+
+        public string SurfaceWindTurbulance
+        {
+            get
+            {
+                string turbulance ="";
+                MetarWind mwItem = GetFirstMetarWindElement();
+                if (mwItem != null)
+                    turbulance = mwItem.Turbulance;
+                return turbulance;
+            }
+            set
+            {
+                MetarWind mwItem = GetFirstMetarWindElement();
+                if (mwItem != null)
+                    mwItem.Turbulance = value;
+            }
+        }
+
 
         private bool IsWindSpeedEntry(string entry, out string units)
         {
@@ -671,6 +672,7 @@ namespace CGC_Sim_IOS
             }
             return bRc;
         }
+
 
         private void ParseCurrentMetarElements()
         {

@@ -95,6 +95,8 @@
                     <Label Grid.ColumnSpan="3" Content="Surface wind direction:" HorizontalAlignment="Left" Height="40" Margin="35,102,0,0" VerticalAlignment="Top" Width="210"/>
                     <Label Content="Surface wind speed" HorizontalAlignment="Left" Height="40" Margin="35,162,0,0" VerticalAlignment="Top" Width="210" RenderTransformOrigin="0.966,0.608" Grid.Column="2"/>
                     <Label x:Name="label_gust" Content="Surface wind gusts" HorizontalAlignment="Left" Height="40" Margin="35,222,0,0" VerticalAlignment="Top" Width="210" RenderTransformOrigin="0.966,0.608" Grid.Column="2"/>
+                    <Label x:Name="label_gust_Copy" Content="Turbulance" HorizontalAlignment="Left" Height="40" Margin="35,282,0,0" VerticalAlignment="Top" Width="210" RenderTransformOrigin="0.966,0.608" Grid.Column="2"/>
+                    <ComboBox x:Name="comboWindTurbulance" Grid.ColumnSpan="3" HorizontalAlignment="Left" Height="40" Margin="315,282,0,0" VerticalAlignment="Top" Width="240" SelectionChanged="ComboWindTurbulance_SelectionChanged"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Slew" Background="Black" FontSize="20" RenderTransformOrigin="-1.373,0.407" Margin="-0.571,0,-0.429,-0.429">

@@ -58,6 +58,7 @@ namespace CGC_Sim_IOS
         private bool rewindActive = false;
 
         private bool trafficTabInit = false;
+        private string lastTabName = "";
 
         private bool statusOnGround = true;
         private bool statusAerotowRequested = false;
@@ -84,8 +85,9 @@ namespace CGC_Sim_IOS
         private List<TrafficHeight> trafficHeights = new List<TrafficHeight>();
         private List<TrafficHeading> trafficHeadings = new List<TrafficHeading>();
         private List<WeatherTheme> weatherThemes = new List<WeatherTheme>();
+        private List<WeatherTurbulance> weatherTurbulances = new List<WeatherTurbulance>();
 
-        
+
 
 
 
@@ -167,7 +169,18 @@ namespace CGC_Sim_IOS
             {
                 trafficHeadings.Add(new TrafficHeading(heading));
             }
-            
+
+
+            weatherTurbulances.Add(new WeatherTurbulance("N"));
+            weatherTurbulances.Add(new WeatherTurbulance("L"));
+            weatherTurbulances.Add(new WeatherTurbulance("M"));
+            weatherTurbulances.Add(new WeatherTurbulance("H"));
+            weatherTurbulances.Add(new WeatherTurbulance("S"));
+
+            comboWindTurbulance.ItemsSource = weatherTurbulances;
+            comboWindTurbulance.DisplayMemberPath = "Description";
+            comboWindTurbulance.SelectedValuePath = "MetarLetter";
+
 
 #if (DEBUG)
 #else
@@ -767,6 +780,7 @@ namespace CGC_Sim_IOS
             sldWind_0_Dir.Value = metar.SurfaceWindDirection;
             sldWind_0_Spd.Value = metar.SurfaceWindSpeed;
             sldWind_0_Gst.Value = metar.SurfaceWindGust;
+            comboWindTurbulance.SelectedValue = metar.SurfaceWindTurbulance;
             Button_Set_Weather.IsEnabled = true;
         }
 
@@ -800,24 +814,37 @@ namespace CGC_Sim_IOS
             Button_Set_Weather.IsEnabled = true;
         }
 
-        #endregion 
+        private void ComboWindTurbulance_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            WeatherTurbulance item = (WeatherTurbulance)(e.AddedItems[0]);
+            sim.CurrentMetar.SurfaceWindTurbulance = item.MetarLetter;
+            Button_Set_Weather.IsEnabled = true;
+        }
+
+        #endregion
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             System.Windows.Controls.TabControl tabControl = sender as System.Windows.Controls.TabControl; // e.Source could have been used instead of sender as well
             TabItem item = tabControl.SelectedValue as TabItem;
-            if (item.Name == "TabWeather")
+
+            if (lastTabName != item.Name)
             {
-                if (SimConnection != null)
+                lastTabName = item.Name;
+
+                if (item.Name == "TabWeather")
                 {
-                    sim.WeatherRequest(currentLatitude, currentLongitude);
+                    if (SimConnection != null)
+                    {
+                        sim.WeatherRequest(currentLatitude, currentLongitude);
+                    }
                 }
-            }
-            else if (item.Name == "TabTraffic")
-            {
-                if (SimConnection != null)
+                else if (item.Name == "TabTraffic")
                 {
-                    InitialiseTrafficTab();
+                    if (SimConnection != null)
+                    {
+                        InitialiseTrafficTab();
+                    }
                 }
             }
         }
@@ -1199,6 +1226,7 @@ namespace CGC_Sim_IOS
             }
 #endif
         }
+
     }
 
     public class TextBoxOutputter : TextWriter
@@ -1300,6 +1328,48 @@ namespace CGC_Sim_IOS
             Description = description;
         }
     }
+
+
+    public class WeatherTurbulance
+    {
+        public string Description
+        {
+            get
+            {
+                string dsc = "";
+                switch (MetarLetter)
+                {
+                    case "N":
+                        dsc = "None";
+                        break;
+                    case "L":
+                        dsc = "Light";
+                        break;
+                    case "O":
+                        dsc = "Light";
+                        break;
+                    case "M":
+                        dsc = "Moderate";
+                        break;
+                    case "H":
+                        dsc = "Heavy";
+                        break;
+                    case "S":
+                        dsc = "Severe";
+                        break;
+                }
+                return dsc;
+            }
+        }
+
+        public string MetarLetter { get; set; }
+
+        public WeatherTurbulance(string metarLetter)
+        {
+            MetarLetter = metarLetter;
+        }
+    }
+
 
 }
 
