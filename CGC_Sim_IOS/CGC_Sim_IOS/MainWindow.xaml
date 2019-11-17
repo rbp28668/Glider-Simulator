@@ -48,7 +48,7 @@
                         <ColumnDefinition Width="0"/>
                         <ColumnDefinition Width="671*"/>
                     </Grid.ColumnDefinitions>
-                    <ComboBox x:Name="comboAirfields" HorizontalAlignment="Left" Height="40" Margin="4.8,42,0,0" VerticalAlignment="Top" Width="519" IsSynchronizedWithCurrentItem="False" SelectionChanged="ComboAirfields_SelectionChanged" Grid.ColumnSpan="4" Grid.Column="1"/>
+                    <ComboBox x:Name="comboAirfields" HorizontalAlignment="Left" Height="40" Margin="4.8,42,0,0" VerticalAlignment="Top" Width="519" IsSynchronizedWithCurrentItem="False" SelectionChanged="ComboAirfields_SelectionChanged" Grid.ColumnSpan="4" Grid.Column="1" MaxDropDownHeight="700"/>
                     <ListBox x:Name="listScenariosForAirField" HorizontalAlignment="Left" Height="504" Margin="5.8,98,0,0" VerticalAlignment="Top" Width="742" RenderTransformOrigin="0.5,0.781" Grid.ColumnSpan="4" SelectionChanged="ListScenariosForAirField_SelectionChanged" Grid.Column="1"/>
                     <Button x:Name="Button_Load_Scenario" Content="Load" Grid.Column="3" HorizontalAlignment="Left" Height="40" Margin="399,42,0,0" VerticalAlignment="Top" Width="200" Click="Button_Load_Scenario_Click" IsEnabled="{Binding ElementName=listScenariosForAirField,Path=SelectedItems.Count}" Grid.ColumnSpan="2"/>
                 </Grid>
