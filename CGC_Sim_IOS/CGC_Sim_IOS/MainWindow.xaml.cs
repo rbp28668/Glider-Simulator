@@ -764,6 +764,7 @@ namespace CGC_Sim_IOS
         {
             sldWind_0_Dir.Value = metar.SurfaceWindDirection;
             sldWind_0_Spd.Value = metar.SurfaceWindSpeed;
+            sldWind_0_Gst.Value = metar.SurfaceWindGust;
             Button_Set_Weather.IsEnabled = true;
         }
 
@@ -771,12 +772,24 @@ namespace CGC_Sim_IOS
         {
             sim.CurrentMetar.SurfaceWindSpeed = (int)e.NewValue;
             Button_Set_Weather.IsEnabled = true;
+            // Adjust wind slider if necessary
+            if (sim.CurrentMetar.SurfaceWindSpeed > sim.CurrentMetar.SurfaceWindGust)
+            {
+                sim.CurrentMetar.SurfaceWindGust = sim.CurrentMetar.SurfaceWindSpeed;
+                sldWind_0_Gst.Value = sim.CurrentMetar.SurfaceWindGust;
+            }
         }
 
         private void SldWind_0_Gst_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            //sim.CurrentMetar.SurfaceWindSpeed = (int)e.NewValue;
+            sim.CurrentMetar.SurfaceWindGust = (int)e.NewValue;
             Button_Set_Weather.IsEnabled = true;
+            // Adjust wind slider if necessary
+            if (sim.CurrentMetar.SurfaceWindGust < sim.CurrentMetar.SurfaceWindSpeed)
+            {
+                sim.CurrentMetar.SurfaceWindSpeed = sim.CurrentMetar.SurfaceWindGust;
+                sldWind_0_Spd.Value = sim.CurrentMetar.SurfaceWindSpeed;
+            }
         }
 
         private void SldWind_0_Dir_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -795,11 +808,13 @@ namespace CGC_Sim_IOS
             {
                 if (SimConnection != null)
                 {
+#if (DEBUG)
+#else
                     label_gust.Visibility = Visibility.Hidden;
                     lblWind_0_Gst.Visibility = Visibility.Hidden;
                     sldWind_0_Gst.Visibility = Visibility.Hidden;
+#endif
                     sim.WeatherRequest(currentLatitude, currentLongitude);
-                    //BuildWeatherThemesList();
                 }
             }
             else if (item.Name == "TabTraffic")
