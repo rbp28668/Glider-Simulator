@@ -1176,6 +1176,12 @@ namespace CGC_Sim_IOS
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+#if (DEBUG)
+            closeWinchXDialog.Abort();
+            minimiseP3DControl.Abort();
+            minimiseP3DInstruments1.Abort();
+            minimiseP3DToPDA.Abort();
+#else
             MessageBoxResult result = System.Windows.MessageBox.Show("Do you really want to close the simulator?", "Warning", MessageBoxButton.YesNo);
             if (result != MessageBoxResult.Yes)
             {
