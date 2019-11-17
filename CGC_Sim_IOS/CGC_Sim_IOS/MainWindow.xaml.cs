@@ -57,6 +57,8 @@ namespace CGC_Sim_IOS
         private int rewindCount = 1;
         private bool rewindActive = false;
 
+        private bool trafficTabInit = false;
+
         private bool statusOnGround = true;
         private bool statusAerotowRequested = false;
         private bool statusWinchLaunchRequested = false;
@@ -278,8 +280,8 @@ namespace CGC_Sim_IOS
                 //Thread.Sleep(1000);
                 //simRest.CMD_Pause();
                 UpdateFailureButtons();
+                BuildAircraftList();
 
- 
             }
         }
 
@@ -808,12 +810,6 @@ namespace CGC_Sim_IOS
             {
                 if (SimConnection != null)
                 {
-#if (DEBUG)
-#else
-                    label_gust.Visibility = Visibility.Hidden;
-                    lblWind_0_Gst.Visibility = Visibility.Hidden;
-                    sldWind_0_Gst.Visibility = Visibility.Hidden;
-#endif
                     sim.WeatherRequest(currentLatitude, currentLongitude);
                 }
             }
@@ -1097,8 +1093,9 @@ namespace CGC_Sim_IOS
 
         private void InitialiseTrafficTab()
         {
-            if (Traffic_Aircraft.Count == 0)
+            if (!trafficTabInit && Traffic_Aircraft.Count > 0)
             {
+                trafficTabInit = true;
                 comboTrafficSpeed.ItemsSource = trafficSpeeds;
                 comboTrafficSpeed.DisplayMemberPath = "Description";
                 comboTrafficSpeed.SelectedValuePath = "Speed";
@@ -1119,7 +1116,14 @@ namespace CGC_Sim_IOS
                 comboTrafficRelativeHeading.SelectedValuePath = "RelativeHeading";
                 comboTrafficRelativeHeading.SelectedIndex = 18;
 
+                comboTrafficAircraft.ItemsSource = Traffic_Aircraft;
+                comboTrafficAircraft.SelectedIndex = 0;
+            }
+            else if (!trafficTabInit)
+            {
+                trafficTabInit = true;
                 BuildAircraftList();
+                trafficTabInit = false;
             }
         }
 
@@ -1140,16 +1144,15 @@ namespace CGC_Sim_IOS
                     foreach (var item in aircraftTypes)
                     {
                         string type = (string)item["title"];
+                        type = type.Trim();
                         Traffic_Aircraft.Add(type);
                     }
-
+                    Traffic_Aircraft.Sort();
                 }
             }
             catch (Exception ex)
             {
             }
-            comboTrafficAircraft.ItemsSource = Traffic_Aircraft;
-            comboTrafficAircraft.SelectedIndex = 0;
         }
 
         private async void Button_Traffic_Launch_Click(object sender, RoutedEventArgs e)
@@ -1194,6 +1197,7 @@ namespace CGC_Sim_IOS
                 minimiseP3DInstruments1.Abort();
                 minimiseP3DToPDA.Abort();
             }
+#endif
         }
     }
 
