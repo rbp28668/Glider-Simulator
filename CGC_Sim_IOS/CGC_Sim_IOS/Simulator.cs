@@ -215,7 +215,9 @@ namespace CGC_Sim_IOS
             if (simConnection != null)
             {
                 //simConnection.WeatherSetModeGlobal();
-                simConnection.WeatherRequestObservationAtNearestStation(DataRequestID.Weather_Data, lat, lng);
+//                simConnection.WeatherRequestObservationAtNearestStation(DataRequestID.Weather_Data, lat, lng);
+                simConnection.WeatherRequestInterpolatedObservation(DataRequestID.Weather_Data, lat, lng, 0.0f);
+                
                 //simConnection.WeatherRequestObservationAtStation(DataRequestID.Weather_Data,"GLOB");
             }
         }
@@ -226,13 +228,8 @@ namespace CGC_Sim_IOS
             {
                 string newMetar = CurrentMetar.MetarString;
                 string oldMetar = CurrentMetar.SetMetarString;
-                //System.Console.WriteLine("Put Orignal Weather Data: " + oldMetar);
-                //simConnection.WeatherSetModeCustom();
-                // simConnection.WeatherSetObservation(0, oldMetar);
-                //simConnection.WeatherSetModeGlobal();
                 System.Console.WriteLine("Put New Weather Data: " + newMetar);
                 simConnection.WeatherSetObservation(10, newMetar);
-//                simConnection.WeatherSetModeCustom();
                 /*  We need to set the same data at all the local metar stations !!!!!!!!!!!!!!!!!!!!!
                  *  Check global again
                  */
@@ -413,7 +410,6 @@ namespace CGC_Sim_IOS
                 Extension = str.Substring(i);
             }
             System.Console.WriteLine("MetarElement type : " + ElementTypeStr() + "  " + SubString);
-
         }
 
         public MetarWind(MetarElementType value, string str, int Speed, int Direction) : base(value, str)
@@ -601,6 +597,39 @@ namespace CGC_Sim_IOS
                         {
                             MetarWind mwItem = (MetarWind)item;
                             mwItem.Direction = value;
+                        }
+                    }
+                }
+            }
+        }
+
+        public int SurfaceWindGust
+        {
+            get
+            {
+                if (metarElements.Count > 0)
+                {
+                    foreach (var item in metarElements)
+                    {
+                        if (item.ElementType == MetarElementType.SurfaceWind)
+                        {
+                            MetarWind mwItem = (MetarWind)item;
+                            return mwItem.Gust;
+                        }
+                    }
+                }
+                return 0;
+            }
+            set
+            {
+                if (metarElements.Count > 0)
+                {
+                    foreach (var item in metarElements)
+                    {
+                        if (item.ElementType == MetarElementType.SurfaceWind)
+                        {
+                            MetarWind mwItem = (MetarWind)item;
+                            mwItem.Gust = value;
                         }
                     }
                 }
