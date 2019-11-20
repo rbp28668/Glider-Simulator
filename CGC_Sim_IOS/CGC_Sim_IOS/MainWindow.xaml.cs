@@ -293,7 +293,7 @@ namespace CGC_Sim_IOS
                 //Thread.Sleep(1000);
                 //simRest.CMD_Pause();
                 UpdateFailureButtons();
-                BuildAircraftList();
+                //BuildAircraftList();
 
             }
         }
@@ -1118,11 +1118,12 @@ namespace CGC_Sim_IOS
 
         #endregion
 
-        private void InitialiseTrafficTab()
+        private async void InitialiseTrafficTab()
         {
-            if (!trafficTabInit && Traffic_Aircraft.Count > 0)
+            if (!trafficTabInit)
             {
                 trafficTabInit = true;
+                await BuildAircraftList();
                 comboTrafficSpeed.ItemsSource = trafficSpeeds;
                 comboTrafficSpeed.DisplayMemberPath = "Description";
                 comboTrafficSpeed.SelectedValuePath = "Speed";
@@ -1146,40 +1147,37 @@ namespace CGC_Sim_IOS
                 comboTrafficAircraft.ItemsSource = Traffic_Aircraft;
                 comboTrafficAircraft.SelectedIndex = 0;
             }
-            else if (!trafficTabInit)
-            {
-                trafficTabInit = true;
-                BuildAircraftList();
-                trafficTabInit = false;
-            }
         }
 
-        private async void BuildAircraftList()
+        private async Task<bool> BuildAircraftList()
         {
             try
             {
-                Traffic_Aircraft.Clear();
-                string[] cmd = { "traffic", "aircraft" };
-                dynamic response = await simRest.RunCmdAsync(cmd);
-                Newtonsoft.Json.Linq.JObject jRep = response;
-                if (jRep.Count > 0)
+                if (Traffic_Aircraft.Count == 0)
                 {
-                    string val1 = (string)jRep["status"];
-                    Newtonsoft.Json.Linq.JToken jToken = jRep["aircraft"];
-                    //var aircraft = jToken["title"];
-                    var aircraftTypes = jToken.Children();
-                    foreach (var item in aircraftTypes)
+                    string[] cmd = { "traffic", "aircraft" };
+                    dynamic response = await simRest.RunCmdAsync(cmd);
+                    Newtonsoft.Json.Linq.JObject jRep = response;
+                    if (jRep.Count > 0)
                     {
-                        string type = (string)item["title"];
-                        type = type.Trim();
-                        Traffic_Aircraft.Add(type);
+                        string val1 = (string)jRep["status"];
+                        Newtonsoft.Json.Linq.JToken jToken = jRep["aircraft"];
+                        //var aircraft = jToken["title"];
+                        var aircraftTypes = jToken.Children();
+                        foreach (var item in aircraftTypes)
+                        {
+                            string type = (string)item["title"];
+                            type = type.Trim();
+                            Traffic_Aircraft.Add(type);
+                        }
+                        Traffic_Aircraft.Sort();
                     }
-                    Traffic_Aircraft.Sort();
                 }
             }
             catch (Exception ex)
             {
             }
+            return (Traffic_Aircraft.Count > 0);
         }
 
         private async void Button_Traffic_Launch_Click(object sender, RoutedEventArgs e)
