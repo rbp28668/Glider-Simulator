@@ -229,8 +229,16 @@ namespace CGC_Sim_IOS
             {
                 handleSource.RemoveHook(HandleSimConnectEvents);
             }
+#if (DEBUG)
+#else
+            var psi = new ProcessStartInfo("shutdown", "/s /t 30");
+            psi.CreateNoWindow = true;
+            psi.UseShellExecute = false;
+            Process.Start(psi);
+#endif
+
         }
-       
+
         #region CGCWindows
 
         private void closeWinchXDialogTask(object obj)
