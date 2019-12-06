@@ -37,6 +37,8 @@
                     <Button x:Name="Button_Fail_Altimeter" Content="Button" Grid.Column="1" HorizontalAlignment="Left" Height="40" Margin="20,338,0,0" VerticalAlignment="Top" Width="210" Click="Button_Fail_Altimeter_Click"/>
                     <Button x:Name="Button_Fail_Pitot" Content="Button" Grid.Column="2" HorizontalAlignment="Left" Height="40" Margin="20,338,0,0" VerticalAlignment="Top" Width="210" Click="Button_Fail_Pitot_Click"/>
                     <Button x:Name="Button_Fail_Electrical" Content="Button" Grid.Column="3" HorizontalAlignment="Left" Height="40" Margin="20,338,0,0" VerticalAlignment="Top" Width="210" Click="Button_Fail_Electrical_Click" RenderTransformOrigin="-0.839,0.976"/>
+                    <ComboBox x:Name="sessionPayingAccountCombo" HorizontalAlignment="Left" Height="40" Margin="20,558,0,0" VerticalAlignment="Top" Width="210" Grid.Column="1" IsEditable="True" IsSynchronizedWithCurrentItem="False" GotKeyboardFocus="SessionPayingAccountCombo_GotKeyboardFocus" LostKeyboardFocus="SessionPayingAccountCombo_LostKeyboardFocus" LostFocus="SessionPayingAccountCombo_LostFocus" GotFocus="SessionPayingAccountCombo_GotFocus"/>
+                    <Button x:Name="Button_Session" Content="Start Session" HorizontalAlignment="Left" Height="40" Margin="20,558,0,0" VerticalAlignment="Top" Width="210"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Scenarios" Background="Black" FontSize="20">
@@ -133,8 +135,8 @@
             <TabItem Header="Tools" Background="Black" FontSize="20">
                 <Grid Background="#FF1E1E1E" OpacityMask="Black" Margin="0,0,-117,-272.857">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="15*"/>
-                        <ColumnDefinition Width="902*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Button x:Name="Launch_P3D" Content="Launch P3D" HorizontalAlignment="Left" Height="40" Margin="10,37,0,0" VerticalAlignment="Top" Width="160" Click="Button_Launch_P3D_Click" FontSize="20" Grid.Column="1"/>
                     <Button x:Name="Button_Kill_PSD" Content="Kill P3D" HorizontalAlignment="Left" Height="40" Margin="220,37,0,0" VerticalAlignment="Top" Width="160" Click="Button_Kill_PSD_Click" FontSize="20" RenderTransformOrigin="0.576,0.773" Grid.Column="1"/>
