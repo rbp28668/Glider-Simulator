@@ -74,8 +74,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\SimP3D\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\inc\SimConnect;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\SimP3D\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\lib\SimConnect;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(P3DSDK)\inc\SimConnect;$(IncludePath)</IncludePath>
+    <LibraryPath>$(P3DSDK)\lib\SimConnect;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -84,8 +84,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>F:\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\inc\SimConnect;$(IncludePath)</IncludePath>
-    <LibraryPath>F:\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\lib\SimConnect;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(P3DSDK)\inc\SimConnect;$(IncludePath)</IncludePath>
+    <LibraryPath>$(P3DSDK)\lib\SimConnect;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

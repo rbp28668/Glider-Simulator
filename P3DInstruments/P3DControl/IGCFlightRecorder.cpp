@@ -87,7 +87,7 @@ File IGCFlightRecorder::createFileName(Directory& folder) {
 			<< "-"
 			<< std::setw(2) << std::setfill('0') << m
 			<< "-"
-			<< std::setw(2) << std::setfill('0') << m
+			<< std::setw(2) << std::setfill('0') << d
 			<< "XPD-AAA"
 			<< std::setw(2) << std::setfill('0') << idx
 			<< ".IGC";

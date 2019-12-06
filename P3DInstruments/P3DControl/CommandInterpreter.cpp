@@ -11,9 +11,12 @@
 #include "TrafficMessageHandler.h"
 #include "WeatherMessageHandler.h"
 #include "IgcMessageHandler.h"
+#include "LogMessageHandler.h"
 #include "QuitHandler.h"
 #include "JSONWriter.h"
 #include "APIParameters.h"
+#include "Simulator.h"
+#include "Logger.h"
 
 CommandInterpreter::CommandInterpreter(Prepar3D* pSim)
 	: pSim(pSim)
@@ -27,6 +30,7 @@ CommandInterpreter::CommandInterpreter(Prepar3D* pSim)
 	add(new TrafficMessageHandler(pSim));
 	add(new WeatherMessageHandler(pSim));
 	add(new IgcMessageHandler(pSim));
+	add(new LogMessageHandler(pSim));
 }
 
 CommandInterpreter::~CommandInterpreter()
@@ -54,6 +58,9 @@ void CommandInterpreter::remove(MessageHandler* pHandler)
 void CommandInterpreter::process(const std::string& cmd, const std::string& params, std::string& output)
 {
 	std::cout << "Processing " << cmd << ":" << params << std::endl;
+	Simulator* sim = static_cast<Simulator*>(pSim);
+	sim->getLogger()->logCommand(cmd, params);
+
 
 	std::string handlerName;
 	std::string handlerCmd;
@@ -78,6 +85,7 @@ void CommandInterpreter::process(const std::string& cmd, const std::string& para
 		JSONWriter json(output);
 		json.add("status", "FAILED")
 			.add("reason", "No command handler for " + handlerName);
+		sim->getLogger()->error("No command handler for " + handlerName);
 	}
 
 }
