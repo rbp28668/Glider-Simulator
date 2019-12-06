@@ -888,7 +888,11 @@ namespace CGC_Sim_IOS
 
         private void Button_Pause_Click(object sender, RoutedEventArgs e)
         {
-             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
+            if (sim.IsPaused == true && rewindCount != 1)
+            {
+                simRest.CMD_Position_Set(rewindCount);
+            }
+           SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
         }
 
         public void SlewStart()
@@ -988,7 +992,6 @@ namespace CGC_Sim_IOS
 
         private void Button_Release_Cable_Click(object sender, RoutedEventArgs e)
         {
-            simRest.CMD_Position_Clear_History();
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.TOW_PLANE_RELEASE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
         }
 
@@ -1018,7 +1021,6 @@ namespace CGC_Sim_IOS
                 if (paused == false && rewindCount != 1)
                 {
                     // user has rewound the position
-                    simRest.CMD_Position_Set(rewindCount);
                     Label_Rewind.Content = "";
                 }
                 Button_Position_Back.IsEnabled = paused;
