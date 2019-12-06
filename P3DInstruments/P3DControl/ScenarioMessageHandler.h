@@ -1,9 +1,15 @@
 #pragma once
 #include "CommandInterpreter.h"
 #include "MessageHandler.h"
+
+class File;
+class JSONWriter;
+
 class ScenarioMessageHandler :
 	public MessageHandler
 {
+
+	void readScenario(File& file, JSONWriter& json);
 
 public:
 	ScenarioMessageHandler(Prepar3D* p3d);
