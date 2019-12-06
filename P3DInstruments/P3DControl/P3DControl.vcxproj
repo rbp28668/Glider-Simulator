@@ -75,16 +75,16 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\SimP3D\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\inc\SimConnect;$(MSBuildProjectDirectory)\..\jsoncpp;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\SimP3D\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\lib\SimConnect;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(P3DSDK)\inc\SimConnect;$(MSBuildProjectDirectory)\..\jsoncpp;$(IncludePath)</IncludePath>
+    <LibraryPath>$(P3DSDK)\lib\SimConnect;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>F:\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\inc\SimConnect;$(MSBuildProjectDirectory)\..\jsoncpp;$(IncludePath)</IncludePath>
-    <LibraryPath>F:\Lockheed Martin\Prepar3D v4 SDK 4.5.12.30293\lib\SimConnect;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(P3DSDK)\inc\SimConnect;$(MSBuildProjectDirectory)\..\jsoncpp;$(IncludePath)</IncludePath>
+    <LibraryPath>$(P3DSDK)\lib\SimConnect;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -179,6 +179,8 @@
     <ClInclude Include="IGCFlightRecorder.h" />
     <ClInclude Include="IgcMessageHandler.h" />
     <ClInclude Include="JSONWriter.h" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="LogMessageHandler.h" />
     <ClInclude Include="MessageHandler.h" />
     <ClInclude Include="MessageThread.h" />
     <ClInclude Include="P3DEventCommand.h" />
@@ -208,7 +210,6 @@
     <ClCompile Include="..\P3DCommon\IndexedList.cpp" />
     <ClCompile Include="..\P3DCommon\Network.cpp" />
     <ClCompile Include="..\P3DCommon\P3DCommon.cpp" />
-    <ClCompile Include="..\P3DCommon\Prepar3D.cpp" />
     <ClCompile Include="AIObject.cpp" />
     <ClCompile Include="APIParameters.cpp" />
     <ClCompile Include="APIThread.cpp" />
@@ -229,6 +230,8 @@
     <ClCompile Include="IGCFlightRecorder.cpp" />
     <ClCompile Include="IgcMessageHandler.cpp" />
     <ClCompile Include="JSONWriter.cpp" />
+    <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="LogMessageHandler.cpp" />
     <ClCompile Include="MessageHandler.cpp" />
     <ClCompile Include="P3DControl.cpp" />
     <ClCompile Include="EventMessageHandler.cpp" />

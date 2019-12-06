@@ -3,7 +3,7 @@
 
 // Expectation is that query string will be a standard html query string
 // starting with ? and have name=value pairs separated by & or ;.
-// It may be URL encoded (not implemented at this point).
+// Also deals with URLDecode of any values in the query string.
 
 APIParameters::APIParameters(const std::string& queryString)
 {

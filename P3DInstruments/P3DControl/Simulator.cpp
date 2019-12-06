@@ -2,6 +2,8 @@
 #include "Simulator.h"
 #include "SimState.h"
 #include "Failures.h"
+#include "Logger.h"
+
 #include "../P3DCommon/SimObjectDataRequest.h"
 
 Simulator::Simulator(const char* appName, bool verbose)
@@ -10,7 +12,10 @@ Simulator::Simulator(const char* appName, bool verbose)
 	, stateRequest(0)
 	, failures(0)
 	, failuresRequest(0)
+	, logger(0)
 {
+	logger = new Logger();
+	logger->info("Startup");
 	state = new SimState(this);
 	stateRequest = new SimObjectDataRequest(this, state, &userAircraft(), SIMCONNECT_PERIOD_SECOND);
 	failures = new Failures(this);
@@ -19,8 +24,10 @@ Simulator::Simulator(const char* appName, bool verbose)
 
 Simulator::~Simulator()
 {
+	logger->info("Shutdown");
 	delete failuresRequest;
 	delete failures;
 	delete stateRequest;
 	delete state;
+	delete logger;
 }
