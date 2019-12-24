@@ -46,15 +46,20 @@ class Prepar3D
     static void CALLBACK DispatchCallback(SIMCONNECT_RECV *pData, DWORD cbData, void *pContext);
     void Process(SIMCONNECT_RECV *pData, DWORD cbData);
 
+public:  // Note event IDs public so can ensure other event IDs start after LAST_P3D_EVENT
 	// Event IDs used to keep track of the sim state.
-	enum EVENT_ID{ 
-		EVENT_SIM_START, 
+	enum EVENT_ID {
+		EVENT_SIM_START,
 		EVENT_SIM_STOP,
 		EVENT_PAUSE,
 		EVENT_SIM,
 		EVENT_CRASHED,
 		EVENT_CRASH_RESET,
+
+		LAST_P3D_EVENT
 	}; 
+	
+private:
 
 	void connect(const char* pszAppName);
 	void registerSystemEvents();

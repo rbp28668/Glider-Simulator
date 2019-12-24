@@ -18,11 +18,45 @@ P3DEventCommand::~P3DEventCommand()
 }
 
 void P3DEventCommand::setupEvents() {
+	mapEvent(THROTTLE_FULL,"THROTTLE_FULL");	
+	mapEvent(THROTTLE_INCR,"THROTTLE_INCR");	
+	mapEvent(THROTTLE_INCR_SMALL,"THROTTLE_INCR_SMALL");
+	mapEvent(THROTTLE_DECR,"THROTTLE_DECR");
+	mapEvent(THROTTLE_DECR_SMALL,"THROTTLE_DECR_SMALL");
+	mapEvent(THROTTLE_CUT,"THROTTLE_CUT");
+	mapEvent(INCREASE_THROTTLE,"INCREASE_THROTTLE");
+	mapEvent(DECREASE_THROTTLE,"DECREASE_THROTTLE");
+	mapEvent(THROTTLE_SET,"THROTTLE_SET");
+	mapEvent(AXIS_THROTTLE_SET, "AXIS_THROTTLE_SET");
+	mapEvent(AXIS_MIXTURE_SET, "AXIS_MIXTURE_SET");
+	mapEvent(AXIS_PROPELLER_SET, "AXIS_PROPELLER_SET");
+	mapEvent(MIXTURE_SET, "MIXTURE_SET");
+	mapEvent(MIXTURE_RICH, "MIXTURE_RICH");
+	mapEvent(MIXTURE_INCR, "MIXTURE_INCR");
+	mapEvent(MIXTURE_INCR_SMALL, "MIXTURE_INCR_SMALL");
+	mapEvent(MIXTURE_DECR, "MIXTURE_DECR");
+	mapEvent(MIXTURE_DECR_SMALL, "MIXTURE_DECR_SMALL");
+	mapEvent(MIXTURE_LEAN, "MIXTURE_LEAN");
+	mapEvent(MIXTURE_SET_BEST, "MIXTURE_SET_BEST");
+	mapEvent(PROP_PITCH_SET, "PROP_PITCH_SET");
+	mapEvent(PROP_PITCH_LO, "PROP_PITCH_LO");
+	mapEvent(PROP_PITCH_INCR, "PROP_PITCH_INCR");
+	mapEvent(PROP_PITCH_INCR_SMALL, "PROP_PITCH_INCR_SMALL");
+	mapEvent(PROP_PITCH_DECR, "PROP_PITCH_DECR");
+	mapEvent(PROP_PITCH_DECR_SMALL, "PROP_PITCH_DECR_SMALL");
+	mapEvent(PROP_PITCH_HI, "PROP_PITCH_HI");
+	mapEvent(MAGNETO_OFF, "MAGNETO_OFF");
+	mapEvent(MAGNETO_RIGHT, "MAGNETO_RIGHT");
+	mapEvent(MAGNETO_LEFT, "MAGNETO_LEFT");
+	mapEvent(MAGNETO_BOTH, "MAGNETO_BOTH");
+	mapEvent(MAGNETO_START, "MAGNETO_START");
+	mapEvent(ENGINE_AUTO_START, "ENGINE_AUTO_START");
+	mapEvent(ENGINE_AUTO_SHUTDOWN, "ENGINE_AUTO_SHUTDOWN");
+	mapEvent(ENGINE, "ENGINE");
 	mapEvent(FLAPS_UP, "FLAPS_UP");
 	mapEvent(FLAPS_1, "FLAPS_1");
-	mapEvent(FLAPS_1, "FLAPS_1");
+	mapEvent(FLAPS_2, "FLAPS_2");
 	mapEvent(FLAPS_3, "FLAPS_3");
-	mapEvent(FLAPS_4, "FLAPS_4");
 	mapEvent(FLAPS_DOWN, "FLAPS_DOWN");
 	mapEvent(ELEV_TRIM_DN, "ELEV_TRIM_DN");
 	mapEvent(ELEV_TRIM_UP, "ELEV_TRIM_UP");
@@ -43,8 +77,12 @@ void P3DEventCommand::setupEvents() {
 	mapEvent(PAUSE_TOGGLE, "PAUSE_TOGGLE");
 	mapEvent(PAUSE_ON, "PAUSE_ON");
 	mapEvent(PAUSE_OFF, "PAUSE_OFF");
-	mapEvent(SITUATION_SAVE, "SITUATION_SAVE");
-	mapEvent(SITUATION_RESET, "SITUATION_RESET");
+	mapEvent(SELECT_1, "SELECT_1");
+	mapEvent(SELECT_2, "SELECT_2");
+	mapEvent(SELECT_3, "SELECT_3");
+	mapEvent(SELECT_4, "SELECT_4");
+	mapEvent(MINUS, "MINUS");
+	mapEvent(PLUS, "PLUS");
 	mapEvent(TOGGLE_AIRCRAFT_LABELS, "TOGGLE_AIRCRAFT_LABELS");
 	mapEvent(EXIT, "EXIT");
 	mapEvent(ABORT, "ABORT");
@@ -61,7 +99,7 @@ void P3DEventCommand::setupEvents() {
 	mapEvent(POSITION_FREEZE_USER, "POSITION_FREEZE_USER");						// Toggles the position freeze (Lat/Lon, Altitude and Attitude) of the controlled SimObject.
 	mapEvent(POSITION_FREEZE_ALL, "POSITION_FREEZE_ALL");						// Toggles the position freeze(Lat / Lon, Altitudeand Attitude) of all SimObjects.
 	mapEvent(SLEW_TOGGLE, "SLEW_TOGGLE");										// Toggles slew on / off	Shared Cockpit(Pilot only)
-	mapEvent(SLEW_OF, "SLEW_OFF"); // 	Turns slew off	Shared Cockpit(Pilot only)
+	mapEvent(SLEW_OFF, "SLEW_OFF"); // 	Turns slew off	Shared Cockpit(Pilot only)
 	mapEvent(SLEW_ON, "SLEW_ON"); // 	Turns slew on	Shared Cockpit(Pilot only)
 	mapEvent(SLEW_SET, "SLEW_SET"); // 	Sets slew on / off(1, 0)	Shared Cockpit(Pilot only)
 	mapEvent(SLEW_RESET, "SLEW_RESET"); // 	Stop slew and reset pitch, bank, and heading all to zero.Shared Cockpit(Pilot only)
