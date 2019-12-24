@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "SimState.h"
+#include <assert.h>
 #include <iostream>
 #include <sstream>
 
@@ -36,6 +37,10 @@ int SimState::itemCount() {
 }
 
 void SimState::onData(void* pvData, SimObject* pObject) {
+	assert(this);
+	assert(pvData);
+	assert(pObject);
+
 	struct Data* pData = reinterpret_cast<Data*>(pvData);
 	CriticalSection::Lock lock(csData);
 	data = *pData;
@@ -47,9 +52,12 @@ void SimState::onData(void* pvData, SimObject* pObject) {
 
 SimState::SimState(Prepar3D* pSim)
 	: SimObjectData(pSim)
+	, init(pSim)
 	, buffer(600)  // 10 mins
 {
+	assert(pSim);
 	createDefinition();
+	init.createDefinition();
 }
 
 
@@ -59,6 +67,7 @@ SimState::~SimState(void)
 
 SimState::Data SimState::current()
 {
+	assert(this);
 	CriticalSection::Lock lock(csData);
 	Data d(data);
 	return d;
@@ -66,7 +75,8 @@ SimState::Data SimState::current()
 
 void SimState::update(const Data& data, FIELDS fields)
 {
-	
+	assert(this);
+
 	if (fields & FIELDS::LATLONG) {
 		this->data.Latitude = data.Latitude;			
 		this->data.Longitude = data.Longitude;		
@@ -92,8 +102,27 @@ void SimState::update(const Data& data, FIELDS fields)
 
 }
 
+void SimState::set(const Data& data)
+{ 
+	assert(this);
+
+	SIMCONNECT_DATA_INITPOSITION pos;
+	pos.Airspeed = data.Airspeed;
+	pos.Altitude = data.Altitude;
+	pos.Bank = data.Bank;
+	pos.Heading = data.Heading;
+	pos.Latitude = data.Latitude;
+	pos.Longitude = data.Longitude;
+	pos.OnGround = data.OnGround;
+	pos.Pitch = data.Pitch;
+
+	init.send(&pos, SIMCONNECT_OBJECT_ID_USER);
+}
+
 int SimState::historyLength()
 {
+	assert(this);
+
 	CriticalSection::Lock lock(csData);
 	int result = buffer.count;
 	return result;
@@ -101,6 +130,9 @@ int SimState::historyLength()
 
 SimState::Data SimState::history(int n)
 {
+	assert(this);
+	assert(n >= 0);
+
 	CriticalSection::Lock lock(csData);
 	Data d = buffer.back(n);  // copy operation in lock scope
 	return d;
@@ -108,6 +140,9 @@ SimState::Data SimState::history(int n)
 
 SimState::Data SimState::rewindTo(int n)
 {
+	assert(this);
+	assert(n >= 0);
+
 	CriticalSection::Lock lock(csData);
 	Data d = buffer.rewind(n);  // copy operation in lock scope
 	return d;

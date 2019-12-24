@@ -132,7 +132,7 @@ void PositionMessageHandler::available(std::string& output)
 void PositionMessageHandler::set(int count, std::string& output)
 {
 	SimState::Data data = pSim->getState()->rewindTo(count);
-	pSim->getState()->update(data);
+	pSim->getState()->set(data);
 	reportSuccess(output);
 }
 

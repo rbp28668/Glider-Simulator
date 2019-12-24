@@ -1,6 +1,7 @@
 #pragma once
 #include "../P3DCommon/SimObjectData.h"
 #include "CriticalSection.h"
+#include "InitPosition.h"
 
 class Prepar3D;
 
@@ -26,6 +27,7 @@ private:
 	static DataItem dataItems[];
 	Data data;
 	CriticalSection csData;
+	InitPosition init;
 
 	struct Buffer {
 		Data* buffer;
@@ -54,6 +56,7 @@ public:
 
 	Data current(); // current position.
 	void update(const Data& data, FIELDS fields = FIELDS::ALL);
+	void set(const Data& data); // Uses initposition to set all fields.
 	int historyLength();
 	Data history(int n);
 	Data rewindTo(int n);
