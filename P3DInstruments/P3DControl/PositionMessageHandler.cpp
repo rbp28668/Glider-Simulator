@@ -83,7 +83,10 @@ void PositionMessageHandler::run(const std::string& cmd, const APIParameters& pa
 	else if (cmd == "start") { // gets the available number of items and freezes motion.
 		start(output);
 	}
-	else if (cmd == "clear") { // go back to point (0 to available) and reset the buffer.
+	else if (cmd == "stop") { // unfreezes motion without changing buffer or position
+		stop(output);
+	}
+	else if (cmd == "clear") { // clears the buffer deleting any existing history.
 		clearHistory(output);
 	}
 	else if (cmd == "set") { // go back to point (0 to available),reset the buffer and unfreeze.
@@ -157,11 +160,17 @@ void PositionMessageHandler::start(std::string& output)
 	json.add("length", len);
 }
 
+void PositionMessageHandler::stop(std::string& output)
+{
+	unfreeze();
+	reportSuccess(output);
+}
+
 // Resets buffer to point and set aircraft to point.
 void PositionMessageHandler::set(int count, std::string& output)
 {
 	SimState::Data data = pSim->getState()->rewindTo(count);
-	pSim->getState()->update(data);
+	pSim->getState()->set(data);
 	unfreeze();
 	reportSuccess(output);
 }
@@ -174,10 +183,10 @@ void PositionMessageHandler::back(int count, std::string& output)
 	reportSuccess(output);
 }
 
+// Clears the history.  Used when changing scenarios etc.
 void PositionMessageHandler::clearHistory(std::string& output)
 {
-	int count = pSim->getState()->historyLength();
-	SimState::Data data = pSim->getState()->rewindTo(count);
+	pSim->getState()->clear();
 	reportSuccess(output);
 }
 

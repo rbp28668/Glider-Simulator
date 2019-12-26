@@ -6,9 +6,13 @@
 // Sequence to allow each data definition to get its own unique index.
 SIMCONNECT_DATA_DEFINITION_ID SimObjectData::definitionIndex = 0;
 
+
+
 SimObjectData::SimObjectData(Prepar3D* pTargetSim)
 	:pSim(pTargetSim)
 	,definitionId(definitionIndex++)
+	,count(0)
+	,pdi(0)
 {
 	assert(pTargetSim != 0);
 }
@@ -60,7 +64,6 @@ void SimObjectData::handle(SIMCONNECT_RECV_SIMOBJECT_DATA *pObjData, SimObject* 
 	onData(pData, pObject);
 }
 
-// NOTE - big assumption that all the data items are double or other 64 bit value.
 void SimObjectData::send(void* pObjData, size_t dataSize, SIMCONNECT_OBJECT_ID objectId) {
 	HRESULT hr = ::SimConnect_SetDataOnSimObject(pSim->getHandle(), definitionId, objectId, 0, 0, (DWORD)dataSize, pObjData);
 }

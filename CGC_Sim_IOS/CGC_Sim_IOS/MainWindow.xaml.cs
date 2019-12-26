@@ -32,6 +32,26 @@ namespace CGC_Sim_IOS
     public partial class MainWindow : Window
     {
 
+        // Define the SetWindowPosFlags enumeration.
+        [Flags()]
+        internal enum SetWindowPosFlags : uint
+        {
+            SynchronousWindowPosition = 0x4000,
+            DeferErase = 0x2000,
+            DrawFrame = 0x0020,
+            FrameChanged = 0x0020,
+            HideWindow = 0x0080,
+            DoNotActivate = 0x0010,
+            DoNotCopyBits = 0x0100,
+            IgnoreMove = 0x0002,
+            DoNotChangeOwnerZOrder = 0x0200,
+            DoNotRedraw = 0x0008,
+            DoNotReposition = 0x0200,
+            DoNotSendChangingEvent = 0x0400,
+            IgnoreResize = 0x0001,
+            IgnoreZOrder = 0x0004,
+            ShowWindow = 0x0040,
+        }
 
         [DllImport("user32.dll")]
         static extern bool SetForegroundWindow(IntPtr hWnd);
@@ -39,6 +59,11 @@ namespace CGC_Sim_IOS
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
         [DllImport("user32.dll", SetLastError = true)]
         static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+        [DllImport("user32.dll", SetLastError = true)]
+        internal static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+        [DllImport("user32.dll", SetLastError = true)]
+        internal static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
+
 
         public enum GWL
         {
@@ -88,6 +113,7 @@ namespace CGC_Sim_IOS
         private List<WeatherTurbulance> weatherTurbulances = new List<WeatherTurbulance>();
 
 
+        Process procKeyboard = null;
 
 
 
@@ -180,7 +206,8 @@ namespace CGC_Sim_IOS
             comboWindTurbulance.ItemsSource = weatherTurbulances;
             comboWindTurbulance.DisplayMemberPath = "Description";
             comboWindTurbulance.SelectedValuePath = "MetarLetter";
-
+            Button_Session.Visibility = Visibility.Hidden;
+            sessionPayingAccountCombo.Visibility = Visibility.Hidden;
 
 #if (DEBUG)
 #else
@@ -202,8 +229,16 @@ namespace CGC_Sim_IOS
             {
                 handleSource.RemoveHook(HandleSimConnectEvents);
             }
+#if (DEBUG)
+#else
+            var psi = new ProcessStartInfo("shutdown", "/s /t 30");
+            psi.CreateNoWindow = true;
+            psi.UseShellExecute = false;
+            Process.Start(psi);
+#endif
+
         }
-       
+
         #region CGCWindows
 
         private void closeWinchXDialogTask(object obj)
@@ -853,7 +888,11 @@ namespace CGC_Sim_IOS
 
         private void Button_Pause_Click(object sender, RoutedEventArgs e)
         {
-             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
+            if (sim.IsPaused == true && rewindCount != 1)
+            {
+                simRest.CMD_Position_Set(rewindCount);
+            }
+           SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.PAUSE_TOGGLE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);            //% USERPROFILE %\Documents\Prepar3D v4 Files
         }
 
         public void SlewStart()
@@ -953,7 +992,6 @@ namespace CGC_Sim_IOS
 
         private void Button_Release_Cable_Click(object sender, RoutedEventArgs e)
         {
-            simRest.CMD_Position_Clear_History();
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.TOW_PLANE_RELEASE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
         }
 
@@ -983,7 +1021,6 @@ namespace CGC_Sim_IOS
                 if (paused == false && rewindCount != 1)
                 {
                     // user has rewound the position
-                    simRest.CMD_Position_Set(rewindCount);
                     Label_Rewind.Content = "";
                 }
                 Button_Position_Back.IsEnabled = paused;
@@ -1225,6 +1262,58 @@ namespace CGC_Sim_IOS
 #endif
         }
 
+        public void ShowOSK()
+        {
+            {
+                // Launch P3D
+                ProcessStartInfo start = new ProcessStartInfo();
+                // Do you want to show a console window?
+                start.WindowStyle = ProcessWindowStyle.Normal;
+                //start.CreateNoWindow = false;
+                start.FileName = "OSK.exe";
+                if (procKeyboard == null)
+                {
+                    procKeyboard = Process.Start(start);
+                    IntPtr handle = (IntPtr)procKeyboard.Handle;
+                    IntPtr hWndInsertAfter = (IntPtr)0;
+                    SetWindowPos(handle, hWndInsertAfter, 0, 0, 0, 0, SetWindowPosFlags.IgnoreResize);
+                }
+            }
+        }
+
+        public void HideOSK()
+        {
+            try
+            {
+                if (procKeyboard != null)
+                {
+                    procKeyboard.Kill();
+                    procKeyboard = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                procKeyboard = null;
+            }
+        }
+
+        private void SessionPayingAccountCombo_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+        }
+
+        private void SessionPayingAccountCombo_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+        }
+
+        private void SessionPayingAccountCombo_LostFocus(object sender, RoutedEventArgs e)
+        {
+            HideOSK();
+        }
+
+        private void SessionPayingAccountCombo_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ShowOSK();
+        }
     }
 
     public class TextBoxOutputter : TextWriter

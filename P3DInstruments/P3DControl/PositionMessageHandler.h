@@ -23,6 +23,7 @@ public:
 	void show(std::string& output);
 	void available(std::string& output);
 	void start(std::string& output);
+	void stop(std::string& output);
 	void set(int count, std::string& output);
 	void back(int count, std::string& output);
 	void load(const std::string& file, std::string& output);
