@@ -95,7 +95,7 @@ void SimState::update(const Data& data, FIELDS fields)
 int SimState::historyLength()
 {
 	CriticalSection::Lock lock(csData);
-	int result = buffer.count;
+	int result = (int)buffer.count;
 	return result;
 }
 
@@ -151,11 +151,11 @@ SimState::Data& SimState::Buffer::back(int n)
 {
 	CriticalSection::Lock lock(cs);
 
-	if (n > count) n = count; // can't go back more than we have data.
+	if (n > count) n = (int)count; // can't go back more than we have data.
 
 	// Go back N items
-	int pos = head - n;
-	if (pos < 0) pos += len;
+	int pos = (int)head - n;
+	if (pos < 0) pos += (int)len;
 	
 	return buffer[pos];
 }
@@ -164,11 +164,11 @@ SimState::Data& SimState::Buffer::rewind(int n)
 {
 	CriticalSection::Lock lock(cs);
 
-	if (n > count) n = count; // can't go back more than we have data.
+	if (n > count) n = (int)count; // can't go back more than we have data.
 
 	// Go back N items
-	int pos = head - n;
-	if (pos < 0) pos += len;
+	int pos = (int)head - n;
+	if (pos < 0) pos += (int)len;
 
 	// Reset buffer to where we go back to.
 	head = ((size_t)pos + 1) % len;

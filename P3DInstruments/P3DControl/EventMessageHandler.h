@@ -2,13 +2,15 @@
 #include "MessageThread.h"
 #include "P3DEventCommand.h"
 #include "MessageHandler.h"
+#include "Simulator.h"
 
 class Prepar3D;
 
 // Message handler that knows how to process basic P3D events.
 class EventMessageHandler : public MessageHandler
 {
-	P3DEventCommand commands;
+	Simulator* pSim;
+
 public:
 	EventMessageHandler(Prepar3D* p3d);
 	virtual ~EventMessageHandler();
