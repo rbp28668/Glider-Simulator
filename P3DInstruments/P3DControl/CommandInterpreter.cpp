@@ -12,6 +12,7 @@
 #include "WeatherMessageHandler.h"
 #include "IgcMessageHandler.h"
 #include "LogMessageHandler.h"
+#include "PanelMessageHandler.h"
 #include "QuitHandler.h"
 #include "JSONWriter.h"
 #include "APIParameters.h"
@@ -31,6 +32,7 @@ CommandInterpreter::CommandInterpreter(Prepar3D* pSim)
 	add(new WeatherMessageHandler(pSim));
 	add(new IgcMessageHandler(pSim));
 	add(new LogMessageHandler(pSim));
+	add(new PanelMessageHandler(pSim));
 }
 
 CommandInterpreter::~CommandInterpreter()

@@ -45,12 +45,9 @@ unsigned MessageThread::run()
 		}
 
 		// Replace any pipe characters with slash to make early UDP messsages more webby
-		pos = cmd.find_first_of(cmd, '|');
-		while (pos != std::string::npos) {
-			cmd[pos] = '/';
-			pos = cmd.find_first_of('|', pos);
-		}
-
+		// allows pipe separator in UDP messages
+		replace(cmd, '|', '/');
+		
 		process(cmd, param);
 	}
 	return 0;
@@ -61,6 +58,17 @@ unsigned MessageThread::run()
 void MessageThread::stop()
 {
 	this->quit = true;
+}
+
+// Replace any "from" chars in target with "to" chars. Returns the passed target string.
+std::string& MessageThread::replace(std::string& target, char from, char to)
+{
+	size_t pos = target.find_first_of(from);
+	while (pos != std::string::npos) {
+		target[pos] = to;
+		pos = target.find_first_of(from, pos);
+	}
+	return target;
 }
 
 void MessageThread::process(const std::string & cmd, const std::string & params)

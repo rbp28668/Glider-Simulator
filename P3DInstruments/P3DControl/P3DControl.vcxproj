@@ -186,6 +186,7 @@
     <ClInclude Include="MessageThread.h" />
     <ClInclude Include="P3DEventCommand.h" />
     <ClInclude Include="P3DInstallationDirectory.h" />
+    <ClInclude Include="PanelMessageHandler.h" />
     <ClInclude Include="PositionMessageHandler.h" />
     <ClInclude Include="QuitHandler.h" />
     <ClInclude Include="RecordMessageHandler.h" />
@@ -240,6 +241,7 @@
     <ClCompile Include="MessageThread.cpp" />
     <ClCompile Include="P3DEventCommand.cpp" />
     <ClCompile Include="P3DInstallationDirectory.cpp" />
+    <ClCompile Include="PanelMessageHandler.cpp" />
     <ClCompile Include="PositionMessageHandler.cpp" />
     <ClCompile Include="QuitHandler.cpp" />
     <ClCompile Include="RecordMessageHandler.cpp" />

@@ -11,6 +11,7 @@ public:
 	~MessageThread();
 	virtual unsigned run();
 	void stop();
+	std::string& replace(std::string& target, char from, char to);
 
 private:
 	unsigned short port;
