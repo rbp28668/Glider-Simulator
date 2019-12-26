@@ -41,6 +41,7 @@ private:
 		void add(const Data& data);
 		Data& back(int n);
 		Data& rewind(int n);
+		void reset();
 	};
 
 	Buffer buffer;
@@ -60,5 +61,6 @@ public:
 	int historyLength();
 	Data history(int n);
 	Data rewindTo(int n);
+	void clear();
 };
 

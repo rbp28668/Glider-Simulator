@@ -124,7 +124,7 @@ int SimState::historyLength()
 	assert(this);
 
 	CriticalSection::Lock lock(csData);
-	int result = buffer.count;
+	int result = (int)buffer.count;
 	return result;
 }
 
@@ -146,6 +146,11 @@ SimState::Data SimState::rewindTo(int n)
 	CriticalSection::Lock lock(csData);
 	Data d = buffer.rewind(n);  // copy operation in lock scope
 	return d;
+}
+
+void SimState::clear()
+{
+	buffer.reset();
 }
 
 SimState::Data::Data()
@@ -186,11 +191,11 @@ SimState::Data& SimState::Buffer::back(int n)
 {
 	CriticalSection::Lock lock(cs);
 
-	if (n > count) n = count; // can't go back more than we have data.
+	if (n > count) n = (int)count; // can't go back more than we have data.
 
 	// Go back N items
-	int pos = head - n;
-	if (pos < 0) pos += len;
+	int pos = (int)head - n;
+	if (pos < 0) pos += (int)len;
 	
 	return buffer[pos];
 }
@@ -199,16 +204,23 @@ SimState::Data& SimState::Buffer::rewind(int n)
 {
 	CriticalSection::Lock lock(cs);
 
-	if (n > count) n = count; // can't go back more than we have data.
+	if (n > count) n = (int)count; // can't go back more than we have data.
 
 	// Go back N items
-	int pos = head - n;
-	if (pos < 0) pos += len;
+	int pos = (int)head - n;
+	if (pos < 0) pos += (int)len;
 
 	// Reset buffer to where we go back to.
 	head = ((size_t)pos + 1) % len;
 	count -= n;
 
 	return buffer[pos];
+}
+
+// Resets the buffer effectively making it empty.
+void SimState::Buffer::reset()
+{
+	CriticalSection::Lock lock(cs);
+	head = count = 0;
 }
 

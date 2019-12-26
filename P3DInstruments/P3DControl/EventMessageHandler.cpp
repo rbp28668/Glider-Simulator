@@ -10,7 +10,7 @@
 
 EventMessageHandler::EventMessageHandler(Prepar3D * p3d)
 	: MessageHandler(p3d, "cmd")
-	, commands(p3d)
+	, pSim(static_cast<Simulator*>(p3d))
 {
 	assert(p3d != 0);
 	this->p3d = p3d;
@@ -31,7 +31,7 @@ void EventMessageHandler::run(const std::string& cmd, const APIParameters& param
 		*i = ::toupper(*i);
 	}
 
-	bool failed = commands.dispatchEvent(asUpper, dwData);
+	bool failed = pSim->getCommands()->dispatchEvent(asUpper, dwData);
 
 	JSONWriter json(output);
 	if (failed) {

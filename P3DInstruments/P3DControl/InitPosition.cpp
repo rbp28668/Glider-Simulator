@@ -20,7 +20,7 @@ void InitPosition::createDefinition()
 		handle
 		, definitionId
 		, "Initial Position"
-		, "NULL"
+		, ""   // don't put "NULL" whatever the documentation says!
 		, SIMCONNECT_DATATYPE_INITPOSITION
 		, 0
 	);
