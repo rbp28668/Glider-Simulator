@@ -1,10 +1,25 @@
 #include "stdafx.h"
 #include <sstream>
+#include <fstream>
+#include <iostream>
+#include "..//rapidxml-1.13/rapidxml.hpp"
 #include "..//P3DCommon/Prepar3D.h"
 #include "ScenarioMessageHandler.h"
 #include "APIParameters.h"
 #include "Folder.h"
 #include "JSONWriter.h"
+
+// Wrapper for dynamically allocateed buffer
+// Resource Allocation Is Initialisation pattern.
+template<class T> 
+class Buffer {
+	T* data;
+public:
+	Buffer(size_t size) { data = new T[size]; }
+	~Buffer() { delete[] data; }
+	operator T* () { return data; }
+};
+
 
 
 ScenarioMessageHandler::ScenarioMessageHandler(Prepar3D* p3d)
@@ -65,6 +80,86 @@ void ScenarioMessageHandler::saveScenario(const std::string& file, const std::st
 	}
 }
 
+void ScenarioMessageHandler::readScenario(File& file, JSONWriter& json) {
+
+	std::string name = file.name();
+	std::string title = name;
+	std::string description = "";
+
+
+	// read the file into memory
+	std::ifstream ifs(file);
+	ifs.seekg(0, std::ios::end);    
+	size_t length = ifs.tellg();          
+	ifs.seekg(0, std::ios::beg);    
+	Buffer<char> buffer(length + 1);
+	ifs.read(buffer, length);       
+	buffer[length] = 0;
+	
+	// Parse it
+	rapidxml::xml_document<> doc;    // character type defaults to char
+
+	try {
+		doc.parse<0>(buffer);
+	}
+	catch (rapidxml::parse_error& err) {
+		// Errors tend to be benign so just log it.
+		std::cout << err.what() << std::endl;
+		if (p3d->isVerbose()) {
+			char* where = err.where<char>();
+			std::cout << where << std::endl;
+		}
+	}
+
+	// Go down to find the main section.
+	rapidxml::xml_node<>* pNode = doc.first_node("SimBase.Document");
+	
+	if (pNode) {
+		pNode = pNode->first_node("Flight.Sections");
+	}
+
+	// Look for Section with Name="Main"
+	if (pNode) {
+		pNode = pNode->first_node("Section");
+		while (pNode) {
+			rapidxml::xml_attribute<>* pAttr = pNode->first_attribute("Name");
+			std::string name = std::string(pAttr->value(), pAttr->value_size());
+			if (name == "Main") {
+				break;
+			}
+			pNode = pNode->next_sibling("Section");
+		}
+	}
+
+	// Look for the properties in the main section
+	if (pNode) {
+		pNode = pNode->first_node("Property");
+		while (pNode) {
+			// Get name and value for this property
+			rapidxml::xml_attribute<>* pAttr = pNode->first_attribute("Name");
+			std::string name = std::string(pAttr->value(), pAttr->value_size());
+			pAttr = pNode->first_attribute("Value");
+			std::string value = std::string(pAttr->value(), pAttr->value_size());
+
+			if (name == "Title") {
+				title = value;
+			}
+			else if (name == "Description") {
+				description = value;
+			}
+
+			pNode = pNode->next_sibling("Property");
+		}
+	}
+
+	json.object();
+	json.add("filename", name);
+	json.add("title", title);
+	json.add("description", description);
+	json.end(); // of the scenario object
+
+}
+
 // Lists any scenarios (in JSON response written to output) that correspond to the filter.
 // If filter is empty then all the .fxml files are written, otherwise only the files
 // that start with the filter are written.
@@ -91,11 +186,7 @@ void ScenarioMessageHandler::listScenarios(const std::string& filter, std::strin
 	json.add("status", "OK");
 	json.array("entries");
 	for (File::ListT::iterator it = files.begin(); it != files.end(); ++it) {
-		json.object();
-		json.add("filename", it->name());
-		json.add("title", it->name());
-		json.add("description", "");
-		json.end(); // of the scenario object
+		readScenario(*it, json);
 	}
 
 

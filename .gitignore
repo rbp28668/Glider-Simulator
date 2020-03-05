@@ -52,35 +52,51 @@ x64
 *.plg
 
 # last resource editor state
-*.aps  
+*.aps
 
 # build helper
-*.ipch  
+*.ipch
 
 # build helper
-*.lastbuildstate  
+*.lastbuildstate
 
 # build result. Can be 3rd party
-*.lib  
+*.lib
 
 # build log
-*.log  
+*.log
 
 # build helper. Can be written yourself.
-#*.manifest  
-
-# build helper 
-*.pch  
-
-# build result
-*.pdb  
+#*.manifest
 
 # build helper
-*.res  
+*.pch
+
+# build result
+*.pdb
+
+# build helper
+*.res
 
 # intellisense dbase
-*.sdf  
+*.sdf
 
 # solution user options
-*.suo  
+*.suo
 *.tlog  # build log
+
+# Various
+**/obj/Debug
+**/obj/Release
+**/obj/Debug/**
+**/obj/Release/**
+
+*.cache
+
+CGC_Sim_IOS/CGC_Sim_IOS/publish/
+
+CGC_Sim_IOS/CGC_Sim_IOS/bin/
+
+
+
+CGC_Sim_IOS/CGC_Sim_IOS/obj/

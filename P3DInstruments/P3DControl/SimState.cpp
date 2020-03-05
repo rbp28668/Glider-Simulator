@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "SimState.h"
+#include <assert.h>
 #include <iostream>
 #include <sstream>
 
@@ -36,6 +37,10 @@ int SimState::itemCount() {
 }
 
 void SimState::onData(void* pvData, SimObject* pObject) {
+	assert(this);
+	assert(pvData);
+	assert(pObject);
+
 	struct Data* pData = reinterpret_cast<Data*>(pvData);
 	CriticalSection::Lock lock(csData);
 	data = *pData;
@@ -47,9 +52,12 @@ void SimState::onData(void* pvData, SimObject* pObject) {
 
 SimState::SimState(Prepar3D* pSim)
 	: SimObjectData(pSim)
+	, init(pSim)
 	, buffer(600)  // 10 mins
 {
+	assert(pSim);
 	createDefinition();
+	init.createDefinition();
 }
 
 
@@ -59,6 +67,7 @@ SimState::~SimState(void)
 
 SimState::Data SimState::current()
 {
+	assert(this);
 	CriticalSection::Lock lock(csData);
 	Data d(data);
 	return d;
@@ -66,7 +75,8 @@ SimState::Data SimState::current()
 
 void SimState::update(const Data& data, FIELDS fields)
 {
-	
+	assert(this);
+
 	if (fields & FIELDS::LATLONG) {
 		this->data.Latitude = data.Latitude;			
 		this->data.Longitude = data.Longitude;		
@@ -92,18 +102,55 @@ void SimState::update(const Data& data, FIELDS fields)
 
 }
 
+void SimState::set(const Data& data)
+{ 
+	assert(this);
+
+	SIMCONNECT_DATA_INITPOSITION pos;
+	pos.Airspeed = data.Airspeed;
+	pos.Altitude = data.Altitude;
+	pos.Bank = data.Bank;
+	pos.Heading = data.Heading;
+	pos.Latitude = data.Latitude;
+	pos.Longitude = data.Longitude;
+	pos.OnGround = data.OnGround;
+	pos.Pitch = data.Pitch;
+
+	init.send(&pos, SIMCONNECT_OBJECT_ID_USER);
+}
+
 int SimState::historyLength()
 {
+	assert(this);
+
 	CriticalSection::Lock lock(csData);
-	int result = buffer.count;
+	int result = (int)buffer.count;
 	return result;
 }
 
 SimState::Data SimState::history(int n)
 {
+	assert(this);
+	assert(n >= 0);
+
 	CriticalSection::Lock lock(csData);
 	Data d = buffer.back(n);  // copy operation in lock scope
 	return d;
+}
+
+SimState::Data SimState::rewindTo(int n)
+{
+	assert(this);
+	assert(n >= 0);
+
+	CriticalSection::Lock lock(csData);
+	Data d = buffer.rewind(n);  // copy operation in lock scope
+	return d;
+}
+
+void SimState::clear()
+{
+	buffer.reset();
 }
 
 SimState::Data::Data()
@@ -144,15 +191,36 @@ SimState::Data& SimState::Buffer::back(int n)
 {
 	CriticalSection::Lock lock(cs);
 
-	if (n > count) n = count; // can't go back more than we have data.
+	if (n > count) n = (int)count; // can't go back more than we have data.
 
 	// Go back N items
-	int pos = head - n;
-	if (pos < 0) pos += len;
+	int pos = (int)head - n;
+	if (pos < 0) pos += (int)len;
 	
+	return buffer[pos];
+}
+
+SimState::Data& SimState::Buffer::rewind(int n)
+{
+	CriticalSection::Lock lock(cs);
+
+	if (n > count) n = (int)count; // can't go back more than we have data.
+
+	// Go back N items
+	int pos = (int)head - n;
+	if (pos < 0) pos += (int)len;
+
 	// Reset buffer to where we go back to.
-	head = (pos + 1) % len;
+	head = ((size_t)pos + 1) % len;
 	count -= n;
 
 	return buffer[pos];
 }
+
+// Resets the buffer effectively making it empty.
+void SimState::Buffer::reset()
+{
+	CriticalSection::Lock lock(cs);
+	head = count = 0;
+}
+

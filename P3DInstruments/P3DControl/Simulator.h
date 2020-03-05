@@ -4,6 +4,8 @@
 class SimState;
 class Failures;
 class SimObjectDataRequest;
+class Logger;
+class P3DEventCommand;
 
 class Simulator : public Prepar3D
 {
@@ -11,6 +13,8 @@ class Simulator : public Prepar3D
 	SimObjectDataRequest* stateRequest;
 	Failures* failures;
 	SimObjectDataRequest* failuresRequest;
+	Logger* logger;
+	P3DEventCommand* commands;
 
 public:
 	Simulator(const char* appName, bool verbose = false);
@@ -18,5 +22,7 @@ public:
 
 	SimState* getState() { return state; }
 	Failures* getFailures() { return failures; }
+	Logger* getLogger() { return logger; }
+	P3DEventCommand* getCommands() { return commands; }
 };
 

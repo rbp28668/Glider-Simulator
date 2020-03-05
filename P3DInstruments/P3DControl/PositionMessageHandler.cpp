@@ -4,6 +4,7 @@
 #include "JSONWriter.h"
 #include "APIParameters.h"
 #include "Folder.h"
+#include "P3DEventCommand.h"
 #include "json/json.h"
 #include <iostream>
 #include <fstream>
@@ -42,6 +43,22 @@ void PositionMessageHandler::getPositionMetadata(File& f, std::string& title, st
 
 }
 
+void PositionMessageHandler::freeze()
+{
+		pSim->getCommands()->dispatchEvent(P3DEventCommand::PAUSE_ON, 0);
+		pSim->getCommands()->dispatchEvent(P3DEventCommand::FREEZE_ALTITUDE_SET, 1);
+		pSim->getCommands()->dispatchEvent(P3DEventCommand::FREEZE_ATTITUDE_SET, 1);
+		pSim->getCommands()->dispatchEvent(P3DEventCommand::FREEZE_LATITUDE_LONGITUDE_SET, 1);
+}
+
+void PositionMessageHandler::unfreeze()
+{
+	pSim->getCommands()->dispatchEvent(P3DEventCommand::FREEZE_LATITUDE_LONGITUDE_SET, 0);
+	pSim->getCommands()->dispatchEvent(P3DEventCommand::FREEZE_ATTITUDE_SET, 0);
+	pSim->getCommands()->dispatchEvent(P3DEventCommand::FREEZE_ALTITUDE_SET, 0);
+	pSim->getCommands()->dispatchEvent(P3DEventCommand::PAUSE_OFF, 0);
+}
+
 PositionMessageHandler::PositionMessageHandler(Prepar3D* p3d)
 	: MessageHandler(p3d, "position")
 	, pSim(static_cast<Simulator*>(p3d))
@@ -63,7 +80,20 @@ void PositionMessageHandler::run(const std::string& cmd, const APIParameters& pa
 	else if (cmd == "available") {
 		available(output);
 	}
-	else if (cmd == "back") {
+	else if (cmd == "start") { // gets the available number of items and freezes motion.
+		start(output);
+	}
+	else if (cmd == "stop") { // unfreezes motion without changing buffer or position
+		stop(output);
+	}
+	else if (cmd == "clear") { // clears the buffer deleting any existing history.
+		clearHistory(output);
+	}
+	else if (cmd == "set") { // go back to point (0 to available),reset the buffer and unfreeze.
+		int count = params.getInt("count", 10); // default to 10s if nothing given.
+		set(count, output);
+	}
+	else if (cmd == "back") {  // Go back to point (0 to available) without resetting buffer.
 		int count = params.getInt("count", 10); // default to 10s if nothing given.
 		back(count, output);
 	}
@@ -121,12 +151,45 @@ void PositionMessageHandler::available(std::string& output)
 	json.add("length", len);
 }
 
+void PositionMessageHandler::start(std::string& output)
+{
+	freeze();
+	int len = pSim->getState()->historyLength();
+	JSONWriter json(output);
+	json.add("status", "OK");
+	json.add("length", len);
+}
+
+void PositionMessageHandler::stop(std::string& output)
+{
+	unfreeze();
+	reportSuccess(output);
+}
+
+// Resets buffer to point and set aircraft to point.
+void PositionMessageHandler::set(int count, std::string& output)
+{
+	SimState::Data data = pSim->getState()->rewindTo(count);
+	pSim->getState()->set(data);
+	unfreeze();
+	reportSuccess(output);
+}
+
+// Puts aircraft to point.
 void PositionMessageHandler::back(int count, std::string& output)
 {
 	SimState::Data data = pSim->getState()->history(count);
 	pSim->getState()->update(data);
 	reportSuccess(output);
 }
+
+// Clears the history.  Used when changing scenarios etc.
+void PositionMessageHandler::clearHistory(std::string& output)
+{
+	pSim->getState()->clear();
+	reportSuccess(output);
+}
+
 
 void PositionMessageHandler::load(const std::string& file, std::string& output)
 {
