@@ -4,23 +4,14 @@
 package uk.co.alvagem.condorjfx.k21;
 
 
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
-
-import javax.imageio.ImageIO;
-
 import uk.co.alvagem.condorjfx.AbstractInstrument;
 import uk.co.alvagem.condorjfx.Instrument;
 

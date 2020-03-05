@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<panelConfiguration>
+    <panel name="K21">
+        <instrument className="uk.co.alvagem.condorjfx.genericInstruments.StripVario" x="5" y="10">
+            <param name="width" type="int">40</param>
+            <param name="height" type="int">460</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21ASIWinter" x="50" y="28">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21Altimeter" x="420" y="28">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="60" y="400">
+            <param name="text" type="string">Request Tow Plane</param>
+            <param name="cmd" type="string">cmd/TOW_PLANE_REQUEST</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="300" y="400">
+            <param name="text" type="string">Toggle Pause</param>
+            <param name="cmd" type="string">cmd/PAUSE_TOGGLE</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="555" y="400">
+            <param name="text" type="string">Restart</param>
+            <param name="cmd" type="string">cmd/SITUATION_RESET</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.SelectPanelButton" x="700" y="400">
+            <param name="text" type="string">Ctrl</param>
+            <param name="panelName" type="string">Control</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+    </panel>
+    <panel name="IFR">
+        <instrument className="uk.co.alvagem.condorjfx.genericInstruments.Horizon" x="206" y="0">
+            <param name="width" type="int">600</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.genericInstruments.StripVario" x="5" y="10">
+            <param name="width" type="int">40</param>
+            <param name="height" type="int">460</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.SimpleTextInstrument$Altimeter" x="500" y="12">
+            <param name="width" type="int">150</param>
+            <param name="height" type="int">40</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.SimpleTextInstrument$Compass" x="310" y="12">
+            <param name="width" type="int">150</param>
+            <param name="height" type="int">40</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21ASIWinter" x="50" y="16">
+            <param name="width" type="int">220</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21TurnAndSlip" x="52" y="251">
+            <param name="width" type="int">220</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="261" y="418">
+            <param name="text" type="string">Request Tow Plane</param>
+            <param name="cmd" type="string">cmd/TOW_PLANE_REQUEST</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="495" y="418">
+            <param name="text" type="string">Toggle Pause</param>
+            <param name="cmd" type="string">cmd/PAUSE_TOGGLE</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="676" y="418">
+            <param name="text" type="string">Restart</param>
+            <param name="cmd" type="string">cmd/SITUATION_RESET</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.SelectPanelButton" x="732" y="12">
+            <param name="text" type="string">Ctrl</param>
+            <param name="panelName" type="string">Control</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+    </panel>
+    <panel name="Control">
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="28" y="98">
+            <param name="text" type="string">Front Panel: VFR</param>
+            <param name="cmd" type="string">Panel 0</param>
+            <param name="host" type="string">192.168.2.2</param>
+            <param name="port" type="int">55278</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="28" y="40">
+            <param name="text" type="string">Front Panel: IFR</param>
+            <param name="cmd" type="string">Panel 1</param>
+            <param name="host" type="string">192.168.2.2</param>
+            <param name="port" type="int">55278</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.SelectPanelButton" x="589" y="426">
+            <param name="text" type="string">Go to VFR Panel</param>
+            <param name="panelName" type="string">K21</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.SelectPanelButton" x="371" y="426">
+            <param name="text" type="string">Go to IFR Panel</param>
+            <param name="panelName" type="string">IFR</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="28" y="201">
+            <param name="text" type="string">Engine Start</param>
+            <param name="cmd" type="string">cmd/ENGINE_AUTO_START</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="28" y="256">
+            <param name="text" type="string">Engine Stop</param>
+            <param name="cmd" type="string">cmd/ENGINE_AUTO_SHUTDOWN</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="524" y="43">
+            <param name="text" type="string">Toggle freeze altitude</param>
+            <param name="cmd" type="string">cmd/FREEZE_ALTITUDE_TOGGLE</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="524" y="101">
+            <param name="text" type="string">Climb 2000 feet</param>
+            <param name="cmd" type="string">position/up?feet=2000</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="524" y="161">
+            <param name="text" type="string">Climb 500 feet</param>
+            <param name="cmd" type="string">position/up?feet=500</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="524" y="222">
+            <param name="text" type="string">Climb 100 feet</param>
+            <param name="cmd" type="string">position/up?feet=100</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="524" y="283">
+            <param name="text" type="string">Descend 100 feet</param>
+            <param name="cmd" type="string">position/down?feet=100</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+    </panel>
+</panelConfiguration>

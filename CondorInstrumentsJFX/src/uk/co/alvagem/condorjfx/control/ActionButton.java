@@ -96,7 +96,7 @@ public class ActionButton implements Instrument {
 
 	@Override
 	public String[] getConfigFields() {
-		String[] fields = {"text","cmd", "host","port"};
+		String[] fields = {"text","cmd", "host","port", "fontSize"};
 		return fields;
 	}
 

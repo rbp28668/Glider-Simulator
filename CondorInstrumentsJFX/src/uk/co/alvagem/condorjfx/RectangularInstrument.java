@@ -18,4 +18,17 @@ public class RectangularInstrument extends AbstractInstrument {
 		this.height = height;
 	}
 	
+	/* (non-Javadoc)
+	 * @see uk.co.alvagem.condorjfx.Instrument#getConfigFields()
+	 */
+	@Override
+	public String[] getConfigFields() {
+		String[] fields =  { "width", "height"};
+		return fields;
+	}
+	
+	public int getHeight() {
+		return height;
+	}
+	
 }

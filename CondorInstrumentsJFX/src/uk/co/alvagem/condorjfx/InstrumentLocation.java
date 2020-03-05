@@ -11,6 +11,7 @@ public class InstrumentLocation {
 	private double initialX;
 	private double initialY;
 	private boolean isDragged = false;
+	private boolean dragEnabled = false;
 	private Node node;
 	private Translate translate;
 	
@@ -29,6 +30,10 @@ public class InstrumentLocation {
 		setDragHandler();
 	}
 	
+	public void enableDrag(boolean enabled) {
+		dragEnabled = enabled;
+	}
+	
 	void setDragHandler() {
 		
 		node.setOnMousePressed( me -> { 
@@ -37,8 +42,10 @@ public class InstrumentLocation {
 			isDragged = false;
 			} );
 		
-		node.setOnMouseDragged( me -> { 
-			isDragged = true;
+		node.setOnMouseDragged( me -> {
+			if(dragEnabled) {
+				isDragged = true;
+			}
 		});
 		
 		node.setOnMouseReleased( me -> {

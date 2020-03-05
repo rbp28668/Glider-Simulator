@@ -61,7 +61,7 @@ public class PopPanelButton implements Instrument {
 
 	@Override
 	public String[] getConfigFields() {
-		String[] fields = {"text"};
+		String[] fields = {"text", "fontSize"};
 		return fields;
 	}
 
