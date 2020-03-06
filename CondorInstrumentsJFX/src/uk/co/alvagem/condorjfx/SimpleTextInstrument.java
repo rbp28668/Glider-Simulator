@@ -46,7 +46,7 @@ public class SimpleTextInstrument extends RectangularInstrument {
 		if(this.value != null){
 			double value = Double.parseDouble(this.value);
 			value *= 3.2808399;  // m to feet.
-			result = String.format("%5.1f", value) + " feet";
+			result = String.format("%5.0f", value) + " ft";
 		}
 		return result;
 	}
@@ -55,7 +55,7 @@ public class SimpleTextInstrument extends RectangularInstrument {
 		String result = "------";
 		if(this.value != null){
 			double value = Double.parseDouble(this.value);
-			result = String.format("%5.1f", value) + " feet";
+			result = String.format("%5.0f", value) + " ft";
 		}
 		return result;
 	}
@@ -80,7 +80,7 @@ public class SimpleTextInstrument extends RectangularInstrument {
 		String result = "------";
 		if(this.value != null){
 			double value = Double.parseDouble(this.value);
-			result = String.format("%3.1f", value) + " degrees";
+			result = String.format("%03.0f", value);
 		}
 		return result;
 	}
@@ -110,8 +110,8 @@ public class SimpleTextInstrument extends RectangularInstrument {
 		gc.setStroke(background);
 		gc.fillRect(0,0, width, height);
 
-		gc.setStroke(Color.RED);
-		gc.setFill(Color.RED);
+		gc.setStroke(Color.BLACK);
+		gc.setFill(Color.BLACK);
 		
 		Font titleFont = new Font("SansSerif", 10);
 		gc.setFont(titleFont);

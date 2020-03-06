@@ -69,7 +69,7 @@ public class SelectPanelButton implements Instrument {
 
 	@Override
 	public String[] getConfigFields() {
-		String[] fields = {"text","panelName"};
+		String[] fields = {"text","panelName","fontSize"};
 		return fields;
 	}
 

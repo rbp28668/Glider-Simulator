@@ -40,12 +40,9 @@ public class SlewControl implements Instrument {
 		address = InetAddress.getByName(host);
 	}
 
-	
-	
 	public String getHost() {
 		return host;
 	}
-
 
 	public int getPort() {
 		return port;
@@ -129,7 +126,7 @@ public class SlewControl implements Instrument {
 
 	@Override
 	public String[] getConfigFields() {
-		String[] fields = {"host","port"};
+		String[] fields = {"host","port","fontSize"};
 		return fields;
 	}
 
