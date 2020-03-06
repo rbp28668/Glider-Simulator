@@ -44,10 +44,11 @@ unsigned MessageThread::run()
 			param = msg.substr(pos + 1);
 		}
 
-		// Replace any pipe characters with slash to make early UDP messsages more webby
+		// Replace any pipe or : characters with slash to make early UDP messsages more webby
 		// allows pipe separator in UDP messages
 		replace(cmd, '|', '/');
-		
+		replace(cmd, ':', '/');
+
 		process(cmd, param);
 	}
 	return 0;

@@ -14,6 +14,11 @@ bin/**
 ## C++ Stuff
 
 # Output files fromm build.
+Release/
+Debug/
+x86Debug/
+x86Release
+/
 *.exe
 *.obj
 *.res
@@ -24,6 +29,8 @@ bin/**
 ipch/*
 x64/*
 x64
+.vs/
+#**/.vs/**/*
 
 # code analysis
 *.pchast
