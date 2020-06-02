@@ -32,6 +32,7 @@ namespace CGC_Sim_IOS
     enum EVENTS
     {
         SIMSTART,
+        ONESEC,
         FOURSECS,
         SIMSTOP,
         PAUSE,
@@ -215,10 +216,10 @@ namespace CGC_Sim_IOS
             if (simConnection != null)
             {
                 //simConnection.WeatherSetModeGlobal();
-//                simConnection.WeatherRequestObservationAtNearestStation(DataRequestID.Weather_Data, lat, lng);
+                //simConnection.WeatherRequestObservationAtNearestStation(DataRequestID.Weather_Data, lat, lng);
+                //simConnection.WeatherRequestObservationAtStation(DataRequestID.Weather_Data,"GLOB");
                 simConnection.WeatherRequestInterpolatedObservation(DataRequestID.Weather_Data, lat, lng, 0.0f);
                 
-                //simConnection.WeatherRequestObservationAtStation(DataRequestID.Weather_Data,"GLOB");
             }
         }
 
