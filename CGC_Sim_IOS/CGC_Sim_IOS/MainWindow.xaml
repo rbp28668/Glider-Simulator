@@ -5,13 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CGC_Sim_IOS"
         mc:Ignorable="d"
-        Title="MainWindow v1.12" Height="727.2" Width="1124" SizeToContent="Manual" BorderBrush="IndianRed" Initialized="Window_Initialized" Activated="Window_Activated" WindowState="Maximized" Closing="Window_Closing">
+        Title="MainWindow v1.13" Height="727.2" Width="1350" SizeToContent="Manual" BorderBrush="IndianRed" Initialized="Window_Initialized" Activated="Window_Activated" WindowState="Maximized" Closing="Window_Closing">
     <Grid Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Window}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Window}}}" HorizontalAlignment="Left" Margin="0,0,2.571,-1" VerticalAlignment="Top" RenderTransformOrigin="0.429,0.489" Background="#FF1E1E1E">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="350*"/>
             <ColumnDefinition Width="81*"/>
+            <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
-        <TabControl Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Grid}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Grid}}}" Margin="5,5,4.857,5.286" SelectionChanged="TabControl_SelectionChanged" RenderTransformOrigin="0.503,0.5" Grid.ColumnSpan="2" >
+        <TabControl Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Grid}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Grid}}}" Margin="5,5,4.857,5.286" SelectionChanged="TabControl_SelectionChanged" RenderTransformOrigin="0.503,0.5" Grid.Column="0" Grid.ColumnSpan="1" >
             <TabItem Header="Flight" Background="Black" FontSize="20" RenderTransformOrigin="-1.373,0.407" Margin="-0.571,0,-0.429,-0.429">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FF1E1E1E" OpacityMask="Black" Margin="5">
                     <Grid.ColumnDefinitions>
@@ -154,5 +155,11 @@
                 </Grid>
             </TabItem>
         </TabControl>
+        <StackPanel Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Grid}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Grid}}}" Margin="5,5,4.857,5.286"  RenderTransformOrigin="0.503,0.5" Grid.Column="1" Grid.ColumnSpan="1" Background="#FF1E1E1E" OpacityMask="Black">
+            <TextBlock x:Name="textBlock1" Height="60" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type StackPanel}}}" Margin="0,100,5,0" TextWrapping="Wrap" Text="Airspeed" Background="#FF1E1E1E" OpacityMask="Black" FontSize="24" FontWeight="Bold" Foreground="#FFFDF8F8"/>
+            <TextBlock x:Name="textAirspeed" Height="160" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type StackPanel}}}" Margin="0,5,5,0" TextWrapping="NoWrap" Text="0" Background="#FF1E1E1E" OpacityMask="Black" FontSize="72" FontWeight="Bold" Foreground="#FFFDF8F8" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
+            <TextBlock x:Name="textBlock2" Height="60" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type StackPanel}}}" Margin="0,50,5,0" TextWrapping="Wrap" Text="Altitude QNH" Background="#FF1E1E1E" OpacityMask="Black" FontSize="24" FontWeight="Bold" Foreground="#FFFDF8F8"/>
+            <TextBlock x:Name="textAltitude" Height="160" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type StackPanel}}}" Margin="0,5,5,0" TextWrapping="NoWrap" Text="0" Background="#FF1E1E1E" OpacityMask="Black" FontSize="72" FontWeight="Bold" Foreground="#FFFDF8F8" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
+        </StackPanel>
     </Grid>
 </Window>

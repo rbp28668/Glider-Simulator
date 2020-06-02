@@ -26,6 +26,7 @@ using System.Net.Http.Headers;
 
 namespace CGC_Sim_IOS
 {
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -93,6 +94,9 @@ namespace CGC_Sim_IOS
 
         private float currentLatitude = 0.0f;
         private float currentLongitude = 0.0f;
+        private float currentAirspeed = 0.0f;
+        private float currentAltitude = 0.0f;
+        private float fieldHeight = 0.0f;
 
         private Thread closeWinchXDialog = null;
         private Thread minimiseP3DControl = null;
@@ -104,6 +108,8 @@ namespace CGC_Sim_IOS
         private List<Scenario> Scenarios_For_Airfield = new List<Scenario>();
         private string defaultScenario = "";
         private string defaultAirfield = "";
+        private string selectedAirfield = "";   // reflects the currently selected airfield on the scenarios tab
+        private string activeAirfield = "";     // the airfield / runway for the currently loaded scenario - used to filter up by IGC traffic files
 
         private List<TrafficSpeed> trafficSpeeds = new List<TrafficSpeed>();
         private List<TrafficRange> trafficRanges = new List<TrafficRange>();
@@ -111,6 +117,8 @@ namespace CGC_Sim_IOS
         private List<TrafficHeading> trafficHeadings = new List<TrafficHeading>();
         private List<WeatherTheme> weatherThemes = new List<WeatherTheme>();
         private List<WeatherTurbulance> weatherTurbulances = new List<WeatherTurbulance>();
+
+        private bool updatingWeatherControls = false;
 
 
         Process procKeyboard = null;
@@ -131,6 +139,9 @@ namespace CGC_Sim_IOS
         const uint DATA = 0;
 
         const int SW_SHOWMINNOACTIVE = 7;
+
+        private IgcManager igcManager = new IgcManager();
+
 
         public SimConnect SimConnection
         {
@@ -382,13 +393,15 @@ namespace CGC_Sim_IOS
 
                     // catch a simobject data request 
                     // Subscribe to system events 
+                    SimConnection.SubscribeToSystemEvent(EVENTS.ONESEC, "6Hz");
                     SimConnection.SubscribeToSystemEvent(EVENTS.FOURSECS, "4sec");
                     SimConnection.SubscribeToSystemEvent(EVENTS.SIMSTART, "SimStart");
                     SimConnection.SubscribeToSystemEvent(EVENTS.SIMSTOP, "SimStop");
                     SimConnection.SubscribeToSystemEvent(EVENTS.PAUSE, "Pause");
                     SimConnection.SubscribeToSystemEvent(EVENTS.CRASH_RESET, "CrashReset");
-                    
+
                     // Initially turn the events off 
+                    SimConnection.SetSystemEventState(EVENTS.ONESEC, SIMCONNECT_STATE.ON);
                     SimConnection.SetSystemEventState(EVENTS.FOURSECS, SIMCONNECT_STATE.ON);
                     SimConnection.SetSystemEventState(EVENTS.SIMSTART, SIMCONNECT_STATE.ON);
                     SimConnection.SetSystemEventState(EVENTS.SIMSTOP, SIMCONNECT_STATE.ON);
@@ -455,6 +468,7 @@ namespace CGC_Sim_IOS
                     //SimConnection.OnRecvEvent += new SimConnect.RecvEventEventHandler(SimCon_OnRecvEvent);
 
                     // Unsubscribe from all the system events 
+                    SimConnection.UnsubscribeFromSystemEvent(EVENTS.ONESEC);
                     SimConnection.UnsubscribeFromSystemEvent(EVENTS.FOURSECS);
                     SimConnection.UnsubscribeFromSystemEvent(EVENTS.SIMSTART);
                     SimConnection.UnsubscribeFromSystemEvent(EVENTS.SIMSTOP);
@@ -488,7 +502,35 @@ namespace CGC_Sim_IOS
             System.Console.WriteLine("Exception received: " + data.dwException);
         }
 
-        async void SimCon_OnRecvEvent(SimConnect sender, SIMCONNECT_RECV_EVENT recEvent)
+        public async Task<dynamic> CheckPosition()
+        {
+            dynamic response = null;
+            try
+            {
+                string[] cmd = { "position", "current" };
+                response = await simRest.RunCmdAsync(cmd);
+                Newtonsoft.Json.Linq.JObject jRep = response;
+                if (jRep.Count > 0)
+                {
+                    string val1 = (string)jRep["status"];
+                    statusOnGround = (1 == (int) jRep["current"]["on_ground"]);
+                    currentLatitude = (float) jRep["current"]["latitude"];
+                    currentLongitude = (float) jRep["current"]["longitude"];
+                    currentAirspeed = (float)jRep["current"]["airspeed"];
+                    currentAltitude = (float)jRep["current"]["altitude"];
+                    if (statusOnGround)
+                        fieldHeight = currentAltitude;
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+            return response;
+        }
+  
+
+
+        public async void SimCon_OnRecvEvent(SimConnect sender, SIMCONNECT_RECV_EVENT recEvent)
         {
             switch (recEvent.uEventID)
             {
@@ -500,44 +542,31 @@ namespace CGC_Sim_IOS
                     System.Console.WriteLine("Sim stopped");
                     break;
 
-                case (uint)EVENTS.FOURSECS:
-                    // System.Console.WriteLine("4s tick");
+                case (uint)EVENTS.ONESEC:
                     // Check current aircraft position
-                    {
-                        try
-                        {
-                            string[] cmd = { "position", "current" };
-                            dynamic response = await simRest.RunCmdAsync(cmd);
-                            Newtonsoft.Json.Linq.JObject jRep = response;
-                            if (jRep.Count > 0)
-                            {
-                                string val1 = (string)jRep["status"];
-                                statusOnGround = (1 == (int)jRep["current"]["on_ground"]);
-                                currentLatitude = (float)jRep["current"]["latitude"];
-                                currentLongitude = (float)jRep["current"]["longitude"];
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                        }
-                    }
+                    CheckPosition();
+                    UpdateInstruments();
+                    break;
+                case (uint)EVENTS.FOURSECS:
                     UpdateFailureButtons();
                     break;
                 case (uint)EVENTS.SITUATION_RESET:
                     System.Console.WriteLine("Situation reset");
                     ClearFailures();
                     Label_Rewind.Content = "";
+                    SetFieldHeight();
                     break;
                 case (uint)EVENTS.CRASH_RESET:
                     System.Console.WriteLine("Crash reset");
                     ClearFailures();
+                    SetFieldHeight();
                     break;
                 case (uint)EVENTS.TOW_PLANE_RELEASE:
                     System.Console.WriteLine("Tow plane release");
                     break;
                 case (uint)EVENTS.TOW_PLANE_REQUEST:
                     System.Console.WriteLine("Tow plane request");
-                     break;
+                    break;
                 case (uint)EVENTS.SLEW:
                     System.Console.WriteLine("Slew toggle");
                     break;
@@ -629,16 +658,31 @@ namespace CGC_Sim_IOS
             simRest.CMD_Pause();
             //HRESULT hr = SimConnect_TransmitClientEvent(p3d->getHandle(), SIMCONNECT_OBJECT_ID_USER, event, 0, SIMCONNECT_GROUP_PRIORITY_HIGHEST, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
         }
-        
+
+        private void UpdateInstruments()
+        {
+            //Debug.WriteLine("Airspeed" + currentAirspeed +  ": Altitude" + currentAltitude);
+            textAirspeed.Text = ((int)currentAirspeed).ToString();
+            if (fieldHeight == 0)
+            {
+                textBlock2.Text = "Altitude QNH";
+            }
+            else
+            {
+                textBlock2.Text = "Altitude QFE";
+            }
+            textAltitude.Text = ((int)currentAltitude - (int)fieldHeight).ToString();
+       }
+
         #region scenarios
 
         private void ComboAirfields_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            selectedAirfield = e.AddedItems[0].ToString();
             Scenarios_For_Airfield.Clear();
             foreach (Scenario entry in Scenarios)
             {
-                string airfield = e.AddedItems[0].ToString();
-                if (entry.FileName.Contains(airfield))
+                if (entry.FileName.Contains(selectedAirfield))
                 {
                     Scenarios_For_Airfield.Add(entry);
                 }
@@ -676,9 +720,10 @@ namespace CGC_Sim_IOS
                     simRest.CMD_Position_Clear_History();
                     SimConnection.FlightLoad(scenarioFileName);
                     ClearFailures();
+                    activeAirfield = selectedAirfield;
+                    SetFieldHeight();
                 }
             }
-
         }
 
         private void BuildScenarioLists()
@@ -727,17 +772,50 @@ namespace CGC_Sim_IOS
                     {
                         defaultScenario = strScenario;
                         defaultAirfield = airfield;
+                        selectedAirfield = defaultAirfield;
                     }
 
                 }
             }
             comboAirfields.ItemsSource = Scenario_Airfields;
             comboAirfields.SelectedItem = defaultAirfield;
+            activeAirfield = defaultAirfield;
 
          }
 
 
         #endregion
+
+        #region igcTraffic
+
+       
+       private void BtnIGCTraffic_Launch_Click(object sender, RoutedEventArgs e)
+       {
+            bool loop = false;
+            foreach (IGCFile igcFile in listIGCTraffic.SelectedItems)
+            {
+                igcManager.LaunchIGCTraffic(simRest, igcFile, loop);
+            }
+            listIGCTraffic.UnselectAll();
+        }
+
+        private void BtnIGCTraffic_Loop_Click(object sender, RoutedEventArgs e)
+        {
+            bool loop = true;
+            foreach(IGCFile igcFile in listIGCTraffic.SelectedItems)
+            {
+                igcManager.LaunchIGCTraffic(simRest, igcFile, loop);
+            }
+            listIGCTraffic.UnselectAll();
+        }
+
+        private void BtnIGCTraffic_Clear_Click(object sender, RoutedEventArgs e)
+        {
+            igcManager.ClearTraffic(simRest);
+        }
+
+        #endregion
+
 
         #region weather
 
@@ -812,34 +890,45 @@ namespace CGC_Sim_IOS
 
         private void UpdateWeatherControls(Metar metar)
         {
+            updatingWeatherControls = true;
             sldWind_0_Dir.Value = metar.SurfaceWindDirection;
             sldWind_0_Spd.Value = metar.SurfaceWindSpeed;
-            sldWind_0_Gst.Value = metar.SurfaceWindGust;
+            int gusts = metar.SurfaceWindGust;
+            if (gusts == 0)
+                gusts = metar.SurfaceWindSpeed;
+            sldWind_0_Gst.Value = gusts;
             comboWindTurbulance.SelectedValue = metar.SurfaceWindTurbulance;
             Button_Set_Weather.IsEnabled = true;
+            updatingWeatherControls = false;
         }
 
         private void SldWind_0_Spd_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            sim.CurrentMetar.SurfaceWindSpeed = (int)e.NewValue;
-            Button_Set_Weather.IsEnabled = true;
-            // Adjust wind slider if necessary
-            if (sim.CurrentMetar.SurfaceWindSpeed > sim.CurrentMetar.SurfaceWindGust)
+            if (!updatingWeatherControls)
             {
-                sim.CurrentMetar.SurfaceWindGust = sim.CurrentMetar.SurfaceWindSpeed;
-                sldWind_0_Gst.Value = sim.CurrentMetar.SurfaceWindGust;
+                sim.CurrentMetar.SurfaceWindSpeed = (int)e.NewValue;
+                Button_Set_Weather.IsEnabled = true;
+                // Adjust wind slider if necessary
+                if (sim.CurrentMetar.SurfaceWindSpeed > sim.CurrentMetar.SurfaceWindGust)
+                {
+                    sim.CurrentMetar.SurfaceWindGust = sim.CurrentMetar.SurfaceWindSpeed;
+                    sldWind_0_Gst.Value = sim.CurrentMetar.SurfaceWindGust;
+                }
             }
         }
 
         private void SldWind_0_Gst_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            sim.CurrentMetar.SurfaceWindGust = (int)e.NewValue;
-            Button_Set_Weather.IsEnabled = true;
-            // Adjust wind slider if necessary
-            if (sim.CurrentMetar.SurfaceWindGust < sim.CurrentMetar.SurfaceWindSpeed)
+            if (!updatingWeatherControls)
             {
-                sim.CurrentMetar.SurfaceWindSpeed = sim.CurrentMetar.SurfaceWindGust;
-                sldWind_0_Spd.Value = sim.CurrentMetar.SurfaceWindSpeed;
+                sim.CurrentMetar.SurfaceWindGust = (int)e.NewValue;
+                Button_Set_Weather.IsEnabled = true;
+                // Adjust wind slider if necessary
+                if (sim.CurrentMetar.SurfaceWindGust < sim.CurrentMetar.SurfaceWindSpeed)
+                {
+                    sim.CurrentMetar.SurfaceWindSpeed = sim.CurrentMetar.SurfaceWindGust;
+                    sldWind_0_Spd.Value = sim.CurrentMetar.SurfaceWindSpeed;
+                }
             }
         }
 
@@ -858,7 +947,7 @@ namespace CGC_Sim_IOS
 
         #endregion
 
-        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        async void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             System.Windows.Controls.TabControl tabControl = sender as System.Windows.Controls.TabControl; // e.Source could have been used instead of sender as well
             TabItem item = tabControl.SelectedValue as TabItem;
@@ -879,6 +968,16 @@ namespace CGC_Sim_IOS
                     if (SimConnection != null)
                     {
                         InitialiseTrafficTab();
+                    }
+                }
+                else if (item.Name == "TabRecordedTraffic")
+                {
+                    if (SimConnection != null)
+                    {
+                        await igcManager.BuildIGCTrafficList(simRest, activeAirfield);
+                        listIGCTraffic.ItemsSource = igcManager.IGCFiles;
+                        listIGCTraffic.DisplayMemberPath = "Description";
+                        listIGCTraffic.SelectedValuePath = "FileName";
                     }
                 }
             }
@@ -1012,10 +1111,11 @@ namespace CGC_Sim_IOS
             SimConnection.FlightLoad("Temp");
         }
 
-#region PositionRewind 
+        #region PositionRewind 
 
-        private async void RewindConfigure(bool paused)
+        public async Task<dynamic> RewindConfigure(bool paused)
         {
+            dynamic response = null;
             try
             {
                 if (paused == false && rewindCount != 1)
@@ -1029,6 +1129,7 @@ namespace CGC_Sim_IOS
                 if (paused)
                 {
                     int length = await simRest.CMD_Position_Available();
+                    response = length;
                     rewindCount = 1;
                     Slider_Position_Rewind.Value = 1;
                     Slider_Position_Rewind.Minimum = 1;
@@ -1044,6 +1145,7 @@ namespace CGC_Sim_IOS
                 System.Console.WriteLine("Rewind Configure\n\n{0}\n\n{1}",
                                          ex.Message, ex.StackTrace);
             }
+            return response;
         }
 
 
@@ -1108,8 +1210,16 @@ namespace CGC_Sim_IOS
             simRest.RunCmdAsync(cmd);
         }
 
-        private async void UpdateFailureButtons()
+        private void SetFieldHeight()
         {
+            fieldHeight = 0;
+            if (activeAirfield.StartsWith("Gransden"))
+                fieldHeight = 250;
+        }
+
+        public async Task<dynamic> UpdateFailureButtons()
+        {
+            dynamic response = null; ;
             bool changed = await simRest.Get_Failure_States();
             if (changed)
             {
@@ -1119,6 +1229,8 @@ namespace CGC_Sim_IOS
                 Button_Fail_Pitot.Content = simRest.PitotFailed ? "Clear Pitot" : "Fail Pitot";
                 Button_Fail_Electrical.Content = simRest.ElectricsFailed ? "Clear Electrics" : "Fail Electrics";
             }
+            response = changed;
+            return response;
         }
 
         private async void Button_Fail_ASI_Click(object sender, RoutedEventArgs e)
@@ -1314,7 +1426,8 @@ namespace CGC_Sim_IOS
         {
             ShowOSK();
         }
-    }
+
+     }
 
     public class TextBoxOutputter : TextWriter
     {
@@ -1456,7 +1569,6 @@ namespace CGC_Sim_IOS
             MetarLetter = metarLetter;
         }
     }
-
 
 }
 
