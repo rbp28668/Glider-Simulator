@@ -35,6 +35,9 @@ public class Main extends Application {
 	private Panel panel = null;
 	private boolean showControl = false;
 	private boolean showDiagnostics = false;
+	private boolean enableDrag = false;
+	private int screenX = 0;
+	private int screenY = 0; 
 	private Stage primaryStage = null;
 	private Commands commands = new Commands(); // Application wide command handler.
 	private PacketReceiver receiver;
@@ -85,6 +88,12 @@ public class Main extends Application {
 			addDiagnostics(root);
 		}
 
+		if(enableDrag) {
+			for(InstrumentLocation il : instruments.getInstruments()) {
+				il.enableDrag(true);
+			}
+		}
+		
 		Scene scene = new Scene(root, primaryStage.getWidth(), primaryStage.getHeight(), Color.rgb(20,20,20));
 
 		// add the single node onto the scene graph
@@ -116,9 +125,13 @@ public class Main extends Application {
 		Canvas c = new Canvas(1920,1200);
 		GraphicsContext gc = c.getGraphicsContext2D();
 		gc.setFill(Color.DARKGRAY);
-		gc.fillRect(0, 0, 1280, 1024);
-		gc.setFill(Color.LIGHTGRAY);
-		gc.fillRect(0, 0, 1024, 768);
+		if(screenX > 0 && screenY > 0) {
+			gc.fillRect(0, 0, screenX, screenY);
+		} else {
+			gc.fillRect(0, 0, 1280, 1024);
+			gc.setFill(Color.LIGHTGRAY);
+			gc.fillRect(0, 0, 1024, 768);
+		}
 		panel.getInstruments().drawDiagnostic(gc);
 		root.getChildren().add(0,c);
 	}
@@ -170,6 +183,17 @@ public class Main extends Application {
 
 		showControl =  "true".equals(argProps.get("dialog"));
 		showDiagnostics =  "true".equals(argProps.get("diagnostics"));
+		if(showDiagnostics) {
+			String str = argProps.get("screenx");
+			if(str != null) {
+				screenX = Integer.parseInt(str);
+			}
+			str = argProps.get("screeny");
+			if(str != null) {
+				screenY = Integer.parseInt(str);
+			}
+		}
+		enableDrag =  "true".equals(argProps.get("drag"));
 		return panel;
 	}
 
