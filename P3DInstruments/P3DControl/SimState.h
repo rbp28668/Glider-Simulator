@@ -1,6 +1,6 @@
 #pragma once
 #include "../P3DCommon/SimObjectData.h"
-#include "CriticalSection.h"
+#include "../P3DCommon/CriticalSection.h"
 #include "InitPosition.h"
 
 class Prepar3D;

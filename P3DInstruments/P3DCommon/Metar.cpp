@@ -114,6 +114,9 @@ void Metar::clear()
 std::string Metar::parse(const std::string& metar)
 {
 	assert(this);
+
+	CriticalSection::Lock lock(guard);
+
 	clear();
 
 	std::string::const_iterator pos = metar.begin();
@@ -159,6 +162,8 @@ std::string Metar::parse(const std::string& metar)
 
 void Metar::merge(const Metar& metar)
 {
+	CriticalSection::Lock lock(guard);
+
 	for (int t = STATION; t < FIELD_COUNT; ++t) {
 		if (!metar.fields[t].empty()) {
 			fields[t] = metar.fields[t];
@@ -177,6 +182,8 @@ bool Metar::setField(FieldType field, const std::string& value)
 {
 	assert(this);
 	assert(field >= STATION && field < FIELD_COUNT);
+
+	CriticalSection::Lock lock(guard);
 
 	fields[field].clear();
 
@@ -241,9 +248,12 @@ bool Metar::outputField(FieldType ft, std::string& output, bool needsSpace) cons
 }
 
 // Regenerates the metar as a text string.
-std::string Metar::text() const
+std::string Metar::text() 
 {
 	assert(this);
+
+	CriticalSection::Lock lock(guard);
+
 	std::string text;
 	bool needsSpace = false;
 	needsSpace = outputField(STATION, text, needsSpace);
@@ -300,9 +310,13 @@ void Metar::showField(FieldType field, std::string& text) const {
 	
 }
 
-std::string Metar::show() const
+std::string Metar::show()
 {
+	assert(this);
+
 	std::string text;
+
+	CriticalSection::Lock lock(guard);
 
 	showField(STATION, text);
 	showField(REPORT_TYPE, text);

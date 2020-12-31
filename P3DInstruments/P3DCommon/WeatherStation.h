@@ -19,9 +19,9 @@ public:
 
 	const std::string& name() const { return icao; }
 	void requestWeather();
-	const Metar& lastWeatherReport() const { return lastWeather; }
-	void updateWeather(const Metar& metar, DWORD seconds);
-	void setWeather(const Metar& metar, DWORD seconds=0);
+	Metar& lastWeatherReport() { return lastWeather; }
+	void updateWeather(Metar& metar, DWORD seconds);
+	void setWeather(Metar& metar, DWORD seconds=0);
 	void updateFromSim(const char* pszMetar);
 };
 

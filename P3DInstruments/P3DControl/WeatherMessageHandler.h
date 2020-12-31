@@ -35,11 +35,11 @@ public:
 	void addWeatherStation(const std::string& icao, std::string& output);
 	void addWeatherStationHere(const std::string& icao, const std::string& name, std::string& output);
 
-	void update(const Metar& m, DWORD seconds, std::string& output);
-	void updateGlobal(const Metar& m, DWORD seconds, std::string& output);
+	void update(Metar& m, DWORD seconds, std::string& output);
+	void updateGlobal(Metar& m, DWORD seconds, std::string& output);
 
-	void set(const Metar& m, DWORD seconds, std::string& output);
-	void setGlobal(const Metar& m, DWORD seconds, std::string& output);
+	void set(Metar& m, DWORD seconds, std::string& output);
+	void setGlobal(Metar& m, DWORD seconds, std::string& output);
 
 };
 

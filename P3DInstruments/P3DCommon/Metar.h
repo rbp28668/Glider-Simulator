@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "CriticalSection.h"
 
 // See SimConnect_WeatherSetObservation for details of metar format.
 // http://www.prepar3d.com/SDKv4/sdk/simconnect_api/references/world_functions.html#Metar%20Data%20Format
@@ -43,6 +44,8 @@ private:
 	Field fields[FIELD_COUNT];
 	static FieldDefinition definitions[FIELD_COUNT];
 
+	CriticalSection guard;
+
 	void skipSpaces(std::string::const_iterator& pos);
 	std::string match(const char* pszRegex, std::string::const_iterator& pos, const std::string::const_iterator& end);
 	bool parseSingleField(FieldType field, std::string::const_iterator& pos, const std::string::const_iterator& end);
@@ -54,8 +57,8 @@ private:
 public:
 	Metar();
 	Metar(const std::string& metar);
-	std::string text() const;
-	std::string show() const;
+	std::string text();
+	std::string show();
 	std::string parse(const std::string& metar);
 	void merge(const Metar& metar);
 	bool setField(FieldType field, const std::string& value); // true if successful set, false if invalid format

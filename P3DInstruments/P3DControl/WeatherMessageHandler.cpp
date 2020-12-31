@@ -377,7 +377,7 @@ void WeatherMessageHandler::requestWeather(const std::string& icao, std::string&
 	WeatherStation* station = pSim->weatherStations().get(icao);
 	if (station) {
 
-		const Metar& metar = station->lastWeatherReport();
+		Metar& metar = station->lastWeatherReport();
 		JSONWriter json(output);
 		json.add("status", "OK");
 		json.add("station", station->name());
@@ -392,7 +392,7 @@ void WeatherMessageHandler::requestWeather(const std::string& icao, std::string&
 void WeatherMessageHandler::requestGlobalWeather(std::string& output)
 {
 	WeatherStation* station = pSim->weatherStations().globalWeather();
-	const Metar& metar = station->lastWeatherReport();
+	Metar& metar = station->lastWeatherReport();
 	JSONWriter json(output);
 	json.add("status", "OK");
 	json.add("station", station->name());
@@ -485,7 +485,7 @@ bool WeatherMessageHandler::buildMetar(const APIParameters& params, Metar& metar
 }
 
 // Updates the weather station identified by its icao code.
-void WeatherMessageHandler::update(const Metar& m, DWORD seconds, std::string& output)
+void WeatherMessageHandler::update(Metar& m, DWORD seconds, std::string& output)
 {
 	std::string icao = m.get(Metar::STATION);
 	if (icao.length() > 4) {
@@ -503,14 +503,14 @@ void WeatherMessageHandler::update(const Metar& m, DWORD seconds, std::string& o
 }
 
 // Update the global weather.
-void WeatherMessageHandler::updateGlobal(const Metar& m, DWORD seconds, std::string& output)
+void WeatherMessageHandler::updateGlobal(Metar& m, DWORD seconds, std::string& output)
 {
 	pSim->weatherStations().globalWeather()->updateWeather(m, seconds);
 	reportSuccess(output);
 }
 
 // Sets the weather station identified by its icao code.
-void WeatherMessageHandler::set(const Metar& m, DWORD seconds, std::string& output)
+void WeatherMessageHandler::set(Metar& m, DWORD seconds, std::string& output)
 {
 	std::string icao = m.get(Metar::STATION);
 	if (icao.length() > 4) {
@@ -528,7 +528,7 @@ void WeatherMessageHandler::set(const Metar& m, DWORD seconds, std::string& outp
 }
 
 // Sets the global weather.
-void WeatherMessageHandler::setGlobal(const Metar& m, DWORD seconds, std::string& output)
+void WeatherMessageHandler::setGlobal(Metar& m, DWORD seconds, std::string& output)
 {
 	pSim->weatherStations().globalWeather()->setWeather(m, seconds);
 	reportSuccess(output);

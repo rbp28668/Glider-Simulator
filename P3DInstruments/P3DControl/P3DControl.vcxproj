@@ -161,7 +161,6 @@
     <ClInclude Include="APIParameters.h" />
     <ClInclude Include="APIThread.h" />
     <ClInclude Include="CommandInterpreter.h" />
-    <ClInclude Include="CriticalSection.h" />
     <ClInclude Include="EventMessageHandler.h" />
     <ClInclude Include="Extension.h" />
     <ClInclude Include="Failures.h" />
@@ -216,7 +215,6 @@
     <ClCompile Include="APIParameters.cpp" />
     <ClCompile Include="APIThread.cpp" />
     <ClCompile Include="CommandInterpreter.cpp" />
-    <ClCompile Include="CriticalSection.cpp" />
     <ClCompile Include="Extension.cpp" />
     <ClCompile Include="Failures.cpp" />
     <ClCompile Include="FailuresMessageHandler.cpp" />

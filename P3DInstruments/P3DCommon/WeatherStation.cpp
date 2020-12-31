@@ -61,7 +61,7 @@ void WeatherStation::requestWeather()
 
 }
 
-void WeatherStation::setWeather(const Metar& metar, DWORD seconds)
+void WeatherStation::setWeather(Metar& metar, DWORD seconds)
 {
 	lastWeather = metar;
 	HRESULT hr = ::SimConnect_WeatherSetObservation(
@@ -71,7 +71,7 @@ void WeatherStation::setWeather(const Metar& metar, DWORD seconds)
 	);
 }
 
-void WeatherStation::updateWeather(const Metar& metar, DWORD seconds)
+void WeatherStation::updateWeather(Metar& metar, DWORD seconds)
 {
 	lastWeather.merge(metar);
 	std::cout << lastWeather.text() << std::endl;
