@@ -9,7 +9,7 @@ class SerialLink : public Transport
 	OVERLAPPED osWrite; // track the write
 
 public:
-	SerialLink(const char* pszPort);
+	SerialLink(const char* pszPort, int bps);
 	virtual ~SerialLink(void);
 
 	virtual bool canSend();

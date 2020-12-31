@@ -68,7 +68,18 @@ bool Metar::parseSingleField(FieldType field, std::string::const_iterator& pos, 
 	assert(field >= STATION && field < FIELD_COUNT);
 	assert(definitions[field].type == field); // sanity check to make sure all in the right order
 
+	// Maybe nothing
+	if (pos == end) {
+		return false;
+	}
+
 	skipSpaces(pos);
+
+	// In case of trailing spaces...
+	if (pos == end) {
+		return false;
+	}
+
 	std::string value = match(definitions[field].regex, pos, end);
 	if (!value.empty()) {
 		fields[field].push_back(value);
@@ -137,6 +148,12 @@ std::string Metar::parse(const std::string& metar)
 	while (!residual.empty() && isspace(residual.back())) {
 		residual.pop_back();
 	}
+
+	// Optional extension must not be set on update hence remove it.
+	if (fields[STATION][0].length() > 4) {
+		fields[STATION][0] = fields[STATION][0].substr(0, 4);
+	}
+
 	return residual;
 }
 
@@ -156,36 +173,20 @@ void Metar::merge(const Metar& metar)
 }
 
 // Sets a field value.  It either has to be a valid value or empty.
-bool Metar::set(FieldType field, const std::string& value)
+bool Metar::setField(FieldType field, const std::string& value)
 {
 	assert(this);
 	assert(field >= STATION && field < FIELD_COUNT);
 
 	fields[field].clear();
-	bool valid = add(field, value);
+
+	std::string::const_iterator pos = value.begin();
+	std::string::const_iterator end = value.end();
+
+	bool valid = parseField(field, pos, end);
 	return valid;
 }
 
-bool Metar::add(FieldType field, const std::string& value)
-{
-	assert(this);
-	assert(field >= STATION && field < FIELD_COUNT);
-
-	bool valid = true;
-
-	if (!value.empty()) {
-		std::regex r(definitions[field].regex);
-		valid = (std::regex_match(value, r));
-		if (valid) {
-			fields[field].push_back(value);
-		}
-		else {
-			std::cout << "Invalid field " << definitions[field].name << " - " << value << " does not match " << definitions[field].regex << std::endl;
-		}
-	}
-
-	return valid;
-}
 
 std::string Metar::get(FieldType field) const
 {
@@ -286,7 +287,7 @@ void Metar::showField(FieldType field, std::string& text) const {
 			text.append(" | ");
 		}
 
-		if (fields[field].size() == 1) {
+		if (fields[field].size() > 0) {
 			text.append(definitions[field].name);
 			text.append(" : ");
 			text.append(fields[field][0]);

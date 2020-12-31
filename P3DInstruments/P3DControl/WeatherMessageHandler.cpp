@@ -97,7 +97,7 @@ void WeatherMessageHandler::run(const std::string& cmd, const APIParameters& par
 		Metar m;
 		std::string error("Unable to update global weather");
 		if (buildMetar(params, m, error)) {
-			m.set(Metar::STATION, "GLOB");
+			m.setField(Metar::STATION, "GLOB");
 			updateGlobal(m, seconds, output);
 		}
 		else {
@@ -123,7 +123,7 @@ void WeatherMessageHandler::run(const std::string& cmd, const APIParameters& par
 		Metar m;
 		std::string error("Unable to update global weather");
 		if (buildMetar(params, m, error)) {
-			m.set(Metar::STATION, "GLOB");
+			m.setField(Metar::STATION, "GLOB");
 			setGlobal(m, seconds, output);
 		}
 		else {
@@ -155,7 +155,7 @@ void WeatherMessageHandler::run(const std::string& cmd, const APIParameters& par
 		Metar m;
 		std::string residual = m.parse(metarText);
 		if (residual.empty()) {
-			m.set(Metar::STATION, "GLOB");
+			m.setField(Metar::STATION, "GLOB");
 			setGlobal(m, seconds, output);
 		}
 		else { // wasn't able to parse whole string so fail...
@@ -436,34 +436,16 @@ void WeatherMessageHandler::addWeatherStationHere(const std::string& icao, const
 // valid is set if there is a failure
 // returns valid.
 bool WeatherMessageHandler::processMetarParam(const APIParameters& params, Metar::FieldType type, const char* pszName,  Metar& metar, std::ostringstream& errorMessage, bool& valid) {
-
 	std::string value = params.getString(pszName);
-	if (!metar.set(type, value)) {
+	if (value.empty()) {
+		return true; // empty is valid (i.e. no value supplied).
+	}
+
+	if (!metar.setField(type, value)) {
 		errorMessage << (valid ? "Metar error " : ", ");
 		errorMessage << "Invalid " << metar.typeName(type) << " : " << value;
 		valid = false;
 	}
-
-	// So if we read in one good non empty value and there may be multiple ones, go look...
-	else if(!value.empty() && metar.multiple(type)) {
-		for (int idx = 0; valid; ++idx) {
-			std::ostringstream os;
-			os << pszName << idx;
-			value = params.getString(os.str());
-			if (value.empty()) {
-				break;
-			}
-			else {
-				if (!metar.add(type, value)) {
-					errorMessage << (valid ? "Metar error " : ", ");
-					errorMessage << "Invalid " << metar.typeName(type) << " : " << value;
-					valid = false;
-				}
-
-			}
-		}
-	}
-
 	return valid;
 }
 // Builds a metar out of its different parameters.

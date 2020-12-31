@@ -58,8 +58,7 @@ public:
 	std::string show() const;
 	std::string parse(const std::string& metar);
 	void merge(const Metar& metar);
-	bool set(FieldType field, const std::string& value); // true if successful set, false if invalid format
-	bool add(FieldType field, const std::string& value); // true if successful set, false if invalid format
+	bool setField(FieldType field, const std::string& value); // true if successful set, false if invalid format
 	std::string get(FieldType field) const;
 	bool multiple(FieldType field) const;
 	const char* typeName(FieldType field) const;

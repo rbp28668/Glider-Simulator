@@ -26,6 +26,7 @@ int main(int argc, char* argv[])
 	int port = 4353;
 	DWORD delay = 500;
 	bool verbose = false;
+	int bps = 115200;
 
 	for(int i=1; i<argc; ) {
 		std::string arg = argv[i++];
@@ -37,7 +38,21 @@ int main(int argc, char* argv[])
 				std::cerr << "Missing port parameter for -serial option, defaulting to " << serialPort << std::endl;
 			}
 			
-		} else if (arg == "-tcp") {
+		} else if (arg == "-bps") {
+			if (i < argc) {
+				try {
+					bps = std::stoi(argv[i++]);
+				}
+				catch (std::exception& ex) {
+					std::cerr << "Missing or invalid bps value: " << ex.what() << std::endl;
+				}
+			}
+			else {
+				std::cerr << "Missing value for --bps option, defaulting to " << bps << std::endl;
+			}
+
+		}
+		else if (arg == "-tcp") {
 			connectionType = TCP;
 			if(i < argc) {
 				host = argv[i++];
@@ -91,7 +106,7 @@ int main(int argc, char* argv[])
 	std::cout << "Starting P3DtoPDA on ";
 	switch(connectionType) {
 	case SERIAL:
-		std::cout << "SERIAL: " << serialPort;
+		std::cout << "SERIAL: " << serialPort << " at " << bps << "bsp";
 		break;
 
 	case TCP:
@@ -119,7 +134,7 @@ int main(int argc, char* argv[])
 
 	switch(connectionType) {
 	case SERIAL:
-		transport = new SerialLink(serialPort);
+		transport = new SerialLink(serialPort, bps);
 		break;
 
 	case UDP:
