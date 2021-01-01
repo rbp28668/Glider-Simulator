@@ -120,9 +120,15 @@ void RecordMessageHandler::stopRecordingAndSave(const std::string& title, const 
 
 void RecordMessageHandler::playbackRecording(const std::string& name, std::string& output)
 {
+
+	//Expand name to full path.
+	DocumentDirectory docs;
+	Directory recordingFolder = docs.sub("Prepar3D v4 files");
+	File file = recordingFolder.file(name.c_str());
+
 	HRESULT hr = SimConnect_PlaybackRecording(
 		p3d->getHandle(),
-		name.c_str(),
+		(const char*)file,
 		0,  // from start
 		-1, // whole recording
 		FALSE // no dialog
