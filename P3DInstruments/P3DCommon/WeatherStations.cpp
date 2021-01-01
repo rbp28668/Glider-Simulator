@@ -80,3 +80,11 @@ WeatherStation* WeatherStations::get(const std::string& ICAO)
 	}
 	return station;
 }
+
+WeatherStations::StationMap::const_iterator WeatherStations::begin() const {
+	return stations.cbegin();
+}
+
+WeatherStations::StationMap::const_iterator WeatherStations::end() const {
+	return stations.cend();
+}

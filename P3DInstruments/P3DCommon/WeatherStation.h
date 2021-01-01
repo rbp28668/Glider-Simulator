@@ -10,6 +10,7 @@ class WeatherStation
 	bool owned; // true if we've created this one, false if existing.
 	LONG requestId;  // used for p3D requests.
 	Metar lastWeather; // set up by requestWeather.
+	bool updated;
 
 public:
 	WeatherStation(Prepar3D* p3d);
@@ -18,6 +19,7 @@ public:
 	~WeatherStation();
 
 	const std::string& name() const { return icao; }
+	bool hasUpdate() const { return updated; }
 	void requestWeather();
 	Metar& lastWeatherReport() { return lastWeather; }
 	void updateWeather(Metar& metar, DWORD seconds);

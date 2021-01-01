@@ -11,7 +11,7 @@
 // Regex to match a single entry
 // flag to say if multiple entries are used. 
 Metar::FieldDefinition Metar::definitions[FIELD_COUNT] = {
-	{ STATION,			"STATION",			"^[A-Z]{4}(&A[0-9]{1,3})?", false },
+	{ STATION,			"STATION",			"^[A-Z0-9]{4}(&A[0-9]{1,3})?", false },
 	{ REPORT_TYPE,		"REPORT_TYPE",		"^METAR|SPECI", false},
 	{ AUTO,				"AUTO",				"^AUTO", false },
 	{ COR,				"COR",				"^COR", false },
@@ -153,7 +153,7 @@ std::string Metar::parse(const std::string& metar)
 	}
 
 	// Optional extension must not be set on update hence remove it.
-	if (fields[STATION][0].length() > 4) {
+	if (!fields[STATION].empty() && fields[STATION][0].length() > 4) {
 		fields[STATION][0] = fields[STATION][0].substr(0, 4);
 	}
 

@@ -78,6 +78,11 @@ void WeatherMessageHandler::run(const std::string& cmd, const APIParameters& par
 		std::string name = params.getString("name");
 		addWeatherStationHere(icao, name, output);
 	}
+	// Gets list of custom stations.
+	else if (cmd == "stations") {
+		getWeatherStations(output);
+	}
+
 	// Updates the weather at the given weather station.  Partial updates
 	// are merged with the current state.
 	else if (cmd == "update") {
@@ -426,6 +431,25 @@ void WeatherMessageHandler::addWeatherStationHere(const std::string& icao, const
 	json.add("status", "OK");
 	json.add("icao", result);
 }
+
+void WeatherMessageHandler::getWeatherStations(std::string& output) {
+	JSONWriter json(output);
+	json.add("status", "OK");
+	json.array("stations");
+	for (auto iter = pSim->weatherStations().begin(); iter != pSim->weatherStations().end(); ++iter) {
+		if (iter->first == "GLOB") {
+			continue;
+		}
+
+		json.object();
+		json.add("icao", iter->first);
+		json.add("updated", iter->second->hasUpdate());
+		json.add("metar", iter->second->lastWeatherReport().text());
+		json.end();
+	}
+	json.end();
+}
+
 
 // Processes the parameter(s) for a single metar field.
 // params holds the params.
