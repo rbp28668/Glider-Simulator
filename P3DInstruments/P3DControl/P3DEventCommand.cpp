@@ -83,6 +83,8 @@ void P3DEventCommand::setupEvents() {
 	mapEvent(SELECT_4, "SELECT_4");
 	mapEvent(MINUS, "MINUS");
 	mapEvent(PLUS, "PLUS");
+	mapEvent(SITUATION_SAVE, "SITUATION_SAVE");
+	mapEvent(SITUATION_RESET, "SITUATION_RESET");
 	mapEvent(TOGGLE_AIRCRAFT_LABELS, "TOGGLE_AIRCRAFT_LABELS");
 	mapEvent(EXIT, "EXIT");
 	mapEvent(ABORT, "ABORT");
