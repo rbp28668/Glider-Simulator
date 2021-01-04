@@ -269,6 +269,8 @@ void PositionMessageHandler::list(const std::string& filter, std::string& output
 		json.array("entries");
 		for (File::ListT::iterator it = files.begin(); it != files.end(); ++it) {
 
+			//File src = p3dFolder.file(*it); // get full path
+
 			std::string title;
 			std::string description;
 			getPositionMetadata(*it, title, description);

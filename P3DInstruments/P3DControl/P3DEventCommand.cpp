@@ -62,11 +62,21 @@ void P3DEventCommand::setupEvents() {
 	mapEvent(ELEV_TRIM_UP, "ELEV_TRIM_UP");
 	mapEvent(SPOILERS_ON, "SPOILERS_ON");
 	mapEvent(SPOILERS_OFF, "SPOILERS_OFF");
+	mapEvent(ELEVATOR_SET, "ELEVATOR_SET");			// Sets elevator position (-16383 - +16383)
+	mapEvent(AILERON_SET, "AILERON_SET");			// Sets aileron position (-16383 - +16383)
+	mapEvent(RUDDER_SET, "RUDDER_SET");				// Sets rudder position (-16383 - +16383)
 	mapEvent(BAROMETRIC, "BAROMETRIC");
 	mapEvent(KOHLSMAN_INC, "KOHLSMAN_INC");
 	mapEvent(KOHLSMAN_DEC, "KOHLSMAN_DEC");
 	mapEvent(KOHLSMAN_SET, "KOHLSMAN_SET");
 	mapEvent(RESET_G_FORCE_INDICATOR, "RESET_G_FORCE_INDICATOR");
+	mapEvent(TOGGLE_VACUUM_FAILURE, "TOGGLE_VACUUM_FAILURE");			// Toggle vacuum system failure	Shared Cockpit
+	mapEvent(TOGGLE_ELECTRICAL_FAILURE, "TOGGLE_ELECTRICAL_FAILURE");		// Toggle electrical system failure	Shared Cockpit
+	mapEvent(TOGGLE_PITOT_BLOCKAGE, "TOGGLE_PITOT_BLOCKAGE");			// Toggles blocked pitot tube	Shared Cockpit
+	mapEvent(TOGGLE_STATIC_PORT_BLOCKAGE, "TOGGLE_STATIC_PORT_BLOCKAGE");		// Toggles blocked static port	Shared Cockpit
+	mapEvent(TOGGLE_HYDRAULIC_FAILURE, "TOGGLE_HYDRAULIC_FAILURE");			// Toggles hydraulic system failure	Shared Cockpit
+	mapEvent(TOGGLE_TOTAL_BRAKE_FAILURE, "TOGGLE_TOTAL_BRAKE_FAILURE");		// Toggles brake failure(both)	Shared Cockpit
+	mapEvent(TOGGLE_ENGINE1_FAILURE, "TOGGLE_ENGINE1_FAILURE");
 	mapEvent(GEAR_UP, "GEAR_UP");
 	mapEvent(GEAR_DOWN, "GEAR_DOWN");
 	mapEvent(TOW_PLANE_RELEASE, "TOW_PLANE_RELEASE");
