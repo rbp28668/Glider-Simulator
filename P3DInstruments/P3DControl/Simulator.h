@@ -6,6 +6,8 @@ class Failures;
 class SimObjectDataRequest;
 class Logger;
 class P3DEventCommand;
+class Tug;
+
 
 class Simulator : public Prepar3D
 {
@@ -15,6 +17,8 @@ class Simulator : public Prepar3D
 	SimObjectDataRequest* failuresRequest;
 	Logger* logger;
 	P3DEventCommand* commands;
+	Tug* pTug; // may be null.
+
 
 public:
 	Simulator(const char* appName, bool verbose = false);
@@ -24,5 +28,10 @@ public:
 	Failures* getFailures() { return failures; }
 	Logger* getLogger() { return logger; }
 	P3DEventCommand* getCommands() { return commands; }
+	Tug* tug() { return pTug; }
+
+	virtual void aircraftAdded(DWORD objectId);
+	virtual void aircraftRemoved(DWORD objectId);
+	void tugReleased();
 };
 

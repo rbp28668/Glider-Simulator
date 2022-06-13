@@ -18,3 +18,13 @@ C:\Users\richa\Documents\Development\Simulator\Glider-Simulator\P3DInstruments\P
 C:\Users\richa\Documents\Development\Simulator\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\obj\Debug\P3DWebApiDriverDemo.csproj.CopyComplete
 C:\Users\richa\Documents\Development\Simulator\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\obj\Debug\P3DWebApiDriverDemo.exe
 C:\Users\richa\Documents\Development\Simulator\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\obj\Debug\P3DWebApiDriverDemo.pdb
+D:\Projects\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\bin\Debug\P3DWebApiDriverDemo.exe.config
+D:\Projects\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\bin\Debug\P3DWebApiDriverDemo.exe
+D:\Projects\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\bin\Debug\P3DWebApiDriverDemo.pdb
+D:\Projects\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\bin\Debug\Newtonsoft.Json.dll
+D:\Projects\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\bin\Debug\Newtonsoft.Json.xml
+D:\Projects\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\obj\Debug\P3DWebApiDriverDemo.csproj.AssemblyReference.cache
+D:\Projects\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\obj\Debug\P3DWebApiDriverDemo.csproj.CoreCompileInputs.cache
+D:\Projects\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\obj\Debug\P3DWebApiDriverDemo.csproj.CopyComplete
+D:\Projects\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\obj\Debug\P3DWebApiDriverDemo.exe
+D:\Projects\Glider-Simulator\P3DInstruments\P3DWebApiDriverDemo\obj\Debug\P3DWebApiDriverDemo.pdb

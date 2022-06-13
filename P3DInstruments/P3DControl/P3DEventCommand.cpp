@@ -147,20 +147,20 @@ bool P3DEventCommand::mapEvent(EventID event, const char* name) {
 	return hr != S_OK;
 }
 
-bool P3DEventCommand::dispatchEvent(EventID event, DWORD  dwData)
+bool P3DEventCommand::dispatchEvent(EventID event, DWORD  dwData, DWORD dwId)
 {
 	// SimConnect_MapClientEventToSimEvent for your key event definitions(along with the extra functions involved in this process) and use SimConnect_TransmitClientEvent to trigger that event.
 	// See http://www.prepar3d.com/SDKv4/sdk/references/variables/event_ids.html for event IDs
 
-	HRESULT hr = ::SimConnect_TransmitClientEvent(p3d->getHandle(), SIMCONNECT_OBJECT_ID_USER, event, dwData, SIMCONNECT_GROUP_PRIORITY_HIGHEST, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
+	HRESULT hr = ::SimConnect_TransmitClientEvent(p3d->getHandle(), dwId, event, dwData, SIMCONNECT_GROUP_PRIORITY_HIGHEST, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
 	return hr != S_OK;
 }
 
-bool P3DEventCommand::dispatchEvent(const std::string & eventName, DWORD  dwData)
+bool P3DEventCommand::dispatchEvent(const std::string & eventName, DWORD  dwData, DWORD dwId)
 {
 	EventLookup::iterator pos = eventLookup.find(eventName);
 	if (pos != eventLookup.end()) {
-		return dispatchEvent(pos->second, dwData);
+		return dispatchEvent(pos->second, dwData, dwId);
 	}
 	return true;
 }

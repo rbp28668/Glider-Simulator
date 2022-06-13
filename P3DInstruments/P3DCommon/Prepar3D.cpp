@@ -39,6 +39,7 @@ Prepar3D::~Prepar3D(void)
 	if (extSim) {
 		delete extSim;
 	}
+
 	HRESULT hr = ::SimConnect_Close(hSimConnect);
 }
 
@@ -87,6 +88,8 @@ void Prepar3D::registerSystemEvents()
 	subscribeToSystemEvent(EVENT_SIM, "Sim", "Unable to subscribe to Sim");
 	subscribeToSystemEvent(EVENT_CRASHED, "Crashed", "Unable to subscribe to Crashed");
 	subscribeToSystemEvent(EVENT_CRASH_RESET, "CrashReset", "Unable to subscribe to CrashReset");
+	subscribeToSystemEvent(EVENT_OBJECT_ADDED, "ObjectAdded", "Unable to subscribe to ObjectAdded");
+	subscribeToSystemEvent(EVENT_OBJECT_REMOVED, "ObjectRemoved", "Unable to subscribe to ObjectRemoved");
 }
 
 // Checks for failure code, outputs the given message if necessary and exits if failed.
@@ -250,6 +253,23 @@ void Prepar3D::handleWeatherObservation(SIMCONNECT_RECV* pData)
 	}
 }
 
+void Prepar3D::handleObjectAddRemove(SIMCONNECT_RECV* pData) {
+	assert(this);
+	assert(pData);
+	assert(pData->dwID == SIMCONNECT_RECV_ID_EVENT_OBJECT_ADDREMOVE);
+
+	SIMCONNECT_RECV_EVENT_OBJECT_ADDREMOVE* poar = static_cast<SIMCONNECT_RECV_EVENT_OBJECT_ADDREMOVE*>(pData);
+
+	if (poar->eObjType == SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT) {
+		if (poar->uEventID == EVENT_OBJECT_ADDED) {
+			aircraftAdded(poar->dwData);
+		}
+		else if (poar->uEventID == EVENT_OBJECT_REMOVED) {
+			aircraftRemoved(poar->dwData);
+		}
+	}
+}
+
 #ifdef USE_EXTERNAL_SIM
 void Prepar3D::handleExternalSimCreate(SIMCONNECT_RECV_EXTERNAL_SIM_CREATE* pData)
 {
@@ -355,6 +375,10 @@ void Prepar3D::Process(SIMCONNECT_RECV* pData, DWORD cbData)
 		handleWeatherObservation(pData);
 		break;
 
+	case SIMCONNECT_RECV_ID_EVENT_OBJECT_ADDREMOVE:
+		handleObjectAddRemove(pData);
+		break;
+
 #ifdef USE_EXTERNAL_SIM
 	case SIMCONNECT_RECV_ID_EXTERNAL_SIM_CREATE:
 		handleExternalSimCreate((SIMCONNECT_RECV_EXTERNAL_SIM_CREATE*)pData);
@@ -435,6 +459,14 @@ void Prepar3D::unregisterSimObject(DWORD dwObjectId)
 	if(dwObjectId != userAc.id()){
 		simObjects.remove(dwObjectId);
 	}
+}
+
+void Prepar3D::aircraftAdded(DWORD objectId)
+{
+}
+
+void Prepar3D::aircraftRemoved(DWORD objectId)
+{
 }
 
 

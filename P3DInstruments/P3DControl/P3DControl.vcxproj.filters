@@ -171,6 +171,12 @@
     <ClInclude Include="PanelMessageHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TugMessageHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -324,6 +330,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PanelMessageHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TugMessageHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tug.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

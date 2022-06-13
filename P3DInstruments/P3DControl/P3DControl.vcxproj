@@ -201,6 +201,8 @@
     <ClInclude Include="Trace.h" />
     <ClInclude Include="TracePoint.h" />
     <ClInclude Include="TrafficMessageHandler.h" />
+    <ClInclude Include="Tug.h" />
+    <ClInclude Include="TugMessageHandler.h" />
     <ClInclude Include="WeatherMessageHandler.h" />
     <ClInclude Include="WideConverter.h" />
   </ItemGroup>
@@ -259,6 +261,8 @@
     <ClCompile Include="Trace.cpp" />
     <ClCompile Include="TracePoint.cpp" />
     <ClCompile Include="TrafficMessageHandler.cpp" />
+    <ClCompile Include="Tug.cpp" />
+    <ClCompile Include="TugMessageHandler.cpp" />
     <ClCompile Include="WeatherMessageHandler.cpp" />
     <ClCompile Include="WideConverter.cpp" />
   </ItemGroup>

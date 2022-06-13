@@ -30,5 +30,6 @@ public:
 
 	void createRequest(void);
 	void handle(SIMCONNECT_RECV_SIMOBJECT_DATA *pObjData);
+	void stop();
 };
 

@@ -146,8 +146,8 @@ public:
 
 	P3DEventCommand(Prepar3D* p3d);
 	~P3DEventCommand();
-	bool dispatchEvent(EventID event, DWORD  dwData);
-	bool dispatchEvent(const std::string& eventName, DWORD  dwData);
+	bool dispatchEvent(EventID event, DWORD  dwData, DWORD dwId = SIMCONNECT_OBJECT_ID_USER);
+	bool dispatchEvent(const std::string& eventName, DWORD  dwData, DWORD dwId = SIMCONNECT_OBJECT_ID_USER);
 
 
 };
