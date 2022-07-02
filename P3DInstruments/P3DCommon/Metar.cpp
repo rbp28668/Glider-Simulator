@@ -207,16 +207,38 @@ std::string Metar::get(FieldType field) const
 	return value;
 }
 
-bool Metar::multiple(FieldType field) const
+std::string Metar::getRepeated(FieldType field) const
 {
 	assert(this);
+	assert(field >= STATION && field < FIELD_COUNT);
+
+	std::string text;
+	bool needsSpace = false;
+
+	for (int i = 0; i < fields[field].size(); ++i) {
+		if (needsSpace) {
+			text.append(" ");
+		}
+		text.append(fields[field][i]);
+		needsSpace = true;
+	}
+	return text;
+}
+
+Metar::FieldType Metar::type(int idx)
+{
+	assert(idx >= STATION && idx < FIELD_COUNT);
+	return definitions[idx].type;
+}
+
+bool Metar::multiple(FieldType field) 
+{
 	assert(field >= STATION && field < FIELD_COUNT);
 	return definitions[field].multiple;
 }
 
-const char* Metar::typeName(FieldType field) const
+const char* Metar::typeName(FieldType field) 
 {
-	assert(this);
 	assert(field >= STATION && field < FIELD_COUNT);
 	return definitions[field].name;
 }

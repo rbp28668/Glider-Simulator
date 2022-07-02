@@ -4,7 +4,7 @@
 #include "Failures.h"
 #include "Logger.h"
 #include "P3DEventCommand.h"
-
+#include "IGCFlightRecorder.h"
 #include "../P3DCommon/SimObjectDataRequest.h"
 
 Simulator::Simulator(const char* appName, bool verbose)
@@ -15,6 +15,7 @@ Simulator::Simulator(const char* appName, bool verbose)
 	, failuresRequest(0)
 	, logger(0)
 	, commands(0)
+	, fr(0)
 {
 	logger = new Logger();
 	logger->info("Startup");
@@ -23,11 +24,13 @@ Simulator::Simulator(const char* appName, bool verbose)
 	failures = new Failures(this);
 	failuresRequest = new SimObjectDataRequest(this, failures, &userAircraft(), SIMCONNECT_PERIOD_SECOND);
 	commands = new P3DEventCommand(this);
+	fr = new IGCFlightRecorder(this);
 }
 
 Simulator::~Simulator()
 {
 	logger->info("Shutdown");
+	delete fr;
 	delete commands;
 	delete failuresRequest;
 	delete failures;
