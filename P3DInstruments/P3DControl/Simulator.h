@@ -6,6 +6,7 @@ class Failures;
 class SimObjectDataRequest;
 class Logger;
 class P3DEventCommand;
+class IGCFlightRecorder;
 
 class Simulator : public Prepar3D
 {
@@ -15,6 +16,8 @@ class Simulator : public Prepar3D
 	SimObjectDataRequest* failuresRequest;
 	Logger* logger;
 	P3DEventCommand* commands;
+	IGCFlightRecorder* fr;
+
 
 public:
 	Simulator(const char* appName, bool verbose = false);
@@ -24,5 +27,6 @@ public:
 	Failures* getFailures() { return failures; }
 	Logger* getLogger() { return logger; }
 	P3DEventCommand* getCommands() { return commands; }
+	IGCFlightRecorder* getFlightRecorder() { return fr; }
 };
 

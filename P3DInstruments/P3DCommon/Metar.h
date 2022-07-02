@@ -63,7 +63,9 @@ public:
 	void merge(const Metar& metar);
 	bool setField(FieldType field, const std::string& value); // true if successful set, false if invalid format
 	std::string get(FieldType field) const;
-	bool multiple(FieldType field) const;
-	const char* typeName(FieldType field) const;
+	std::string getRepeated(FieldType field) const;
+	static FieldType type(int idx);
+	static bool multiple(FieldType field);
+	static const char* typeName(FieldType field);
 };
 
