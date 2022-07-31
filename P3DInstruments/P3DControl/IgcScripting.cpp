@@ -90,7 +90,7 @@ int IgcScripting::start(lua_State* L)
 	size_t len;
 	const char* str;
 
-	int interval = luaL_checkinteger(L, 1);
+	int interval = (int)luaL_checkinteger(L, 1);
 
 	str = luaL_checklstring(L, 2, &len);
 	std::string p1(str, len);

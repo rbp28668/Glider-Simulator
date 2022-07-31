@@ -74,9 +74,11 @@ int main(int argc, char* argv[])
 	APIThread api(&interpreter);
 	api.start();
 
+	Lua::cleanup.start();
+
 	// Setup LUA interpreter and run any startup script.
-	Lua lua(&sim);
 	if(!script.empty()) {
+		Lua lua(&sim);
 		std::string error;
 		if (lua.runFile(script, error)) {
 			sim.getLogger()->error(error);
@@ -85,7 +87,9 @@ int main(int argc, char* argv[])
 	}
 
 	sim.DispatchLoop();
-	
+
+	Lua::cleanup.stop();
+
 	api.stop();
 	messageReceiver.stop();
 

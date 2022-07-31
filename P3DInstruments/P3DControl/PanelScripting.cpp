@@ -11,7 +11,7 @@ void PanelScripting::registerMethods(Lua& lua)
 int PanelScripting::send(lua_State* L)
 {
 	std::string host(luaL_checkstring(L, 1));
-	int port = (luaL_checkinteger(L, 2));
+	int port = (int) (luaL_checkinteger(L, 2));
 	std::string cmd(luaL_checkstring(L, 3));
 	std::string err;
 	PanelMessageHandler::send(host, port, cmd, err);

@@ -7,7 +7,7 @@ class P3DEventCommand
 {
 public:
 	typedef enum EVENT_ID {
-		START_VALUE = Prepar3D::LAST_P3D_EVENT, // Note that without this we get duplicate event ID exeptions. 
+		START_VALUE = Prepar3D::EVENT_ID::LAST_P3D_EVENT, // Note that without this we get duplicate event ID exeptions. 
 
 		THROTTLE_FULL,			// Set throttles max	Shared Cockpit
 		THROTTLE_INCR,			// Increment throttles	Shared Cockpit

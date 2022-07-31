@@ -210,6 +210,15 @@
     <ClInclude Include="WeatherScripting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BlockingQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SimScripting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -402,6 +411,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WeatherScripting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BlockingQueue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SimScripting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -160,6 +160,7 @@
     <ClInclude Include="AIObject.h" />
     <ClInclude Include="APIParameters.h" />
     <ClInclude Include="APIThread.h" />
+    <ClInclude Include="BlockingQueue.h" />
     <ClInclude Include="CommandInterpreter.h" />
     <ClInclude Include="EventMessageHandler.h" />
     <ClInclude Include="EventMessageScripting.h" />
@@ -186,6 +187,7 @@
     <ClInclude Include="LogMessageHandler.h" />
     <ClInclude Include="LogScripting.h" />
     <ClInclude Include="Lua.h" />
+    <ClInclude Include="LuaThread.h" />
     <ClInclude Include="MessageHandler.h" />
     <ClInclude Include="MessageThread.h" />
     <ClInclude Include="P3DEventCommand.h" />
@@ -201,6 +203,7 @@
     <ClInclude Include="ScenarioMessageHandler.h" />
     <ClInclude Include="ScenarioScripting.h" />
     <ClInclude Include="ScriptMessageHandler.h" />
+    <ClInclude Include="SimScripting.h" />
     <ClInclude Include="SimState.h" />
     <ClInclude Include="Simulator.h" />
     <ClInclude Include="Spline.h" />
@@ -227,6 +230,7 @@
     <ClCompile Include="AIObject.cpp" />
     <ClCompile Include="APIParameters.cpp" />
     <ClCompile Include="APIThread.cpp" />
+    <ClCompile Include="BlockingQueue.cpp" />
     <ClCompile Include="CommandInterpreter.cpp" />
     <ClCompile Include="EventMessageScripting.cpp" />
     <ClCompile Include="Extension.cpp" />
@@ -251,6 +255,7 @@
     <ClCompile Include="LogMessageHandler.cpp" />
     <ClCompile Include="LogScripting.cpp" />
     <ClCompile Include="Lua.cpp" />
+    <ClCompile Include="LuaThread.cpp" />
     <ClCompile Include="MessageHandler.cpp" />
     <ClCompile Include="P3DControl.cpp" />
     <ClCompile Include="EventMessageHandler.cpp" />
@@ -268,6 +273,7 @@
     <ClCompile Include="ScenarioMessageHandler.cpp" />
     <ClCompile Include="ScenarioScripting.cpp" />
     <ClCompile Include="ScriptMessageHandler.cpp" />
+    <ClCompile Include="SimScripting.cpp" />
     <ClCompile Include="SimState.cpp" />
     <ClCompile Include="Simulator.cpp" />
     <ClCompile Include="Spline.cpp" />
