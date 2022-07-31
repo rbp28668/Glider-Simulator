@@ -205,6 +205,7 @@ bool PositionMessageHandler::load(Simulator* pSim, const std::string& file, std:
 	data.Airspeed = root["airspeed"].asInt();
 
 	pSim->getState()->update(data);
+	return true;
 }
 
 void PositionMessageHandler::save(Simulator* pSim, const std::string& file, const std::string& title, const std::string& description)

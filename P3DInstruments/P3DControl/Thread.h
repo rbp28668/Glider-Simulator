@@ -4,15 +4,21 @@
 class Thread
 {
 private:
-	uintptr_t threadHandle;
-	unsigned thrdaddr;
+	HANDLE threadHandle;
+	DWORD threadId;
+	bool shouldTerminate;
 
-	static unsigned __stdcall threadFunction(void * obj);
+	static DWORD WINAPI threadFunction(void * obj);
+
 public:
 	Thread(bool autostart = true);
 	virtual ~Thread();
 	void start();
 	virtual unsigned run() = 0;
 	void waitToFinish();
+	void stop();
+	HANDLE handle() { return threadHandle; }
+	bool running() { return !shouldTerminate; }
+
 };
 

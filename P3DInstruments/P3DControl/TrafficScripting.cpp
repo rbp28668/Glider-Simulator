@@ -42,7 +42,9 @@ int TrafficScripting::aircraft(lua_State* L)
 
 	}
 	catch (FileException& fx) {
-		lua_pushstring(L, "Unable to list available aircraft");
+		std::string err("Unable to list available aircraft: ");
+		err.append(fx.what());
+		lua_pushstring(L, err.c_str());
 		lua_error(L);
 	}
 

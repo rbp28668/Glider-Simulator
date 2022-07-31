@@ -21,7 +21,7 @@ int EventMessageScripting::dispatchEvent(lua_State* L)
 	// make parameter optional
 	DWORD dwData = 0;
 	if (lua_gettop(L) > 1) {
-		dwData = luaL_checkinteger(L, 2);
+		dwData = (DWORD) luaL_checkinteger(L, 2);
 	}
 
 	if (EventMessageHandler::dispatchEvent(pSim, cmd, dwData, output)) {

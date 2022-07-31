@@ -6,6 +6,7 @@
 #include "Folder.h"
 #include "JSONWriter.h"
 #include "Lua.h"
+#include "LuaThread.h"
 
 
 ScriptMessageHandler::ScriptMessageHandler(Prepar3D* p3d)
@@ -27,11 +28,12 @@ void ScriptMessageHandler::run(const std::string& cmd, const APIParameters& para
 	else if (cmd == "run") {
 
 		std::string file = params.getString("script");
+		bool threaded = params.getBool("threaded", true);  // run threaded by default.
 		if (file.empty()) {
 			reportFailure("Must supply file to run script", 0, output);
 		}
 		else {
-			runScript(file, output);
+			runScript(file, threaded, output);
 		}
 	}
 	else {
@@ -69,16 +71,26 @@ void ScriptMessageHandler::listScriptFiles(const std::string& filter, std::strin
 
 }
 
-void ScriptMessageHandler::runScript(const std::string& file, std::string& output)
+void ScriptMessageHandler::runScript(const std::string& file, bool threaded,  std::string& output)
 {
 	DocumentDirectory documents;
 	Directory scriptFolder = documents.sub(Prepar3D::DOCUMENTS).sub("script");
 	File f = scriptFolder.file(file);
 
 	if (f.exists()) {
-		Lua lua((Simulator*)p3d);
+
 		std::string error;
-		if (lua.runFile(f, error)) {
+		int status;
+
+		if (threaded) {
+			LuaThread* pThread = new LuaThread((Simulator*)p3d);
+			status = pThread->runFile(f, error); // load then run in thread
+		}
+		else {
+			Lua lua((Simulator*)p3d);
+			status = lua.runFile(f, error);
+		}
+		if (status) {
 			reportFailure(error.c_str(), 0, output);
 		}
 		else {

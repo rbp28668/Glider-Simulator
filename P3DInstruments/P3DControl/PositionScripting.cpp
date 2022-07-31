@@ -96,7 +96,7 @@ int PositionScripting::clear(lua_State* L)
 int PositionScripting::set(lua_State* L)
 {
     Simulator* pSim = *(Simulator**)lua_getextraspace(L);
-    int count = luaL_checkinteger(L, 1);
+    int count = (int) luaL_checkinteger(L, 1);
     PositionMessageHandler::set(pSim, count);
     return 0;
 }
@@ -104,7 +104,7 @@ int PositionScripting::set(lua_State* L)
 int PositionScripting::back(lua_State* L)
 {
     Simulator* pSim = *(Simulator**)lua_getextraspace(L);
-    int count = luaL_checkinteger(L, 1);
+    int count = (int) luaL_checkinteger(L, 1);
     PositionMessageHandler::back(pSim, count);
     return 0;
 }
@@ -179,7 +179,7 @@ int PositionScripting::list(lua_State* L)
 int PositionScripting::up(lua_State* L)
 {
     Simulator* pSim = *(Simulator**)lua_getextraspace(L);
-    int feet = luaL_checkinteger(L, 1);
+    int feet = (int) luaL_checkinteger(L, 1);
     PositionMessageHandler::up(pSim, feet);
     return 0;
 }
@@ -187,7 +187,7 @@ int PositionScripting::up(lua_State* L)
 int PositionScripting::down(lua_State* L)
 {
     Simulator* pSim = *(Simulator**)lua_getextraspace(L);
-    int feet = luaL_checkinteger(L, 1);
+    int feet = (int) luaL_checkinteger(L, 1);
     PositionMessageHandler::down(pSim, feet);
     return 0;
 }

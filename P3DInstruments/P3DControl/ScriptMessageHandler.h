@@ -10,7 +10,7 @@ public:
 	virtual void run(const std::string& cmd, const APIParameters& params, std::string& output);
 
 	void listScriptFiles(const std::string& filter, std::string& output);
-	void runScript(const std::string& file, std::string& output);
+	void runScript(const std::string& file, bool threaded, std::string& output);
 
 };
 
