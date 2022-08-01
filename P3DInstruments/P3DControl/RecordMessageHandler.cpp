@@ -4,11 +4,69 @@
 #include "APIParameters.h"
 #include "Folder.h"
 #include "JSONWriter.h"
+#include "Simulator.h"
 
 RecordMessageHandler::RecordMessageHandler(Prepar3D* p3d)
 	: MessageHandler(p3d, "record")
 {
 }
+
+bool RecordMessageHandler::start(Simulator* pSim)
+{
+	HRESULT hr = ::SimConnect_StartRecorder(
+		pSim->getHandle()
+	);
+
+	return (hr == S_OK);
+}
+
+bool RecordMessageHandler::stop(Simulator* pSim, const std::string& title, const std::string& description)
+{
+	HRESULT hr = ::SimConnect_StopRecorderAndSaveRecording(
+		pSim->getHandle(),
+		title.c_str(),
+		description.c_str(),
+		FALSE // don't propmt the user
+	);
+	return (hr == S_OK);
+}
+
+bool RecordMessageHandler::playback(Simulator* pSim, const std::string& name)
+{
+	//Expand name to full path.
+	DocumentDirectory docs;
+	Directory recordingFolder = docs.sub("Prepar3D v4 files");
+	File file = recordingFolder.file(name.c_str());
+
+	HRESULT hr = SimConnect_PlaybackRecording(
+		pSim->getHandle(),
+		(const char*)file,
+		0,  // from start
+		-1, // whole recording
+		FALSE // no dialog
+	);
+	return (hr == S_OK);
+}
+
+bool RecordMessageHandler::analyse(Simulator* pSim)
+{
+	HRESULT hr = ::SimConnect_GenerateFlightAnalysisDiagrams(
+		pSim->getHandle()
+	);
+	return(hr == S_OK);
+
+}
+
+File::ListT& RecordMessageHandler::list(File::ListT& files)
+{
+	DocumentDirectory docs;
+	Directory recordingFolder = docs.sub("Prepar3D v4 files");
+
+	recordingFolder.files(files, "*.fsr");
+
+	return files;
+}
+
 
 void RecordMessageHandler::run(const std::string& cmd, const APIParameters& params, std::string& output)
 {
@@ -48,14 +106,13 @@ void RecordMessageHandler::run(const std::string& cmd, const APIParameters& para
 }
 
 void RecordMessageHandler::saveAnalysis(std::string& output) {
-	HRESULT hr = ::SimConnect_GenerateFlightAnalysisDiagrams(
-		p3d->getHandle()
-	);
-	if (hr == S_OK) {
+	Simulator* pSim = static_cast<Simulator*>(p3d);
+	
+	if(analyse(pSim)){
 		reportSuccess(output);
 	}
 	else {
-		reportFailure("Unable to start recording", hr, output);
+		reportFailure("Unable to start recording", 0, output);
 	}
 }
 
@@ -87,57 +144,38 @@ void RecordMessageHandler::listRecordings(std::string& output) {
 	}
 }
 
+
 void RecordMessageHandler::startRecording(std::string& output)
 {
-	HRESULT hr = ::SimConnect_StartRecorder(
-		p3d->getHandle()
-	);
-
-	if (hr == S_OK) {
+	Simulator* pSim = static_cast<Simulator*>(p3d);
+	if(start(pSim)) {
 		reportSuccess(output);
 	}
 	else {
-		reportFailure("Unable to start recording", hr, output);
+		reportFailure("Unable to start recording", 0, output);
 	}
 }
 
 void RecordMessageHandler::stopRecordingAndSave(const std::string& title, const std::string& description, std::string& output)
 {
-	HRESULT hr = ::SimConnect_StopRecorderAndSaveRecording(
-		p3d->getHandle(),
-		title.c_str(),
-		description.c_str(),
-		FALSE // don't propmt the user
-	);
-	if (hr == S_OK) {
+	Simulator* pSim = static_cast<Simulator*>(p3d);
+	if(stop(pSim, title, description)) {
 		reportSuccess(output);
 	}
 	else {
-		reportFailure("Unable to stop and save recording", hr, output);
+		reportFailure("Unable to stop and save recording", 0, output);
 	}
 
 }
 
 void RecordMessageHandler::playbackRecording(const std::string& name, std::string& output)
 {
-
-	//Expand name to full path.
-	DocumentDirectory docs;
-	Directory recordingFolder = docs.sub("Prepar3D v4 files");
-	File file = recordingFolder.file(name.c_str());
-
-	HRESULT hr = SimConnect_PlaybackRecording(
-		p3d->getHandle(),
-		(const char*)file,
-		0,  // from start
-		-1, // whole recording
-		FALSE // no dialog
-	);
-	if (hr == S_OK) {
+	Simulator* pSim = static_cast<Simulator*>(p3d);
+	if (playback(pSim, name)) {
 		reportSuccess(output);
 	}
 	else {
-		reportFailure("Unable to playback recording", hr, output);
+		reportFailure("Unable to playback recording", 0, output);
 	}
 
 }

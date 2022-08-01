@@ -160,10 +160,13 @@
     <ClInclude Include="AIObject.h" />
     <ClInclude Include="APIParameters.h" />
     <ClInclude Include="APIThread.h" />
+    <ClInclude Include="BlockingQueue.h" />
     <ClInclude Include="CommandInterpreter.h" />
     <ClInclude Include="EventMessageHandler.h" />
+    <ClInclude Include="EventMessageScripting.h" />
     <ClInclude Include="Extension.h" />
     <ClInclude Include="Failures.h" />
+    <ClInclude Include="FailureScripting.h" />
     <ClInclude Include="FailuresMessageHandler.h" />
     <ClInclude Include="Folder.h" />
     <ClInclude Include="http.h" />
@@ -177,33 +180,46 @@
     <ClInclude Include="IGCFile.h" />
     <ClInclude Include="IGCFlightRecorder.h" />
     <ClInclude Include="IgcMessageHandler.h" />
+    <ClInclude Include="IgcScripting.h" />
     <ClInclude Include="InitPosition.h" />
     <ClInclude Include="JSONWriter.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="LogMessageHandler.h" />
+    <ClInclude Include="LogScripting.h" />
+    <ClInclude Include="Lua.h" />
+    <ClInclude Include="LuaThread.h" />
     <ClInclude Include="MessageHandler.h" />
     <ClInclude Include="MessageThread.h" />
     <ClInclude Include="P3DEventCommand.h" />
     <ClInclude Include="P3DInstallationDirectory.h" />
     <ClInclude Include="PanelMessageHandler.h" />
+    <ClInclude Include="PanelScripting.h" />
     <ClInclude Include="PositionMessageHandler.h" />
+    <ClInclude Include="PositionScripting.h" />
     <ClInclude Include="QuitHandler.h" />
     <ClInclude Include="RecordMessageHandler.h" />
+    <ClInclude Include="RecordScripting.h" />
     <ClInclude Include="RESTAPI.h" />
     <ClInclude Include="ScenarioMessageHandler.h" />
+    <ClInclude Include="ScenarioScripting.h" />
+    <ClInclude Include="ScriptMessageHandler.h" />
+    <ClInclude Include="SimScripting.h" />
     <ClInclude Include="SimState.h" />
     <ClInclude Include="Simulator.h" />
     <ClInclude Include="Spline.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="ThermalMessageHandler.h" />
+    <ClInclude Include="ThermalScripting.h" />
     <ClInclude Include="Thread.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="TracePoint.h" />
     <ClInclude Include="TrafficMessageHandler.h" />
+    <ClInclude Include="TrafficScripting.h" />
     <ClInclude Include="Tug.h" />
     <ClInclude Include="TugMessageHandler.h" />
     <ClInclude Include="WeatherMessageHandler.h" />
+    <ClInclude Include="WeatherScripting.h" />
     <ClInclude Include="WideConverter.h" />
   </ItemGroup>
   <ItemGroup>
@@ -216,9 +232,12 @@
     <ClCompile Include="AIObject.cpp" />
     <ClCompile Include="APIParameters.cpp" />
     <ClCompile Include="APIThread.cpp" />
+    <ClCompile Include="BlockingQueue.cpp" />
     <ClCompile Include="CommandInterpreter.cpp" />
+    <ClCompile Include="EventMessageScripting.cpp" />
     <ClCompile Include="Extension.cpp" />
     <ClCompile Include="Failures.cpp" />
+    <ClCompile Include="FailureScripting.cpp" />
     <ClCompile Include="FailuresMessageHandler.cpp" />
     <ClCompile Include="Folder.cpp" />
     <ClCompile Include="HTTPException.cpp" />
@@ -231,10 +250,14 @@
     <ClCompile Include="IGCFile.cpp" />
     <ClCompile Include="IGCFlightRecorder.cpp" />
     <ClCompile Include="IgcMessageHandler.cpp" />
+    <ClCompile Include="IgcScripting.cpp" />
     <ClCompile Include="InitPosition.cpp" />
     <ClCompile Include="JSONWriter.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="LogMessageHandler.cpp" />
+    <ClCompile Include="LogScripting.cpp" />
+    <ClCompile Include="Lua.cpp" />
+    <ClCompile Include="LuaThread.cpp" />
     <ClCompile Include="MessageHandler.cpp" />
     <ClCompile Include="P3DControl.cpp" />
     <ClCompile Include="EventMessageHandler.cpp" />
@@ -242,11 +265,17 @@
     <ClCompile Include="P3DEventCommand.cpp" />
     <ClCompile Include="P3DInstallationDirectory.cpp" />
     <ClCompile Include="PanelMessageHandler.cpp" />
+    <ClCompile Include="PanelScripting.cpp" />
     <ClCompile Include="PositionMessageHandler.cpp" />
+    <ClCompile Include="PositionScripting.cpp" />
     <ClCompile Include="QuitHandler.cpp" />
     <ClCompile Include="RecordMessageHandler.cpp" />
+    <ClCompile Include="RecordScripting.cpp" />
     <ClCompile Include="RESTAPI.cpp" />
     <ClCompile Include="ScenarioMessageHandler.cpp" />
+    <ClCompile Include="ScenarioScripting.cpp" />
+    <ClCompile Include="ScriptMessageHandler.cpp" />
+    <ClCompile Include="SimScripting.cpp" />
     <ClCompile Include="SimState.cpp" />
     <ClCompile Include="Simulator.cpp" />
     <ClCompile Include="Spline.cpp" />
@@ -257,13 +286,16 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ThermalMessageHandler.cpp" />
+    <ClCompile Include="ThermalScripting.cpp" />
     <ClCompile Include="Thread.cpp" />
     <ClCompile Include="Trace.cpp" />
     <ClCompile Include="TracePoint.cpp" />
     <ClCompile Include="TrafficMessageHandler.cpp" />
     <ClCompile Include="Tug.cpp" />
     <ClCompile Include="TugMessageHandler.cpp" />
+    <ClCompile Include="TrafficScripting.cpp" />
     <ClCompile Include="WeatherMessageHandler.cpp" />
+    <ClCompile Include="WeatherScripting.cpp" />
     <ClCompile Include="WideConverter.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -271,6 +303,9 @@
     <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Lua\Lua.vcxproj">
+      <Project>{f3b53c7a-45f6-4047-a76a-8866c7c534f0}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\P3DCommon\P3DCommon.vcxproj">
       <Project>{863d5727-3e2e-4158-b8a3-6c943ca31c61}</Project>
     </ProjectReference>

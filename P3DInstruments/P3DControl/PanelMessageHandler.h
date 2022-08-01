@@ -10,6 +10,6 @@ public:
 	virtual ~PanelMessageHandler();
 
 	virtual void run(const std::string& cmd, const APIParameters& params, std::string& output);
-	void send(const std::string& host, int port, const std::string& cmd, std::string& output);
+	static void send(const std::string& host, int port, const std::string& cmd, std::string& output);
 };
 

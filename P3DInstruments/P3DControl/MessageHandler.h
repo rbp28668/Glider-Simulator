@@ -13,8 +13,8 @@ protected:
 public:
 	MessageHandler(Prepar3D* p3d, const std::string& name);
 	const std::string& getName() { return name; }
-	void reportSuccess(std::string& output);
-	void reportFailure(const char* pszReason, unsigned long code, std::string& output);
+	static void reportSuccess(std::string& output);
+	static void reportFailure(const char* pszReason, unsigned long code, std::string& output);
 
 	virtual void run(const std::string& cmd, const APIParameters& params, std::string& output) = 0;
 

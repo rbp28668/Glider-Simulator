@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <iostream>
 #include <sstream>
+#include <list>
 #include "Prepar3D.h"
 #include "SimObjectDataRequest.h"
 #include "Metar.h"
@@ -12,6 +13,39 @@
 
 // Folder in documents that P3D uses for its files.
 const char* Prepar3D::DOCUMENTS = "Prepar3D v4 Files";
+
+/// <summary>
+/// Event definitions.  Used as a lookup table to convert event IDs to the corresponding strings
+/// and implement reference counting for each event as P3D only allows a client to register
+/// and event once.
+/// </summary>
+Prepar3D::EventDefinition Prepar3D::definitions[to_underlying(EVENT_ID::LAST_P3D_EVENT)] = {
+	{ EVENT_ID::EVENT_1SEC, "1sec", 0 },
+	{ EVENT_ID::EVENT_4SEC, "4sec", 0 },
+	{ EVENT_ID::EVENT_6HZ, "6Hz", 0 },
+	{ EVENT_ID::EVENT_AIRCRAFT_LOADED, "AircraftLoaded", 0 },
+	{ EVENT_ID::EVENT_CRASHED, "Crashed", 0 },
+	{ EVENT_ID::EVENT_CRASH_RESET, "CrashReset", 0 },
+	{ EVENT_ID::EVENT_FLIGHT_LOADED, "FlightLoaded", 0 },
+	{ EVENT_ID::EVENT_FLIGHT_SAVED, "FlightSaved", 0 },
+	{ EVENT_ID::EVENT_FLIGHT_PLAN_ACTIVATED, "FlightPlanActivated", 0 },
+	{ EVENT_ID::EVENT_FLIGHT_PLAN_DEACTIVATED, "FlightPlanDeactivated", 0 },
+	{ EVENT_ID::EVENT_FRAME, "Frame", 0 },
+	{ EVENT_ID::EVENT_PAUSE, "Pause", 0 },
+	{ EVENT_ID::EVENT_PAUSED, "Paused", 0 },
+	{ EVENT_ID::EVENT_PAUSE_FRAME, "PauseFrame", 0 },
+	{ EVENT_ID::EVENT_POSITION_CHANGED, "PositionChanged", 0 },
+	{ EVENT_ID::EVENT_SIM, "Sim", 0 },
+	{ EVENT_ID::EVENT_SIM_START, "SimStart", 0 },
+	{ EVENT_ID::EVENT_SIM_STOP, "SimStop", 0 },
+	{ EVENT_ID::EVENT_SOUND, "Sound", 0 },
+	{ EVENT_ID::EVENT_UNPAUSED, "Unpaused", 0 },
+	{ EVENT_ID::EVENT_VIEW, "View", 0 },
+	{ EVENT_ID::EVENT_WEATHER_MODE_CHANGED, "WeatherModeChanged", 0 },
+	{ EVENT_ID::EVENT_TEXT_EVENT_CREATED, "TextEventCreated", 0 },
+	{ EVENT_ID::EVENT_TEXT_EVENT_DESTROYED, "TextEventDestroyed", 0 },
+};
+
 
 Prepar3D::Prepar3D(const char* appName, bool verbose)
 	: hSimConnect(NULL),
@@ -30,6 +64,14 @@ Prepar3D::Prepar3D(const char* appName, bool verbose)
 	extSim(0),
 	userAc(this)
 {
+
+	// Create lookup tables for event definitions
+	for (int i = 0; i < to_underlying(EVENT_ID::LAST_P3D_EVENT); ++i) {
+		EventDefinition* def = definitions + i;
+		idToEvent.insert(std::make_pair(def->id, def));
+		nameToEvent.insert(std::make_pair(def->name, def));
+	}
+
 	connect(appName);
 }
 
@@ -82,24 +124,24 @@ void Prepar3D::registerSystemEvents()
 	// Subscribe to system events.
 	// See https://www.prepar3d.com/SDKv4/sdk/simconnect_api/references/general_functions.html#SimConnect_SubscribeToSystemEvent
 
-	subscribeToSystemEvent(EVENT_SIM_START, "SimStart", "Unable to subscribe to SimStart");
-	subscribeToSystemEvent(EVENT_SIM_STOP, "SimStop", "Unable to subscribe to SimStop");
-	subscribeToSystemEvent(EVENT_PAUSE, "Pause", "Unable to subscribe to Pause");
-	subscribeToSystemEvent(EVENT_SIM, "Sim", "Unable to subscribe to Sim");
-	subscribeToSystemEvent(EVENT_CRASHED, "Crashed", "Unable to subscribe to Crashed");
-	subscribeToSystemEvent(EVENT_CRASH_RESET, "CrashReset", "Unable to subscribe to CrashReset");
-	subscribeToSystemEvent(EVENT_OBJECT_ADDED, "ObjectAdded", "Unable to subscribe to ObjectAdded");
-	subscribeToSystemEvent(EVENT_OBJECT_REMOVED, "ObjectRemoved", "Unable to subscribe to ObjectRemoved");
+	subscribeToSystemEvent(EVENT_ID::EVENT_SIM_START, "SimStart", "Unable to subscribe to SimStart");
+	subscribeToSystemEvent(EVENT_ID::EVENT_SIM_STOP, "SimStop", "Unable to subscribe to SimStop");
+	subscribeToSystemEvent(EVENT_ID::EVENT_PAUSE, "Pause", "Unable to subscribe to Pause");
+	subscribeToSystemEvent(EVENT_ID::EVENT_SIM, "Sim", "Unable to subscribe to Sim");
+	subscribeToSystemEvent(EVENT_ID::EVENT_CRASHED, "Crashed", "Unable to subscribe to Crashed");
+	subscribeToSystemEvent(EVENT_ID::EVENT_CRASH_RESET, "CrashReset", "Unable to subscribe to CrashReset");
+	subscribeToSystemEvent(EVENT_ID::EVENT_OBJECT_ADDED, "ObjectAdded", "Unable to subscribe to ObjectAdded");
+	subscribeToSystemEvent(EVENT_ID::EVENT_OBJECT_REMOVED, "ObjectRemoved", "Unable to subscribe to ObjectRemoved");
 }
 
 // Checks for failure code, outputs the given message if necessary and exits if failed.
 void Prepar3D::subscribeToSystemEvent(EVENT_ID event, const char* name, const char* pszFailureMessage)
 {
-	HRESULT hr = ::SimConnect_SubscribeToSystemEvent(hSimConnect, event, name);
-	if (SUCCEEDED(hr)) {
+	LONG id = subscribeToSystemEvent(name);
+	if(id == to_underlying(event)) {
 		if (verbose) {
 			std::ostringstream os;
-			os << "Registered event " << name << " with id " << event;
+			os << "Registered event " << name << " with id " << to_underlying(event);
 			showLastRequest(os.str().c_str());
 		}
 	}
@@ -132,7 +174,7 @@ void Prepar3D::handleSystemEvent(SIMCONNECT_RECV* pData)
 	SIMCONNECT_RECV_EVENT* evt = (SIMCONNECT_RECV_EVENT*)pData;
 
 	switch (evt->uEventID) {
-	case EVENT_SIM_START:
+	case to_underlying(EVENT_ID::EVENT_SIM_START):
 		logEvent("Sim Start");
 		// Defer creation of SimConnect requests until the sim proper has started.
 		dataRequests.createRequests();
@@ -145,12 +187,12 @@ void Prepar3D::handleSystemEvent(SIMCONNECT_RECV* pData)
 		}
 		break;
 
-	case EVENT_SIM_STOP:
+	case to_underlying(EVENT_ID::EVENT_SIM_STOP):
 		logEvent("Sim Stop");
 		started = false;
 		break;
 
-	case EVENT_PAUSE:
+	case to_underlying(EVENT_ID::EVENT_PAUSE):
 		logEvent("Paused", evt->dwData);
 		paused = (evt->dwData != 0);
 		if (!paused) {
@@ -158,7 +200,7 @@ void Prepar3D::handleSystemEvent(SIMCONNECT_RECV* pData)
 		}
 		break;
 
-	case EVENT_SIM:
+	case to_underlying(EVENT_ID::EVENT_SIM):
 		logEvent("Sim running", evt->dwData);
 		scenarioRunning = (evt->dwData != 0);
 		if (scenarioRunning && waitingDataRequests) {
@@ -168,18 +210,24 @@ void Prepar3D::handleSystemEvent(SIMCONNECT_RECV* pData)
 		weatherStations().refresh();
 		break;
 
-	case EVENT_CRASHED:
+	case to_underlying(EVENT_ID::EVENT_CRASHED):
 		logEvent("Crashed");
 		crashed = true;
 		break;
 
-	case EVENT_CRASH_RESET:
+	case to_underlying(EVENT_ID::EVENT_CRASH_RESET):
 		logEvent("Crash Reset");
 		crashed = false;
 		break;
 
 	default:
 		break;
+
+	}
+
+	// Allow any event handlers to receive the event.
+	for (auto iter = systemEventHandlers.begin(); iter != systemEventHandlers.end(); ++iter) {
+		(*iter)->handleEvent(evt);
 	}
 
 }
@@ -404,6 +452,12 @@ void Prepar3D::Process(SIMCONNECT_RECV* pData, DWORD cbData)
 	case SIMCONNECT_RECV_ID_QUIT:
 		std::cout << "Sim quit" << std::endl;
 		quit = true;
+
+		// Let any registered handlers we're closing down.
+		for (auto iter = systemEventHandlers.begin(); iter != systemEventHandlers.end(); ++iter) {
+			(*iter)->quitEvent();
+		}
+
 		break;
 
 	default:
@@ -417,6 +471,7 @@ LONG Prepar3D::nextRequestId()
 {
 	return ::InterlockedIncrement(&requestIdSequence);
 }
+
 
 // Registers a data request so that the actual request to P3D can be
 // created when need be.
@@ -449,6 +504,18 @@ void Prepar3D::registerSimObject(SimObject* pObject, DWORD dwRequestId)
 	simObjects.add(pObject, dwRequestId);
 }
 
+void Prepar3D::registerSystemEventHandler(SystemEventHandler* handler)
+{
+	CriticalSection::Lock lock(eventHandersGuard);
+	systemEventHandlers.push_back(handler);
+}
+
+void Prepar3D::unRegisterSystemEventHandler(SystemEventHandler* handler)
+{
+	CriticalSection::Lock lock(eventHandersGuard);
+	systemEventHandlers.remove(handler);
+}
+
 SimObject* Prepar3D::lookupSimObject(DWORD dwObjectId)
 {
 	return simObjects.lookup(dwObjectId);
@@ -458,6 +525,63 @@ void Prepar3D::unregisterSimObject(DWORD dwObjectId)
 {
 	if(dwObjectId != userAc.id()){
 		simObjects.remove(dwObjectId);
+	}
+}
+
+/// <summary>
+/// Sets up a subscription to a given system event.  Subscribed events will be sent
+/// to any registered event handler.  Note that this reference counts so that if 
+/// there are 2 calls to subscribe to a given event it will only be registered on the
+/// first call but unsubscribed on the second call to unsubscribeFromSystemEvent.
+/// </summary>
+/// <param name="name">Is the event name to subscribe to</param>
+/// <returns>The event ID or -1 for failure.</returns>
+LONG Prepar3D::subscribeToSystemEvent(const char* name)
+{
+	auto it = nameToEvent.find(name);
+	if (it != nameToEvent.end()) {
+		CriticalSection::Lock lock(definitionsGuard);
+		EventDefinition* def = it->second;
+		SIMCONNECT_CLIENT_EVENT_ID id = to_underlying(def->id);
+
+		if (def->registered == 0) {
+			HRESULT hr = ::SimConnect_SubscribeToSystemEvent(hSimConnect, id, def->name);
+			if (SUCCEEDED(hr)) {
+				++def->registered;
+				return to_underlying(def->id);
+			}
+			else { // failed
+				return -1;
+			}
+		}
+		else { // registered count > 0 so already registered - just return the ID
+			return id;  
+		}
+	}
+	else {
+		return -1;
+	}
+}
+
+/// <summary>
+/// Unsubscribes from a system event.  Reference counting ensures that the unsubscribe call
+/// to P3D only takes place when there are as many unsubscribe calls for an event as there
+/// were subscribe calls.
+/// </summary>
+/// <param name="eventId">is the event ID returned by subscribeToSystemEvent</param>
+void Prepar3D::unsubscribeFromSystemEvent(LONG eventId)
+{
+	auto it = idToEvent.find((EVENT_ID)eventId);
+	if (it != idToEvent.end()) {
+		CriticalSection::Lock lock(definitionsGuard);
+		EventDefinition* def = it->second;
+		if (def->registered == 0) {
+			return; 
+		}
+		--def->registered;
+		if (def->registered == 0) {
+			::SimConnect_UnsubscribeFromSystemEvent(hSimConnect, eventId);
+		}
 	}
 }
 

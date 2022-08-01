@@ -15,6 +15,6 @@ public:
 	EventMessageHandler(Prepar3D* p3d);
 	virtual ~EventMessageHandler();
 	virtual void run(const std::string& cmd, const APIParameters& params, std::string& output);
-
+	static bool dispatchEvent(Simulator* pSim, const std::string& cmd, DWORD dwData, std::string& output);
 };
 

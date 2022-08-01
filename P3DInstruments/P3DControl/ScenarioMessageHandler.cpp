@@ -6,8 +6,8 @@
 #include "..//P3DCommon/Prepar3D.h"
 #include "ScenarioMessageHandler.h"
 #include "APIParameters.h"
-#include "Folder.h"
 #include "JSONWriter.h"
+#include "Simulator.h"
 
 // Wrapper for dynamically allocateed buffer
 // Resource Allocation Is Initialisation pattern.
@@ -29,6 +29,26 @@ ScenarioMessageHandler::ScenarioMessageHandler(Prepar3D* p3d)
 
 ScenarioMessageHandler::~ScenarioMessageHandler()
 {
+}
+
+bool ScenarioMessageHandler::load(Simulator* pSim, const std::string& file)
+{
+	HRESULT hr = ::SimConnect_FlightLoad(pSim->getHandle(), file.c_str());
+	return(hr == S_OK);
+}
+
+bool ScenarioMessageHandler::save(Simulator* pSim, const std::string& file, const std::string& title, const std::string& description)
+{
+	HRESULT hr = ::SimConnect_FlightSave(pSim->getHandle(), file.c_str(), title.c_str(), description.c_str(), 0);
+	return(hr == S_OK);
+}
+
+void ScenarioMessageHandler::list(const std::string& filter, File::ListT& files)
+{
+	DocumentDirectory documents;
+	Directory p3dFolder = documents.sub(Prepar3D::DOCUMENTS);
+	files = p3dFolder.files(files, filter + "*.fxml");
+
 }
 
 void ScenarioMessageHandler::run(const std::string& cmd, const APIParameters& params, std::string& output)
@@ -62,25 +82,25 @@ void ScenarioMessageHandler::run(const std::string& cmd, const APIParameters& pa
 
 void ScenarioMessageHandler::loadScenario(const std::string& file, std::string& output)
 {
-	HRESULT hr = ::SimConnect_FlightLoad(p3d->getHandle(), file.c_str());
-	if (hr == S_OK) {
+	Simulator* pSim = static_cast<Simulator*>(p3d);
+	if (load(pSim, file)) {
 		reportSuccess(output);
 	} else {
-		reportFailure("Unable to load scenario", hr, output);
+		reportFailure("Unable to load scenario", 0, output);
 	}
 }
 
 void ScenarioMessageHandler::saveScenario(const std::string& file, const std::string& title, const std::string& description, std::string& output)
 {
-	HRESULT hr = ::SimConnect_FlightSave(p3d->getHandle(), file.c_str(), title.c_str(), description.c_str(), 0);
-	if (hr == S_OK) {
+	Simulator* pSim = static_cast<Simulator*>(p3d);
+	if(save(pSim, file.c_str(), title.c_str(), description.c_str())){
 		reportSuccess(output);
 	} else {
-		reportFailure("Unable to save scenario", hr, output);
+		reportFailure("Unable to save scenario", 0, output);
 	}
 }
 
-void ScenarioMessageHandler::readScenario(File& file, JSONWriter& json) {
+void ScenarioMessageHandler::readScenario(Simulator* pSim, File& file, FileInfo& fileInfo) {
 
 	std::string name = file.name();
 	std::string title = name;
@@ -105,7 +125,7 @@ void ScenarioMessageHandler::readScenario(File& file, JSONWriter& json) {
 	catch (rapidxml::parse_error& err) {
 		// Errors tend to be benign so just log it.
 		std::cout << err.what() << std::endl;
-		if (p3d->isVerbose()) {
+		if (pSim->isVerbose()) {
 			char* where = err.where<char>();
 			std::cout << where << std::endl;
 		}
@@ -152,12 +172,9 @@ void ScenarioMessageHandler::readScenario(File& file, JSONWriter& json) {
 		}
 	}
 
-	json.object();
-	json.add("filename", name);
-	json.add("title", title);
-	json.add("description", description);
-	json.end(); // of the scenario object
-
+	fileInfo.filename = name;
+	fileInfo.title = title;
+	fileInfo.description = description;
 }
 
 // Lists any scenarios (in JSON response written to output) that correspond to the filter.
@@ -166,12 +183,9 @@ void ScenarioMessageHandler::readScenario(File& file, JSONWriter& json) {
 void ScenarioMessageHandler::listScenarios(const std::string& filter, std::string& output)
 {
 	File::ListT files;
-
+	Simulator* pSim = static_cast<Simulator*>(p3d);
 	try {
-		// E:\Users\rbp28668\Documents\Prepar3D v4 Files
-		DocumentDirectory documents;
-		Directory p3dFolder = documents.sub(Prepar3D::DOCUMENTS);
-		files = p3dFolder.files(files, filter + "*.fxml");
+		list(filter, files);
 	}
 	catch (FileException& fx) {
 		JSONWriter json(output);
@@ -186,7 +200,13 @@ void ScenarioMessageHandler::listScenarios(const std::string& filter, std::strin
 	json.add("status", "OK");
 	json.array("entries");
 	for (File::ListT::iterator it = files.begin(); it != files.end(); ++it) {
-		readScenario(*it, json);
+		FileInfo fileInfo;
+		readScenario(pSim, *it, fileInfo);
+		json.object();
+		json.add("filename", fileInfo.filename);
+		json.add("title", fileInfo.title);
+		json.add("description", fileInfo.description);
+		json.end(); // of the scenario object
 	}
 
 
