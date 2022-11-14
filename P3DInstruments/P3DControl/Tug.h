@@ -38,11 +38,16 @@ public:
 	virtual void onData(void* pData, SimObject* pObject);
 };
 
-
+/// <summary>
+/// Class to control behaviour of the Tug aircraft.
+/// </summary>
 class Tug :
 	public SimObject
 {
 
+	/// <summary>
+	/// A Feature is some tug behaviour that can be started and may take place over a period of time.
+	/// </summary>
 	class Feature {
 	public:
 		virtual ~Feature() {}
@@ -51,6 +56,9 @@ class Tug :
 		virtual bool isComplete() = 0;
 	};
 
+	/// <summary>
+	/// WingWaggleFeature drives a tug's wave-off signal
+	/// </summary>
 	class WingWaggleFeature : public Feature{
 		double startTime;
 		bool complete;
@@ -62,6 +70,10 @@ class Tug :
 		virtual bool isComplete();
 	};
 
+	/// <summary>
+	/// RudderWaggleFeature drives a tug's "you've got a problem e.g. brakes" signal.
+	/// Note - currently doesn't work!
+	/// </summary>
 	class RudderWaggleFeature : public Feature {
 		double startTime;
 		bool complete;
@@ -82,6 +94,7 @@ class Tug :
 	TugOutputDataT outputValues;
 	bool headingSet;
 	bool speedSet;
+	bool isReleased;
 
 	Feature* currentFeature;
 
@@ -90,6 +103,7 @@ class Tug :
 	double frequency; // of timer in ticks per second.
 
 public:
+
 	Tug(Simulator* pSim, DWORD dwObjectId);
 	virtual ~Tug();
 
@@ -97,6 +111,7 @@ public:
 
 	void simulate(TugInputDataT* inputData);
 	void dispatchEvent(P3DEventCommand::EventID event, DWORD dwData);
+	void dispatchEvent(const std::string& event, DWORD dwData);
 
 	void setDesiredSpeed(double kts) {
 		outputValues.desiredSpeedKnots = kts;
@@ -112,5 +127,12 @@ public:
 	void waggleWings();
 	void waggleRudder();
 	void released();
+	bool hasReleased() { return isReleased; }
+	double getAltitude() { return inputValues.altitude; }
+	double getHeading() { return inputValues.heading; }
+	double getLatitude() { return inputValues.latitude; }
+	double getLongitude() { return inputValues.longitude; }
+	double getDesiredSpeed() { return inputValues.desiredSpeedKnots; }
+	double getDesiredHeading() { return inputValues.desiredHeading; }
 };
 

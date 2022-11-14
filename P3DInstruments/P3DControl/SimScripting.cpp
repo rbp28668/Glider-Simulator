@@ -11,6 +11,7 @@ void SimScripting::registerMethods(Lua& lua)
     module.add("sleep", SimScripting::sleep);
     module.add("now", SimScripting::now);
     module.add("schedule", SimScripting::schedule);
+    module.add("scheduleFromNow", SimScripting::scheduleFromNow);
 
  }
 
@@ -57,5 +58,14 @@ int SimScripting::schedule(lua_State* L)
     std::string event(luaL_checkstring(L, -2));
     Lua* lua = Lua::get(L);
     lua->scheduleEvent(mS, event);
+    return 0;
+}
+
+int SimScripting::scheduleFromNow(lua_State* L)
+{
+    long mS = (long)luaL_checkinteger(L, -1);
+    std::string event(luaL_checkstring(L, -2));
+    Lua* lua = Lua::get(L);
+    lua->scheduleFromNow(mS, event);
     return 0;
 }

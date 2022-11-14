@@ -43,6 +43,7 @@ class Lua
 		ScheduleThread(Lua* lua);
 		~ScheduleThread();
 		void schedule(long mS, const std::string& eventName);
+		void scheduleFromNow(long mS, const std::string& eventName);
 		virtual unsigned run();
 		
 	};
@@ -119,6 +120,7 @@ public:
 	std::string nextEvent() { return eventQueue.dequeue(); }
 	bool hasEvent() { return !eventQueue.empty(); }
 	void scheduleEvent(long mS, const std::string& eventName);
+	void scheduleFromNow(long mS, const std::string& eventName);
 
 	// Raise an event via the event queue.
 	void raiseEvent(const std::string& eventName) { eventQueue.enqueue(eventName); }

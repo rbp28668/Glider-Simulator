@@ -13,5 +13,6 @@ private:
 	static int sleep(lua_State* L);
 	static int now(lua_State* L);
 	static int schedule(lua_State* L);
+	static int scheduleFromNow(lua_State* L);
 };
 

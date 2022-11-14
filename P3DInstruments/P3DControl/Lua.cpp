@@ -11,6 +11,7 @@
 #include "ScenarioScripting.h"
 #include "ThermalScripting.h"
 #include "TrafficScripting.h"
+#include "TugScripting.h"
 #include "WeatherScripting.h"
 #include "SimScripting.h"
 
@@ -93,6 +94,7 @@ Lua::Lua(Simulator* pSim)
     ScenarioScripting::registerMethods(*this);
     ThermalScripting::registerMethods(*this);
     TrafficScripting::registerMethods(*this);
+    TugScripting::registerMethods(*this);
     WeatherScripting::registerMethods(*this);
     SimScripting::registerMethods(*this);
 }
@@ -191,6 +193,10 @@ int Lua::run(std::string& errorMessage)
     return 0;
 }
 
+/// <summary>
+/// Subscribes to a system event.
+/// </summary>
+/// <param name="eventName">is the name of the system event to subscribe to.  These are defined in Prepar3D.cpp & SimConnect documentation</param>
 void Lua::subscribeToEvent(const std::string& eventName)
 {
     if (eventHandler == 0) {
@@ -200,9 +206,24 @@ void Lua::subscribeToEvent(const std::string& eventName)
     eventHandler->addEvent(eventName);
 }
 
+/// <summary>
+/// Schedules an event to happen a given number of mS after the script started.
+/// </summary>
+/// <param name="mS">the number of milliseconds that should elapse from the time the script started before firing this event.</param>
+/// <param name="eventName">The name of the event to raise.</param>
 void Lua::scheduleEvent(long mS, const std::string& eventName)
 {
     scheduler.schedule(mS, eventName);
+}
+
+/// <summary>
+/// Schedules a named event to happen mS milliseconds in the future.
+/// </summary>
+/// <param name="mS">is the time from now for the event to trigger</param>
+/// <param name="eventName">is the event to send at the given time</param>
+void Lua::scheduleFromNow(long mS, const std::string& eventName)
+{
+    scheduler.scheduleFromNow(mS, eventName);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -286,6 +307,18 @@ Lua::ScheduleThread::~ScheduleThread()
 void Lua::ScheduleThread::schedule(long mS, const std::string& eventName)
 {
     CriticalSection::Lock lock(cs);
+    timedEvents.insert(std::make_pair(mS, eventName));
+}
+
+/// <summary>
+/// Schedules an event to be raised at a given time in mS after this point in time.
+/// </summary>
+/// <param name="mS"> is the number of mS in the future at which the event should be raised.</param>
+/// <param name="eventName">is the event string that should be raised.</param>
+void Lua::ScheduleThread::scheduleFromNow(long mS, const std::string& eventName)
+{
+    CriticalSection::Lock lock(cs);
+    mS += (::timeGetTime() - startTime);
     timedEvents.insert(std::make_pair(mS, eventName));
 }
 

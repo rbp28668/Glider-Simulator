@@ -44,6 +44,9 @@ Prepar3D::EventDefinition Prepar3D::definitions[to_underlying(EVENT_ID::LAST_P3D
 	{ EVENT_ID::EVENT_WEATHER_MODE_CHANGED, "WeatherModeChanged", 0 },
 	{ EVENT_ID::EVENT_TEXT_EVENT_CREATED, "TextEventCreated", 0 },
 	{ EVENT_ID::EVENT_TEXT_EVENT_DESTROYED, "TextEventDestroyed", 0 },
+	{ EVENT_ID::EVENT_OBJECT_ADDED, "ObjectAdded", 0 },
+	{ EVENT_ID::EVENT_OBJECT_REMOVED, "ObjectRemoved", 0},
+
 };
 
 
@@ -309,10 +312,10 @@ void Prepar3D::handleObjectAddRemove(SIMCONNECT_RECV* pData) {
 	SIMCONNECT_RECV_EVENT_OBJECT_ADDREMOVE* poar = static_cast<SIMCONNECT_RECV_EVENT_OBJECT_ADDREMOVE*>(pData);
 
 	if (poar->eObjType == SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT) {
-		if (poar->uEventID == EVENT_OBJECT_ADDED) {
+		if (poar->uEventID == to_underlying(EVENT_ID::EVENT_OBJECT_ADDED)) {
 			aircraftAdded(poar->dwData);
 		}
-		else if (poar->uEventID == EVENT_OBJECT_REMOVED) {
+		else if (poar->uEventID == to_underlying(EVENT_ID::EVENT_OBJECT_REMOVED)) {
 			aircraftRemoved(poar->dwData);
 		}
 	}
@@ -504,18 +507,6 @@ void Prepar3D::registerSimObject(SimObject* pObject, DWORD dwRequestId)
 	simObjects.add(pObject, dwRequestId);
 }
 
-void Prepar3D::registerSystemEventHandler(SystemEventHandler* handler)
-{
-	CriticalSection::Lock lock(eventHandersGuard);
-	systemEventHandlers.push_back(handler);
-}
-
-void Prepar3D::unRegisterSystemEventHandler(SystemEventHandler* handler)
-{
-	CriticalSection::Lock lock(eventHandersGuard);
-	systemEventHandlers.remove(handler);
-}
-
 SimObject* Prepar3D::lookupSimObject(DWORD dwObjectId)
 {
 	return simObjects.lookup(dwObjectId);
@@ -526,6 +517,28 @@ void Prepar3D::unregisterSimObject(DWORD dwObjectId)
 	if(dwObjectId != userAc.id()){
 		simObjects.remove(dwObjectId);
 	}
+}
+
+/// <summary>
+/// Registers an event handler to receive any system events.
+/// Threadsafe.  After registering the handler will receive
+/// all system events.
+/// </summary>
+/// <param name="handler">is the event handler to register.</param>
+void Prepar3D::registerSystemEventHandler(SystemEventHandler* handler)
+{
+	CriticalSection::Lock lock(eventHandersGuard);
+	systemEventHandlers.push_back(handler);
+}
+
+/// <summary>
+/// Un-registers a system event handler. Threadsafe.
+/// </summary>
+/// <param name="handler">is the handler to unregister</param>
+void Prepar3D::unRegisterSystemEventHandler(SystemEventHandler* handler)
+{
+	CriticalSection::Lock lock(eventHandersGuard);
+	systemEventHandlers.remove(handler);
 }
 
 /// <summary>

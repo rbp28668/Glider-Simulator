@@ -218,6 +218,7 @@
     <ClInclude Include="TrafficScripting.h" />
     <ClInclude Include="Tug.h" />
     <ClInclude Include="TugMessageHandler.h" />
+    <ClInclude Include="TugScripting.h" />
     <ClInclude Include="WeatherMessageHandler.h" />
     <ClInclude Include="WeatherScripting.h" />
     <ClInclude Include="WideConverter.h" />
@@ -294,6 +295,7 @@
     <ClCompile Include="Tug.cpp" />
     <ClCompile Include="TugMessageHandler.cpp" />
     <ClCompile Include="TrafficScripting.cpp" />
+    <ClCompile Include="TugScripting.cpp" />
     <ClCompile Include="WeatherMessageHandler.cpp" />
     <ClCompile Include="WeatherScripting.cpp" />
     <ClCompile Include="WideConverter.cpp" />
