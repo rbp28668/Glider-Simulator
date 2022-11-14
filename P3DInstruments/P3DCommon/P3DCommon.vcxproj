@@ -69,8 +69,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>&lt;F:\Lockheed Martin\Prepar3D v3 SDK 3.3.5.17625\Utilities\SimConnect SDK\Inc;$(IncludePath)</IncludePath>
-    <LibraryPath>F:\Lockheed Martin\Prepar3D v3 SDK 3.3.5.17625\Utilities\SimConnect SDK\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(P3DSDK)\inc\SimConnect;$(IncludePath)</IncludePath>
+    <LibraryPath>$(P3DSDK)\lib\SimConnect;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -79,8 +79,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>&lt;F:\Lockheed Martin\Prepar3D v3 SDK 3.3.5.17625\Utilities\SimConnect SDK\Inc;$(IncludePath)</IncludePath>
-    <LibraryPath>F:\Lockheed Martin\Prepar3D v3 SDK 3.3.5.17625\Utilities\SimConnect SDK\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(P3DSDK)\inc\SimConnect;$(IncludePath)</IncludePath>
+    <LibraryPath>$(P3DSDK)\lib\SimConnect;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>

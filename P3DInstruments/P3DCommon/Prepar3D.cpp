@@ -44,6 +44,9 @@ Prepar3D::EventDefinition Prepar3D::definitions[to_underlying(EVENT_ID::LAST_P3D
 	{ EVENT_ID::EVENT_WEATHER_MODE_CHANGED, "WeatherModeChanged", 0 },
 	{ EVENT_ID::EVENT_TEXT_EVENT_CREATED, "TextEventCreated", 0 },
 	{ EVENT_ID::EVENT_TEXT_EVENT_DESTROYED, "TextEventDestroyed", 0 },
+	{ EVENT_ID::EVENT_OBJECT_ADDED, "ObjectAdded", 0 },
+	{ EVENT_ID::EVENT_OBJECT_REMOVED, "ObjectRemoved", 0},
+
 };
 
 
@@ -81,6 +84,7 @@ Prepar3D::~Prepar3D(void)
 	if (extSim) {
 		delete extSim;
 	}
+
 	HRESULT hr = ::SimConnect_Close(hSimConnect);
 }
 
@@ -129,6 +133,8 @@ void Prepar3D::registerSystemEvents()
 	subscribeToSystemEvent(EVENT_ID::EVENT_SIM, "Sim", "Unable to subscribe to Sim");
 	subscribeToSystemEvent(EVENT_ID::EVENT_CRASHED, "Crashed", "Unable to subscribe to Crashed");
 	subscribeToSystemEvent(EVENT_ID::EVENT_CRASH_RESET, "CrashReset", "Unable to subscribe to CrashReset");
+	subscribeToSystemEvent(EVENT_ID::EVENT_OBJECT_ADDED, "ObjectAdded", "Unable to subscribe to ObjectAdded");
+	subscribeToSystemEvent(EVENT_ID::EVENT_OBJECT_REMOVED, "ObjectRemoved", "Unable to subscribe to ObjectRemoved");
 }
 
 // Checks for failure code, outputs the given message if necessary and exits if failed.
@@ -298,6 +304,23 @@ void Prepar3D::handleWeatherObservation(SIMCONNECT_RECV* pData)
 	}
 }
 
+void Prepar3D::handleObjectAddRemove(SIMCONNECT_RECV* pData) {
+	assert(this);
+	assert(pData);
+	assert(pData->dwID == SIMCONNECT_RECV_ID_EVENT_OBJECT_ADDREMOVE);
+
+	SIMCONNECT_RECV_EVENT_OBJECT_ADDREMOVE* poar = static_cast<SIMCONNECT_RECV_EVENT_OBJECT_ADDREMOVE*>(pData);
+
+	if (poar->eObjType == SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT) {
+		if (poar->uEventID == to_underlying(EVENT_ID::EVENT_OBJECT_ADDED)) {
+			aircraftAdded(poar->dwData);
+		}
+		else if (poar->uEventID == to_underlying(EVENT_ID::EVENT_OBJECT_REMOVED)) {
+			aircraftRemoved(poar->dwData);
+		}
+	}
+}
+
 #ifdef USE_EXTERNAL_SIM
 void Prepar3D::handleExternalSimCreate(SIMCONNECT_RECV_EXTERNAL_SIM_CREATE* pData)
 {
@@ -403,6 +426,10 @@ void Prepar3D::Process(SIMCONNECT_RECV* pData, DWORD cbData)
 		handleWeatherObservation(pData);
 		break;
 
+	case SIMCONNECT_RECV_ID_EVENT_OBJECT_ADDREMOVE:
+		handleObjectAddRemove(pData);
+		break;
+
 #ifdef USE_EXTERNAL_SIM
 	case SIMCONNECT_RECV_ID_EXTERNAL_SIM_CREATE:
 		handleExternalSimCreate((SIMCONNECT_RECV_EXTERNAL_SIM_CREATE*)pData);
@@ -480,18 +507,6 @@ void Prepar3D::registerSimObject(SimObject* pObject, DWORD dwRequestId)
 	simObjects.add(pObject, dwRequestId);
 }
 
-void Prepar3D::registerSystemEventHandler(SystemEventHandler* handler)
-{
-	CriticalSection::Lock lock(eventHandersGuard);
-	systemEventHandlers.push_back(handler);
-}
-
-void Prepar3D::unRegisterSystemEventHandler(SystemEventHandler* handler)
-{
-	CriticalSection::Lock lock(eventHandersGuard);
-	systemEventHandlers.remove(handler);
-}
-
 SimObject* Prepar3D::lookupSimObject(DWORD dwObjectId)
 {
 	return simObjects.lookup(dwObjectId);
@@ -502,6 +517,28 @@ void Prepar3D::unregisterSimObject(DWORD dwObjectId)
 	if(dwObjectId != userAc.id()){
 		simObjects.remove(dwObjectId);
 	}
+}
+
+/// <summary>
+/// Registers an event handler to receive any system events.
+/// Threadsafe.  After registering the handler will receive
+/// all system events.
+/// </summary>
+/// <param name="handler">is the event handler to register.</param>
+void Prepar3D::registerSystemEventHandler(SystemEventHandler* handler)
+{
+	CriticalSection::Lock lock(eventHandersGuard);
+	systemEventHandlers.push_back(handler);
+}
+
+/// <summary>
+/// Un-registers a system event handler. Threadsafe.
+/// </summary>
+/// <param name="handler">is the handler to unregister</param>
+void Prepar3D::unRegisterSystemEventHandler(SystemEventHandler* handler)
+{
+	CriticalSection::Lock lock(eventHandersGuard);
+	systemEventHandlers.remove(handler);
 }
 
 /// <summary>
@@ -559,6 +596,14 @@ void Prepar3D::unsubscribeFromSystemEvent(LONG eventId)
 			::SimConnect_UnsubscribeFromSystemEvent(hSimConnect, eventId);
 		}
 	}
+}
+
+void Prepar3D::aircraftAdded(DWORD objectId)
+{
+}
+
+void Prepar3D::aircraftRemoved(DWORD objectId)
+{
 }
 
 

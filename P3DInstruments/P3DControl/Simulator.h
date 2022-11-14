@@ -7,6 +7,8 @@ class SimObjectDataRequest;
 class Logger;
 class P3DEventCommand;
 class IGCFlightRecorder;
+class Tug;
+
 
 class Simulator : public Prepar3D
 {
@@ -17,6 +19,7 @@ class Simulator : public Prepar3D
 	Logger* logger;
 	P3DEventCommand* commands;
 	IGCFlightRecorder* fr;
+	Tug* pTug; // may be null.
 
 
 public:
@@ -28,5 +31,10 @@ public:
 	Logger* getLogger() { return logger; }
 	P3DEventCommand* getCommands() { return commands; }
 	IGCFlightRecorder* getFlightRecorder() { return fr; }
+	Tug* tug() { return pTug; }
+
+	virtual void aircraftAdded(DWORD objectId);
+	virtual void aircraftRemoved(DWORD objectId);
+	void tugReleased();
 };
 

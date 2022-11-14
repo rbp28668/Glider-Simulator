@@ -95,6 +95,8 @@ public:  // Note event IDs public so can ensure other event IDs start after LAST
 		EVENT_WEATHER_MODE_CHANGED,
 		EVENT_TEXT_EVENT_CREATED,
 		EVENT_TEXT_EVENT_DESTROYED,
+		EVENT_OBJECT_ADDED,
+		EVENT_OBJECT_REMOVED,
 		LAST_P3D_EVENT
 		}; 
 	
@@ -126,7 +128,8 @@ private:
 	void handleSimObjectDataByType(SIMCONNECT_RECV* pData);
 	void handleAssignedObjectId(SIMCONNECT_RECV* pData);
 	void handleWeatherObservation(SIMCONNECT_RECV* pData);
-	
+	void handleObjectAddRemove(SIMCONNECT_RECV* pData);
+
 #ifdef USE_EXTERNAL_SIM
 	void handleExternalSimCreate(SIMCONNECT_RECV_EXTERNAL_SIM_CREATE* pData);
 	void handleExternalSimDestroy(SIMCONNECT_RECV_EXTERNAL_SIM_DESTROY* pData);
@@ -152,7 +155,6 @@ public:
 	WeatherStations& weatherStations() { return wxStations; }
 	ExternalSim& externalSim() { return *extSim; }
 	SimObject& userAircraft() { return userAc; }
-
     void Dispatch();
 	void DispatchLoop();
 
@@ -174,6 +176,9 @@ public:
 	// Register/unregister event handlers for system events.
 	void registerSystemEventHandler(SystemEventHandler* handler);
 	void unRegisterSystemEventHandler(SystemEventHandler* handler);
+
+	virtual void aircraftAdded(DWORD objectId);
+	virtual void aircraftRemoved(DWORD objectId);
 
 	Prepar3D(const char* appName, bool verbose = false);
 	virtual ~Prepar3D(void);

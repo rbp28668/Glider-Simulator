@@ -14,6 +14,7 @@
 #include "LogMessageHandler.h"
 #include "PanelMessageHandler.h"
 #include "ScriptMessageHandler.h"
+#include "TugMessageHandler.h"
 #include "QuitHandler.h"
 #include "JSONWriter.h"
 #include "APIParameters.h"
@@ -35,6 +36,7 @@ CommandInterpreter::CommandInterpreter(Prepar3D* pSim)
 	add(new LogMessageHandler(pSim));
 	add(new PanelMessageHandler(pSim));
 	add(new ScriptMessageHandler(pSim));
+	add(new TugMessageHandler(pSim));
 }
 
 CommandInterpreter::~CommandInterpreter()

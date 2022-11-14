@@ -219,6 +219,15 @@
     <ClInclude Include="LuaThread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TugMessageHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TugScripting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -420,6 +429,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LuaThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TugMessageHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TugScripting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
