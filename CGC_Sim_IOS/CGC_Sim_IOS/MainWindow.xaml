@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CGC_Sim_IOS"
         mc:Ignorable="d"
-        Title="MainWindow v1.13" Height="727.2" Width="1350" SizeToContent="Manual" BorderBrush="IndianRed" Initialized="Window_Initialized" Activated="Window_Activated" WindowState="Maximized" Closing="Window_Closing">
+        Title="MainWindow v1.20 v5" Height="727.2" Width="1350" SizeToContent="Manual" BorderBrush="IndianRed" Initialized="Window_Initialized" Activated="Window_Activated" WindowState="Maximized" Closing="Window_Closing">
     <Grid Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Window}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Window}}}" HorizontalAlignment="Left" Margin="0,0,2.571,-1" VerticalAlignment="Top" RenderTransformOrigin="0.429,0.489" Background="#FF1E1E1E">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="350*"/>
@@ -40,7 +40,17 @@
                     <Button x:Name="Button_Fail_Electrical" Content="Button" Grid.Column="3" HorizontalAlignment="Left" Height="40" Margin="20,338,0,0" VerticalAlignment="Top" Width="210" Click="Button_Fail_Electrical_Click" RenderTransformOrigin="-0.839,0.976"/>
                     <ComboBox x:Name="sessionPayingAccountCombo" HorizontalAlignment="Left" Height="40" Margin="20,558,0,0" VerticalAlignment="Top" Width="210" Grid.Column="1" IsEditable="True" IsSynchronizedWithCurrentItem="False" GotKeyboardFocus="SessionPayingAccountCombo_GotKeyboardFocus" LostKeyboardFocus="SessionPayingAccountCombo_LostKeyboardFocus" LostFocus="SessionPayingAccountCombo_LostFocus" GotFocus="SessionPayingAccountCombo_GotFocus"/>
                     <Button x:Name="Button_Session" Content="Start Session" HorizontalAlignment="Left" Height="40" Margin="20,558,0,0" VerticalAlignment="Top" Width="210"/>
-                </Grid>
+                    <Button x:Name="Button_Engine_Start" Content="Engine Start" HorizontalAlignment="Left" Height="40" Margin="20,417,0,0" VerticalAlignment="Top" Width="210" Click="Button_Engine_Start_Click" FontSize="20" RenderTransformOrigin="0.576,0.773"/>
+                    <Button x:Name="Button_Engine_Stop" Content="Engine Stop" HorizontalAlignment="Left" Height="40" Margin="20,417,0,0" VerticalAlignment="Top" Width="210" Click="Button_Engine_Stop_Click" FontSize="20" RenderTransformOrigin="0.576,0.773" Grid.Column="1"/>
+                    <Slider x:Name="Slider_Throttle" HorizontalAlignment="Left" Height="30" Margin="20,492,0,0" VerticalAlignment="Top" Width="450" RenderTransformOrigin="0.808,0.5" ValueChanged="Slider_Throttle_ValueChanged" Grid.Column="1" Grid.ColumnSpan="2"/>
+                    <Border x:Name="Border_Rewind_Copy" BorderBrush="Gray" BorderThickness="3" Grid.ColumnSpan="3" Grid.Column="1" HorizontalAlignment="Left" Height="145" Margin="10,3,0,0" VerticalAlignment="Top" Width="720">
+                        <Label x:Name="Label_Rewind1" Content="" HorizontalAlignment="Left" Height="40" Margin="17.8,91.8,0,0" VerticalAlignment="Top" Width="294"/>
+                    </Border>
+                    <Button x:Name="Button_Throttle_Min" Content="&lt;&lt;&lt;" HorizontalAlignment="Left" Height="40" Margin="20,482,0,0" VerticalAlignment="Top" Width="95" Click="Button_Throttle_Min_Click" FontSize="20" RenderTransformOrigin="0.576,0.773"/>
+                    <Button x:Name="Button_Throttle_Decrease" Content="&lt;" HorizontalAlignment="Left" Height="40" Margin="135,482,0,0" VerticalAlignment="Top" Width="95" Click="Button_Throttle_Decrease_Click" FontSize="20" RenderTransformOrigin="0.576,0.773"/>
+                    <Button x:Name="Button_Throttle_Increase" Content="&gt;" HorizontalAlignment="Left" Height="40" Margin="20,482,0,0" VerticalAlignment="Top" Width="95" Click="Button_Throttle_Increase_Click" FontSize="20" RenderTransformOrigin="0.576,0.773" Grid.Column="3"/>
+                    <Button x:Name="Button_Throttle_Max" Content="&gt;&gt;&gt;" HorizontalAlignment="Left" Height="40" Margin="135,482,0,0" VerticalAlignment="Top" Width="95" Click="Button_Throttle_Max_Click" FontSize="20" RenderTransformOrigin="0.576,0.773" Grid.Column="3"/>
+                 </Grid>
             </TabItem>
             <TabItem Header="Scenarios" Background="Black" FontSize="20">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FF1E1E1E" OpacityMask="Black" Margin="0,0,-0.857,1.714">
@@ -143,15 +153,17 @@
                     <Button x:Name="Button_Slew_Freeze_Copy" FontFamily="Segoe UI Symbol" Content="&#xE10A;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.5,0.676" PreviewMouseDown="Button_Slew_Freeze_PreviewMouseDown" FontWeight="Bold" Grid.Column="5" Grid.Row="2" Width="80" Height="80"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Tools" Background="Black" FontSize="20">
+            <TabItem Header="Tools" Name ="TabTools" Background="Black" FontSize="20">
                 <Grid Background="#FF1E1E1E" OpacityMask="Black" Margin="0,0,-117,-272.857">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="65"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="Launch_P3D" Content="Launch P3D" HorizontalAlignment="Left" Height="40" Margin="10,37,0,0" VerticalAlignment="Top" Width="160" Click="Button_Launch_P3D_Click" FontSize="20" Grid.Column="1"/>
-                    <Button x:Name="Button_Kill_PSD" Content="Kill P3D" HorizontalAlignment="Left" Height="40" Margin="220,37,0,0" VerticalAlignment="Top" Width="160" Click="Button_Kill_PSD_Click" FontSize="20" RenderTransformOrigin="0.576,0.773" Grid.Column="1"/>
-                    <TextBox HorizontalAlignment="Left" Height="506" Margin="10,121,0,0" TextWrapping="Wrap" Text="TextBox" x:Name="TestBox" VerticalAlignment="Top" Width="1020" Grid.Column="1" FontSize="14"/>
+                    <Button x:Name="Launch_P3D" Content="Launch P3D" HorizontalAlignment="Left" Height="40" Margin="10,37,0,0" VerticalAlignment="Top" Width="160" Click="Button_Launch_P3D_Click" FontSize="20" Grid.Column="3"/>
+                    <Button x:Name="Button_Kill_PSD" Content="Kill P3D" HorizontalAlignment="Left" Height="40" Margin="220,37,0,0" VerticalAlignment="Top" Width="160" Click="Button_Kill_PSD_Click" FontSize="20" RenderTransformOrigin="0.576,0.773" Grid.Column="3"/>
+                    <TextBox HorizontalAlignment="Left" Height="435" Margin="10,192,0,0" TextWrapping="Wrap" Text="TextBox" x:Name="TestBox" VerticalAlignment="Top" Width="1020" Grid.Column="3" FontSize="14"/>
                 </Grid>
             </TabItem>
         </TabControl>

@@ -83,6 +83,8 @@ namespace CGC_Sim_IOS
         private int rewindCount = 1;
         private bool rewindActive = false;
 
+        private int throttleSetting = 0;
+
         private bool trafficTabInit = false;
         private string lastTabName = "";
 
@@ -153,10 +155,11 @@ namespace CGC_Sim_IOS
                     {
                         if (sim.OpenSimConnection(handle))
                         {
+                            System.Threading.Thread.Sleep(5000);
                             InitSimConnectionEvents();
                             p3DAlreadyRunning = true;
                         }
-                    }
+                    }                    
                 }
                 return sim.SimConnection;
             }
@@ -338,10 +341,10 @@ namespace CGC_Sim_IOS
                 //simRest.CMD_Pause();
                 //Thread.Sleep(1000);
                 //simRest.CMD_Pause();
-                UpdateFailureButtons();
                 //BuildAircraftList();
 
             }
+            UpdateFailureButtons();
         }
 
 
@@ -388,7 +391,6 @@ namespace CGC_Sim_IOS
 
                     // listen to events 
                     SimConnection.OnRecvEvent += new SimConnect.RecvEventEventHandler(SimCon_OnRecvEvent);
-
                     SimConnection.OnRecvWeatherObservation += new SimConnect.RecvWeatherObservationEventHandler(SimCon_OnRevWeatherObservation);
 
                     // catch a simobject data request 
@@ -406,7 +408,19 @@ namespace CGC_Sim_IOS
                     SimConnection.SetSystemEventState(EVENTS.SIMSTART, SIMCONNECT_STATE.ON);
                     SimConnection.SetSystemEventState(EVENTS.SIMSTOP, SIMCONNECT_STATE.ON);
 
+                    // define a data structure
+                    SimConnection.AddToDataDefinition(DEFINITIONS.Struct1, "title", null, SIMCONNECT_DATATYPE.STRING256, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                    SimConnection.AddToDataDefinition(DEFINITIONS.Struct1, "Plane Latitude", "degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                    SimConnection.AddToDataDefinition(DEFINITIONS.Struct1, "Plane Longitude", "degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                    SimConnection.AddToDataDefinition(DEFINITIONS.Struct1, "Plane Altitude", "feet", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                    SimConnection.AddToDataDefinition(DEFINITIONS.Struct1, "Number Of Engines", "number", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                    SimConnection.AddToDataDefinition(DEFINITIONS.Struct1, "Yaw String Angle", "radians", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                    SimConnection.AddToDataDefinition(DEFINITIONS.Struct1, "YAW STRING PCT EXTENDED", "number", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                    SimConnection.AddToDataDefinition(DEFINITIONS.Struct1, "Turn coordinator ball", "radians", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+
+                    SimConnection.RegisterDataDefineStruct<Struct1>(DEFINITIONS.Struct1);
                     SimConnection.OnRecvSimobjectDataBytype += new SimConnect.RecvSimobjectDataBytypeEventHandler(SimCon_OnRecvSimobjectDataBytype);
+
                     SimConnection.MapClientEventToSimEvent(EVENTS.PAUSE_TOGGLE, "PAUSE_TOGGLE");
 
                     SimConnection.MapClientEventToSimEvent(EVENTS.SLEW, "SLEW_TOGGLE");
@@ -536,6 +550,7 @@ namespace CGC_Sim_IOS
             {
                 case (uint)EVENTS.SIMSTART:
                     System.Console.WriteLine("Sim running");
+                    SimConnection.RequestDataOnSimObjectType(DataRequestID.Aircraft_Data, DEFINITIONS.Struct1, 0, SIMCONNECT_SIMOBJECT_TYPE.USER);
                     break;
 
                 case (uint)EVENTS.SIMSTOP:
@@ -544,10 +559,12 @@ namespace CGC_Sim_IOS
 
                 case (uint)EVENTS.ONESEC:
                     // Check current aircraft position
+                    SimConnection.RequestDataOnSimObjectType(DataRequestID.Aircraft_Data, DEFINITIONS.Struct1, 0, SIMCONNECT_SIMOBJECT_TYPE.USER);
                     CheckPosition();
                     UpdateInstruments();
                     break;
                 case (uint)EVENTS.FOURSECS:
+//                    SimConnection.RequestDataOnSimObject(DataRequestID.Aircraft_Data, DEFINITIONS.Struct1, 0, SIMCONNECT_PERIOD.SIM_FRAME, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 0, 0);
                     UpdateFailureButtons();
                     break;
                 case (uint)EVENTS.SITUATION_RESET:
@@ -602,7 +619,20 @@ namespace CGC_Sim_IOS
                     break;
                 case DataRequestID.Location_Data:
                     break;
-                default:
+                case DataRequestID.Aircraft_Data:
+                    Struct1 s1 = (Struct1)data.dwData[0];
+
+                    //Debug.WriteLine("title: " + s1.title);
+                    //Debug.WriteLine("Lat:   " + s1.latitude);
+                    //Debug.WriteLine("Lon:   " + s1.longitude);
+                    //Debug.WriteLine("Alt:   " + s1.altitude);
+                    //Debug.WriteLine("Number of Engines: " + s1.engines);
+                    Debug.WriteLine("Turn coordinator ball: " + s1.turnCoardinator + " Yaw Angle: " + (Math.Sign(s1.yawAngle)*(Math.Abs(s1.yawAngle)-Math.PI)) + " Yaw Angle: " + (s1.yawAngle)/ Math.Abs(s1.yawAngle) * (Math.Abs(s1.yawAngle) - Math.PI));
+                    //Debug.WriteLine("Yaw String: " + s1.yawString);
+                    sim.Engines = (int)s1.engines;
+                    break;
+
+                 default:
                     System.Console.WriteLine("Unknown request ID: " + data.dwRequestID);
                     break;
             }
@@ -618,9 +648,8 @@ namespace CGC_Sim_IOS
             System.Console.WriteLine("Get Weather Data: " + sim.CurrentMetar.MetarString);
         }
 
-#endregion
+        #endregion
 
- 
         private void Button_Launch_P3D_Click(object sender, RoutedEventArgs e)
         {
             LaunchP3D();
@@ -653,10 +682,15 @@ namespace CGC_Sim_IOS
 
         }
 
-        private void Button_Test_Click(object sender, RoutedEventArgs e)
+        private void Button_Engine_Start_Click(object sender, RoutedEventArgs e)
         {
-            simRest.CMD_Pause();
+            simRest.CMD_Engine_Auto_Start();
             //HRESULT hr = SimConnect_TransmitClientEvent(p3d->getHandle(), SIMCONNECT_OBJECT_ID_USER, event, 0, SIMCONNECT_GROUP_PRIORITY_HIGHEST, SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
+        }
+
+        private void Button_Engine_Stop_Click(object sender, RoutedEventArgs e)
+        {
+            simRest.CMD_Engine_Auto_Stop();
         }
 
         private void UpdateInstruments()
@@ -839,6 +873,10 @@ namespace CGC_Sim_IOS
                 handleSource.AddHook(HandleSimConnectEvents);
                 BuildScenarioLists();
                 LaunchP3D();
+                Slider_Throttle.Minimum = 0;
+                Slider_Throttle.Maximum = 16383;
+                Slider_Throttle.Value = 0;
+
             }
         }
 
@@ -978,6 +1016,12 @@ namespace CGC_Sim_IOS
                         listIGCTraffic.ItemsSource = igcManager.IGCFiles;
                         listIGCTraffic.DisplayMemberPath = "Description";
                         listIGCTraffic.SelectedValuePath = "FileName";
+                    }
+                }
+                else if (item.Name == "TabTools")
+                {
+                    if (SimConnection != null)
+                    {
                     }
                 }
             }
@@ -1228,6 +1272,14 @@ namespace CGC_Sim_IOS
                 Button_Fail_Altimeter.Content = simRest.AltimeterFailed ? "Clear Altimeter" : "Fail Altimeter";
                 Button_Fail_Pitot.Content = simRest.PitotFailed ? "Clear Pitot" : "Fail Pitot";
                 Button_Fail_Electrical.Content = simRest.ElectricsFailed ? "Clear Electrics" : "Fail Electrics";
+                Button_Engine_Start.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                Button_Engine_Stop.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                Slider_Throttle.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                Button_Engine_Stop.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                Button_Throttle_Min.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                Button_Throttle_Decrease.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                Button_Throttle_Increase.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                Button_Throttle_Max.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
             }
             response = changed;
             return response;
@@ -1427,7 +1479,38 @@ namespace CGC_Sim_IOS
             ShowOSK();
         }
 
-     }
+
+        private void Slider_Throttle_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (throttleSetting != (int)e.NewValue)
+            {
+                throttleSetting = (int)e.NewValue;
+                simRest.CMD_Throttle_Set(throttleSetting);
+            }
+
+        }
+
+ 
+        private void Button_Throttle_Min_Click(object sender, RoutedEventArgs e)
+        {
+            Slider_Throttle.Value = Slider_Throttle.Minimum;
+        }
+
+        private void Button_Throttle_Decrease_Click(object sender, RoutedEventArgs e)
+        {
+            Slider_Throttle.Value = Math.Max(Slider_Throttle.Minimum, Slider_Throttle.Value - (Slider_Throttle.Maximum - Slider_Throttle.Minimum) / 10);
+        }
+
+        private void Button_Throttle_Increase_Click(object sender, RoutedEventArgs e)
+        {
+            Slider_Throttle.Value = Math.Min(Slider_Throttle.Maximum, Slider_Throttle.Value + (Slider_Throttle.Maximum - Slider_Throttle.Minimum) / 10);
+        }
+
+        private void Button_Throttle_Max_Click(object sender, RoutedEventArgs e)
+        {
+            Slider_Throttle.Value = Slider_Throttle.Maximum;
+        }
+    }
 
     public class TextBoxOutputter : TextWriter
     {
