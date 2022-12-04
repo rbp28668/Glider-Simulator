@@ -15,12 +15,15 @@
 #include "EventMessageHandler.h"
 #include "HTTPService.h"
 #include "APIThread.h"
+#include "Lua.h"
+#include "Logger.h"
 
 int main(int argc, char* argv[])
 {
 
 	bool verbose = false;
 	unsigned short port = 3000;
+	std::string script;
 
 	for (int i = 1; i<argc; ) {
 		std::string arg = argv[i++];
@@ -31,8 +34,16 @@ int main(int argc, char* argv[])
 			else {
 				std::cerr << "Missing port parameter for -port option, defaulting to " << port << std::endl;
 			}
-
 		}
+		else if (arg == "-script") {
+			if (i < argc) {
+				script = argv[i++];
+			}
+			else {
+				std::cerr << "Missing script parameter for -script option, ignoring this" << std::endl;
+			}
+		}
+
 		else if (arg == "-verbose") {
 			verbose = true;
 		}
@@ -46,6 +57,7 @@ int main(int argc, char* argv[])
 			return 2;
 		}
 	}
+
 
 	HTTPService httpService;
 
@@ -62,8 +74,22 @@ int main(int argc, char* argv[])
 	APIThread api(&interpreter);
 	api.start();
 
+	Lua::cleanup.start();
+
+	// Setup LUA interpreter and run any startup script.
+	if(!script.empty()) {
+		Lua lua(&sim);
+		std::string error;
+		if (lua.runFile(script, error)) {
+			sim.getLogger()->error(error);
+		}
+		
+	}
+
 	sim.DispatchLoop();
-	
+
+	Lua::cleanup.stop();
+
 	api.stop();
 	messageReceiver.stop();
 

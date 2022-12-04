@@ -91,30 +91,7 @@ TrafficMessageHandler::~TrafficMessageHandler()
 {
 }
 
-void TrafficMessageHandler::run(const std::string& cmd, const APIParameters& params, std::string& output)
-{
-	if (cmd == "launch") {
-		double targetRange = params.getDouble("range",4.0);  // Start target 4NM away 
-		double targetSpeed = params.getDouble("speed",300); // in kts;
-		double relativeBearing = params.getDouble("bearing",0);  // degrees 0 is on the nose, 90 from the right etc.
-		std::string targetName = params.getString("name"); // one of the aircraft in F:\Lockheed Martin\Prepar3D v4\SimObjects\Airplanes, title from aircraft.cfg
-		if (targetName.empty()) targetName = "F-15";
-		std::string targetTailNumber = params.getString("tail_number");
-		if (targetTailNumber.empty()) targetTailNumber = "Viper";
-		double relativeTargetHeight = params.getDouble("relative_height",0); // same level
-
-		launch(targetName, targetTailNumber, targetRange, targetSpeed, relativeBearing, relativeTargetHeight);
-		reportSuccess(output);
-	}
-	else if (cmd == "aircraft") {
-		availableAircraft(output);
-	}
-	else {
-		reportFailure("Unknown traffic command", 0, output);
-	}
-}
-
-void TrafficMessageHandler::launch(const std::string& targetName, const std::string& targetTailNumber, double targetRange, double targetSpeed, double relativeBearing, double relativeTargetHeight)
+bool TrafficMessageHandler::launch(Simulator* pSim, const std::string& targetName, const std::string& targetTailNumber, double targetRange, double targetSpeed, double relativeBearing, double relativeTargetHeight)
 {
 	double R = 6371 / 1.852; // radius of earth in NM (convert km to NM)
 	double pi = 3.1415926535897932384636434;
@@ -163,6 +140,63 @@ void TrafficMessageHandler::launch(const std::string& targetName, const std::str
 		pSim->nextRequestId()
 	);
 
+	return hr == S_OK;
+}
+
+std::list<std::string>& TrafficMessageHandler::listAircraft(std::list<std::string>& aircraft)
+{
+
+	P3DInstallationDirectory p3dInstall;
+	Directory airplanesFolder = p3dInstall.sub("SimObjects").sub("Airplanes");
+
+	Directory::ListT folders;
+	airplanesFolder.folders(folders);
+
+	for (Directory::ListT::iterator it = folders.begin();
+		it != folders.end();
+		++it) {
+
+		File config = it->file("aircraft.cfg");
+		if (!config.exists()) {
+			config = it->file("sim.cfg");
+		}
+
+		if (config.exists()) {
+			std::string title = getAircraftTitle(config);
+			aircraft.push_back(title);
+		}
+
+	}
+	
+	return aircraft;
+}
+
+void TrafficMessageHandler::run(const std::string& cmd, const APIParameters& params, std::string& output)
+{
+	if (cmd == "launch") {
+		double targetRange = params.getDouble("range",4.0);  // Start target 4NM away 
+		double targetSpeed = params.getDouble("speed",300); // in kts;
+		double relativeBearing = params.getDouble("bearing",0);  // degrees 0 is on the nose, 90 from the right etc.
+		std::string targetName = params.getString("name"); // one of the aircraft in F:\Lockheed Martin\Prepar3D v4\SimObjects\Airplanes, title from aircraft.cfg
+		if (targetName.empty()) targetName = "F-15";
+		std::string targetTailNumber = params.getString("tail_number");
+		if (targetTailNumber.empty()) targetTailNumber = "Viper";
+		double relativeTargetHeight = params.getDouble("relative_height",0); // same level
+
+		launch(targetName, targetTailNumber, targetRange, targetSpeed, relativeBearing, relativeTargetHeight);
+		reportSuccess(output);
+	}
+	else if (cmd == "aircraft") {
+		availableAircraft(output);
+	}
+	else {
+		reportFailure("Unknown traffic command", 0, output);
+	}
+}
+
+void TrafficMessageHandler::launch(const std::string& targetName, const std::string& targetTailNumber, double targetRange, double targetSpeed, double relativeBearing, double relativeTargetHeight)
+{
+	launch(pSim, targetName, targetTailNumber, targetRange, targetSpeed, relativeBearing, relativeTargetHeight);
 }
 
 // Note that if there are multiple title fields in a config file then this
@@ -170,36 +204,21 @@ void TrafficMessageHandler::launch(const std::string& targetName, const std::str
 void TrafficMessageHandler::availableAircraft(std::string& output)
 {
 	try {
-		P3DInstallationDirectory p3dInstall;
-		Directory airplanesFolder = p3dInstall.sub("SimObjects").sub("Airplanes");
-
-		Directory::ListT folders;
-		airplanesFolder.folders(folders);
 
 		JSONWriter json(output);
 		json.add("status", "OK");
 		json.array("aircraft");
 
-
-		for (Directory::ListT::iterator it = folders.begin();
-			it != folders.end();
-			++it) {
-			
-			File config = it->file("aircraft.cfg");
-			if (!config.exists()) {
-				config = it->file("sim.cfg");
-			}
-
-			if (config.exists()) {
-				std::string aircraft = getAircraftTitle(config);
-				json.object();
-				json.add("title", aircraft);
-				json.end();
-			}
+		std::list<std::string> aircraft;
+		listAircraft(aircraft);
+		for (auto it = aircraft.begin(); it != aircraft.end(); ++it) {
+			json.object();
+			json.add("title", *it);
+			json.end();
 
 		}
-
 		json.end(); // of array
+
 	}
 	catch (FileException& fx) {
 		output.erase();

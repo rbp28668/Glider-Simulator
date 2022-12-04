@@ -89,8 +89,6 @@ bool IGCAircraft::simulate(const SimInputData& inputData, SimOutputData& outputD
 	outputData.vWorldY = 0; // p.vwz; // up/down
 	outputData.verticalSpeed = 0; // p.vwz;
 
-	//std::cout << "Lat: " << p.lat << "Long: " << p.lon << "Alt (feet)" << p.alt << std::endl;
-
 	return !trace.complete(t);
 }
 

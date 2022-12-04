@@ -1,8 +1,9 @@
 #include "stdafx.h"
-#include "SimState.h"
 #include <assert.h>
 #include <iostream>
 #include <sstream>
+#include "SimState.h"
+#include "Simulator.h"
 
 /* For reference see https://www.prepar3d.com/SDKv4/sdk/simconnect_api/references/structures_and_enumerations.html#SIMCONNECT_DATA_INITPOSITION
 struct SIMCONNECT_DATA_INITPOSITION {
@@ -16,7 +17,7 @@ struct SIMCONNECT_DATA_INITPOSITION {
 	DWORD  Airspeed;
 };
 */
-// Note this should match the structure above.
+// Note this should match the Data type based initposition above.
 SimObjectData::DataItem SimState::dataItems[] = {
 	{"PLANE LATITUDE","degrees",SIMCONNECT_DATATYPE_FLOAT64},
 	{"PLANE LONGITUDE","degrees",SIMCONNECT_DATATYPE_FLOAT64},
@@ -26,6 +27,8 @@ SimObjectData::DataItem SimState::dataItems[] = {
 	{"PLANE HEADING DEGREES TRUE","degrees",SIMCONNECT_DATATYPE_FLOAT64},
 	{"SIM ON GROUND","bool",SIMCONNECT_DATATYPE_INT32},
     {"AIRSPEED TRUE","knots",SIMCONNECT_DATATYPE_INT32},
+	{"TOW CONNECTION","bool",SIMCONNECT_DATATYPE_INT32},
+
 };
 
 SimObjectData::DataItem* SimState::items() {
@@ -43,17 +46,27 @@ void SimState::onData(void* pvData, SimObject* pObject) {
 
 	struct Data* pData = reinterpret_cast<Data*>(pvData);
 	CriticalSection::Lock lock(csData);
-	data = *pData;
+	if (pData) {
+		data = *pData;
 
-	if (!getSim()->isPaused()) {
-		buffer.add(this->data);
+		if (!getSim()->isPaused()) {
+			buffer.add(this->data);
+		}
+
+		if (tugConnected && (data.onTow == 0)) {
+			pSim->tugReleased();
+		}
+
+		tugConnected = (data.onTow != 0);
 	}
 }
 
 SimState::SimState(Prepar3D* pSim)
-	: SimObjectData(pSim)
+	: pSim(static_cast<Simulator*>(pSim))
+	, SimObjectData(pSim)
 	, init(pSim)
 	, buffer(600)  // 10 mins
+	, tugConnected(false)
 {
 	assert(pSim);
 	createDefinition();
@@ -154,6 +167,7 @@ void SimState::clear()
 }
 
 SimState::Data::Data()
+	: onTow(0)
 {
 	Latitude = 0;
 	Longitude = 0;

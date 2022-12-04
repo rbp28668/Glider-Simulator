@@ -17,12 +17,12 @@ public:
 	virtual void run(const std::string& cmd, const APIParameters& params, std::string& output);
 
 	void current(std::string& output);
-	void failAirspeed(Failures::FAILURE_MODE mode, std::string& output);
-	void failAltimeter(Failures::FAILURE_MODE mode, std::string& output);
-	void failElectrical(Failures::FAILURE_MODE mode, std::string& output);
-	void failPitot(Failures::FAILURE_MODE mode, std::string& output);
-	void failTurnCoordinator(Failures::FAILURE_MODE mode, std::string& output);
-	void clearAll(std::string& output);
+	static void failAirspeed(Simulator* pSim, Failures::FAILURE_MODE mode, std::string& output);
+	static void failAltimeter(Simulator* pSim, Failures::FAILURE_MODE mode, std::string& output);
+	static void failElectrical(Simulator* pSim, Failures::FAILURE_MODE mode, std::string& output);
+	static void failPitot(Simulator* pSim, Failures::FAILURE_MODE mode, std::string& output);
+	static void failTurnCoordinator(Simulator* pSim, Failures::FAILURE_MODE mode, std::string& output);
+	static void clearAll(Simulator* pSim, std::string& output);
 
 };
 

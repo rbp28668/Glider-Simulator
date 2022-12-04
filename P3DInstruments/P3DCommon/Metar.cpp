@@ -11,7 +11,7 @@
 // Regex to match a single entry
 // flag to say if multiple entries are used. 
 Metar::FieldDefinition Metar::definitions[FIELD_COUNT] = {
-	{ STATION,			"STATION",			"^[A-Z]{4}(&A[0-9]{1,3})?", false },
+	{ STATION,			"STATION",			"^[A-Z0-9]{4}(&A[0-9]{1,3})?", false },
 	{ REPORT_TYPE,		"REPORT_TYPE",		"^METAR|SPECI", false},
 	{ AUTO,				"AUTO",				"^AUTO", false },
 	{ COR,				"COR",				"^COR", false },
@@ -68,7 +68,18 @@ bool Metar::parseSingleField(FieldType field, std::string::const_iterator& pos, 
 	assert(field >= STATION && field < FIELD_COUNT);
 	assert(definitions[field].type == field); // sanity check to make sure all in the right order
 
+	// Maybe nothing
+	if (pos == end) {
+		return false;
+	}
+
 	skipSpaces(pos);
+
+	// In case of trailing spaces...
+	if (pos == end) {
+		return false;
+	}
+
 	std::string value = match(definitions[field].regex, pos, end);
 	if (!value.empty()) {
 		fields[field].push_back(value);
@@ -103,6 +114,9 @@ void Metar::clear()
 std::string Metar::parse(const std::string& metar)
 {
 	assert(this);
+
+	CriticalSection::Lock lock(guard);
+
 	clear();
 
 	std::string::const_iterator pos = metar.begin();
@@ -137,11 +151,19 @@ std::string Metar::parse(const std::string& metar)
 	while (!residual.empty() && isspace(residual.back())) {
 		residual.pop_back();
 	}
+
+	// Optional extension must not be set on update hence remove it.
+	if (!fields[STATION].empty() && fields[STATION][0].length() > 4) {
+		fields[STATION][0] = fields[STATION][0].substr(0, 4);
+	}
+
 	return residual;
 }
 
 void Metar::merge(const Metar& metar)
 {
+	CriticalSection::Lock lock(guard);
+
 	for (int t = STATION; t < FIELD_COUNT; ++t) {
 		if (!metar.fields[t].empty()) {
 			fields[t] = metar.fields[t];
@@ -156,36 +178,22 @@ void Metar::merge(const Metar& metar)
 }
 
 // Sets a field value.  It either has to be a valid value or empty.
-bool Metar::set(FieldType field, const std::string& value)
+bool Metar::setField(FieldType field, const std::string& value)
 {
 	assert(this);
 	assert(field >= STATION && field < FIELD_COUNT);
+
+	CriticalSection::Lock lock(guard);
 
 	fields[field].clear();
-	bool valid = add(field, value);
+
+	std::string::const_iterator pos = value.begin();
+	std::string::const_iterator end = value.end();
+
+	bool valid = parseField(field, pos, end);
 	return valid;
 }
 
-bool Metar::add(FieldType field, const std::string& value)
-{
-	assert(this);
-	assert(field >= STATION && field < FIELD_COUNT);
-
-	bool valid = true;
-
-	if (!value.empty()) {
-		std::regex r(definitions[field].regex);
-		valid = (std::regex_match(value, r));
-		if (valid) {
-			fields[field].push_back(value);
-		}
-		else {
-			std::cout << "Invalid field " << definitions[field].name << " - " << value << " does not match " << definitions[field].regex << std::endl;
-		}
-	}
-
-	return valid;
-}
 
 std::string Metar::get(FieldType field) const
 {
@@ -199,16 +207,38 @@ std::string Metar::get(FieldType field) const
 	return value;
 }
 
-bool Metar::multiple(FieldType field) const
+std::string Metar::getRepeated(FieldType field) const
 {
 	assert(this);
+	assert(field >= STATION && field < FIELD_COUNT);
+
+	std::string text;
+	bool needsSpace = false;
+
+	for (int i = 0; i < fields[field].size(); ++i) {
+		if (needsSpace) {
+			text.append(" ");
+		}
+		text.append(fields[field][i]);
+		needsSpace = true;
+	}
+	return text;
+}
+
+Metar::FieldType Metar::type(int idx)
+{
+	assert(idx >= STATION && idx < FIELD_COUNT);
+	return definitions[idx].type;
+}
+
+bool Metar::multiple(FieldType field) 
+{
 	assert(field >= STATION && field < FIELD_COUNT);
 	return definitions[field].multiple;
 }
 
-const char* Metar::typeName(FieldType field) const
+const char* Metar::typeName(FieldType field) 
 {
-	assert(this);
 	assert(field >= STATION && field < FIELD_COUNT);
 	return definitions[field].name;
 }
@@ -240,9 +270,12 @@ bool Metar::outputField(FieldType ft, std::string& output, bool needsSpace) cons
 }
 
 // Regenerates the metar as a text string.
-std::string Metar::text() const
+std::string Metar::text() 
 {
 	assert(this);
+
+	CriticalSection::Lock lock(guard);
+
 	std::string text;
 	bool needsSpace = false;
 	needsSpace = outputField(STATION, text, needsSpace);
@@ -286,7 +319,7 @@ void Metar::showField(FieldType field, std::string& text) const {
 			text.append(" | ");
 		}
 
-		if (fields[field].size() == 1) {
+		if (fields[field].size() > 0) {
 			text.append(definitions[field].name);
 			text.append(" : ");
 			text.append(fields[field][0]);
@@ -299,9 +332,13 @@ void Metar::showField(FieldType field, std::string& text) const {
 	
 }
 
-std::string Metar::show() const
+std::string Metar::show()
 {
+	assert(this);
+
 	std::string text;
+
+	CriticalSection::Lock lock(guard);
 
 	showField(STATION, text);
 	showField(REPORT_TYPE, text);

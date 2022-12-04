@@ -37,26 +37,26 @@ void FailuresMessageHandler::run(const std::string& cmd, const APIParameters& pa
 {
 	if (cmd == "airspeed") {
 		Failures::FAILURE_MODE mode = getMode(params);
-		failAirspeed(mode, output);
+		failAirspeed(pSim, mode, output);
 	}
 	else if (cmd == "altimeter") {
 		Failures::FAILURE_MODE mode = getMode(params);
-		failAltimeter(mode, output);
+		failAltimeter(pSim, mode, output);
 	}
 	else if (cmd == "electrical") {
 		Failures::FAILURE_MODE mode = getMode(params);
-		failElectrical(mode, output);
+		failElectrical(pSim, mode, output);
 	}
 	else if (cmd == "pitot") {
 		Failures::FAILURE_MODE mode = getMode(params);
-		failPitot(mode, output);
+		failPitot(pSim, mode, output);
 	}
 	else if (cmd == "turn_coordinator") {
 		Failures::FAILURE_MODE mode = getMode(params);
-		failTurnCoordinator(mode, output);
+		failTurnCoordinator(pSim, mode, output);
 	}
 	else if (cmd == "clear") {
-		clearAll(output);
+		clearAll(pSim, output);
 	}
 	else if (cmd == "current") {
 		current(output);
@@ -78,37 +78,37 @@ void FailuresMessageHandler::current(std::string& output)
 	json.add("turn_coordinator", data.turn_coordinator);
 }
 
-void FailuresMessageHandler::failAirspeed(Failures::FAILURE_MODE mode, std::string& output)
+void FailuresMessageHandler::failAirspeed(Simulator* pSim, Failures::FAILURE_MODE mode, std::string& output)
 {
 	pSim->getFailures()->failAirspeed(mode);
 	reportSuccess(output);
 }
 
-void FailuresMessageHandler::failAltimeter(Failures::FAILURE_MODE mode, std::string& output)
+void FailuresMessageHandler::failAltimeter(Simulator* pSim, Failures::FAILURE_MODE mode, std::string& output)
 {
 	pSim->getFailures()->failAltimeter(mode);
 	reportSuccess(output);
 }
 
-void FailuresMessageHandler::failElectrical(Failures::FAILURE_MODE mode, std::string& output)
+void FailuresMessageHandler::failElectrical(Simulator* pSim, Failures::FAILURE_MODE mode, std::string& output)
 {
 	pSim->getFailures()->failElectrical(mode);
 	reportSuccess(output);
 }
 
-void FailuresMessageHandler::failPitot(Failures::FAILURE_MODE mode, std::string& output)
+void FailuresMessageHandler::failPitot(Simulator* pSim, Failures::FAILURE_MODE mode, std::string& output)
 {
 	pSim->getFailures()->failPitot(mode);
 	reportSuccess(output);
 }
 
-void FailuresMessageHandler::failTurnCoordinator(Failures::FAILURE_MODE mode, std::string& output)
+void FailuresMessageHandler::failTurnCoordinator(Simulator* pSim, Failures::FAILURE_MODE mode, std::string& output)
 {
 	pSim->getFailures()->failTurnCoordinator(mode);
 	reportSuccess(output);
 }
 
-void FailuresMessageHandler::clearAll(std::string& output)
+void FailuresMessageHandler::clearAll(Simulator* pSim, std::string& output)
 {
 	pSim->getFailures()->clearAll();
 	reportSuccess(output);

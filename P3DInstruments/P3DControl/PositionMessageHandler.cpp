@@ -22,7 +22,7 @@ void PositionMessageHandler::write(const SimState::Data& data, JSONWriter& json)
 	json.add("airspeed", data.Airspeed);
 }
 
-void PositionMessageHandler::getPositionMetadata(File& f, std::string& title, std::string& description)
+void PositionMessageHandler::getPositionMetadata(Simulator* pSim, File& f, std::string& title, std::string& description)
 {
 	Json::Value root;
 	std::ifstream ifs;
@@ -33,7 +33,7 @@ void PositionMessageHandler::getPositionMetadata(File& f, std::string& title, st
 	bool ok = parseFromStream(builder, ifs, &root, &errs);
 	ifs.close();
 	if (ok) {
-		if (p3d->isVerbose()) {
+		if (pSim->isVerbose()) {
 			std::cout << root << std::endl;
 		}
 		assert(root.isObject());
@@ -43,7 +43,7 @@ void PositionMessageHandler::getPositionMetadata(File& f, std::string& title, st
 
 }
 
-void PositionMessageHandler::freeze()
+void PositionMessageHandler::freeze(Simulator* pSim)
 {
 		pSim->getCommands()->dispatchEvent(P3DEventCommand::PAUSE_ON, 0);
 		pSim->getCommands()->dispatchEvent(P3DEventCommand::FREEZE_ALTITUDE_SET, 1);
@@ -51,7 +51,7 @@ void PositionMessageHandler::freeze()
 		pSim->getCommands()->dispatchEvent(P3DEventCommand::FREEZE_LATITUDE_LONGITUDE_SET, 1);
 }
 
-void PositionMessageHandler::unfreeze()
+void PositionMessageHandler::unfreeze(Simulator* pSim)
 {
 	pSim->getCommands()->dispatchEvent(P3DEventCommand::FREEZE_LATITUDE_LONGITUDE_SET, 0);
 	pSim->getCommands()->dispatchEvent(P3DEventCommand::FREEZE_ATTITUDE_SET, 0);
@@ -132,66 +132,42 @@ void PositionMessageHandler::run(const std::string& cmd, const APIParameters& pa
 	}
 }
 
-void PositionMessageHandler::show(std::string& output)
-{
-	SimState::Data data = pSim->getState()->current();
-	JSONWriter json(output);
-	json.add("status", "OK");
-	
-	json.object("current");
-	write(data, json);
-	json.end();
+
+SimState::Data PositionMessageHandler::show(Simulator* pSim){
+	return pSim->getState()->current();
 }
 
-void PositionMessageHandler::available(std::string& output)
+int PositionMessageHandler::available(Simulator* pSim)
 {
+	return pSim->getState()->historyLength();
+}
+
+int PositionMessageHandler::start(Simulator* pSim)
+{
+	freeze(pSim);
 	int len = pSim->getState()->historyLength();
-	JSONWriter json(output);
-	json.add("status", "OK");
-	json.add("length", len);
+	return len;
 }
 
-void PositionMessageHandler::start(std::string& output)
+void PositionMessageHandler::stop(Simulator* pSim)
 {
-	freeze();
-	int len = pSim->getState()->historyLength();
-	JSONWriter json(output);
-	json.add("status", "OK");
-	json.add("length", len);
+	unfreeze(pSim);
 }
 
-void PositionMessageHandler::stop(std::string& output)
-{
-	unfreeze();
-	reportSuccess(output);
-}
-
-// Resets buffer to point and set aircraft to point.
-void PositionMessageHandler::set(int count, std::string& output)
+void PositionMessageHandler::set(Simulator* pSim, int count)
 {
 	SimState::Data data = pSim->getState()->rewindTo(count);
 	pSim->getState()->set(data);
-	unfreeze();
-	reportSuccess(output);
+	unfreeze(pSim);
 }
 
-// Puts aircraft to point.
-void PositionMessageHandler::back(int count, std::string& output)
+void PositionMessageHandler::back(Simulator* pSim, int count)
 {
 	SimState::Data data = pSim->getState()->history(count);
 	pSim->getState()->update(data);
-	reportSuccess(output);
 }
 
-// Clears the history.  Used when changing scenarios etc.
-void PositionMessageHandler::clearHistory(std::string& output)
-{
-	pSim->getState()->clear();
-	reportSuccess(output);
-}
-
-
-void PositionMessageHandler::load(const std::string& file, std::string& output)
+bool PositionMessageHandler::load(Simulator* pSim, const std::string& file, std::string& err)
 {
 	DocumentDirectory documents;
 	Directory p3dFolder = documents.sub(Prepar3D::DOCUMENTS);
@@ -204,12 +180,12 @@ void PositionMessageHandler::load(const std::string& file, std::string& output)
 	Json::CharReaderBuilder builder;
 	Json::String errs;
 	if (!parseFromStream(builder, ifs, &root, &errs)) {
-		reportFailure(errs.c_str(),0,output);
+		err = errs.c_str();
 		ifs.close();
-		return;
+		return false;
 	}
 	ifs.close();
-	if (p3d->isVerbose()) {
+	if (pSim->isVerbose()) {
 		std::cout << root << std::endl;
 	}
 	assert(root.isObject());
@@ -229,11 +205,10 @@ void PositionMessageHandler::load(const std::string& file, std::string& output)
 	data.Airspeed = root["airspeed"].asInt();
 
 	pSim->getState()->update(data);
-
-	reportSuccess(output);
+	return true;
 }
 
-void PositionMessageHandler::save(const std::string& file, const std::string& title, const std::string& description, std::string& output)
+void PositionMessageHandler::save(Simulator* pSim, const std::string& file, const std::string& title, const std::string& description)
 {
 	SimState::Data data = pSim->getState()->current();
 	std::string contents;
@@ -242,7 +217,7 @@ void PositionMessageHandler::save(const std::string& file, const std::string& ti
 	json.add("description", description);
 	write(data, json);
 	json.end();
-		
+
 	DocumentDirectory documents;
 	Directory p3dFolder = documents.sub(Prepar3D::DOCUMENTS);
 	File dest = p3dFolder.file(file);
@@ -250,6 +225,108 @@ void PositionMessageHandler::save(const std::string& file, const std::string& ti
 	ofs << contents << std::endl;
 	ofs.close();
 
+
+}
+
+void PositionMessageHandler::list(Simulator* pSim, const std::string& filter, File::ListT& files)
+{
+	// E:\Users\rbp28668\Documents\Prepar3D v4 Files
+	DocumentDirectory documents;
+	Directory p3dFolder = documents.sub(Prepar3D::DOCUMENTS);
+	files = p3dFolder.files(files, filter + "*.posn");
+}
+
+void PositionMessageHandler::up(Simulator* pSim, int feet)
+{
+	SimState::Data data = pSim->getState()->current();
+	data.Altitude += feet;
+	if (data.Altitude < 0) data.Altitude = 0;
+	pSim->getState()->update(data);
+}
+
+void PositionMessageHandler::down(Simulator* pSim, int feet)
+{
+	up(pSim, -feet);
+}
+
+void PositionMessageHandler::clearHistory(Simulator* pSim)
+{
+	pSim->getState()->clear();
+}
+
+
+
+// ===================================================================================
+void PositionMessageHandler::show(std::string& output)
+{
+	SimState::Data data = show(pSim);
+	JSONWriter json(output);
+	json.add("status", "OK");
+	
+	json.object("current");
+	write(data, json);
+	json.end();
+}
+
+void PositionMessageHandler::available(std::string& output)
+{
+	int len = available(pSim);
+	JSONWriter json(output);
+	json.add("status", "OK");
+	json.add("length", len);
+}
+
+void PositionMessageHandler::start(std::string& output)
+{
+	freeze(pSim);
+	int len = pSim->getState()->historyLength();
+	JSONWriter json(output);
+	json.add("status", "OK");
+	json.add("length", len);
+}
+
+void PositionMessageHandler::stop(std::string& output)
+{
+	stop(pSim);
+	reportSuccess(output);
+}
+
+// Resets buffer to point and set aircraft to point.
+void PositionMessageHandler::set(int count, std::string& output)
+{
+	set(pSim, count);
+	reportSuccess(output);
+}
+
+// Puts aircraft to point.
+void PositionMessageHandler::back(int count, std::string& output)
+{
+	back(pSim, count);
+	reportSuccess(output);
+}
+
+// Clears the history.  Used when changing scenarios etc.
+void PositionMessageHandler::clearHistory(std::string& output)
+{
+	clearHistory(pSim);
+	reportSuccess(output);
+}
+
+
+void PositionMessageHandler::load(const std::string& file, std::string& output)
+{
+	std::string err;
+	if (load(pSim, file, err)) {
+		reportSuccess(output);
+	}
+	else {
+		reportFailure(err.c_str(), 0, output);
+	}
+}
+
+void PositionMessageHandler::save(const std::string& file, const std::string& title, const std::string& description, std::string& output)
+{
+	save(pSim, file, title, description);
 	reportSuccess(output);
 }
 
@@ -258,22 +335,16 @@ void PositionMessageHandler::list(const std::string& filter, std::string& output
 	File::ListT files;
 	
 	try {
-		// E:\Users\rbp28668\Documents\Prepar3D v4 Files
-		DocumentDirectory documents;
-		Directory p3dFolder = documents.sub("Prepar3D v4 Files");
-		files = p3dFolder.files(files, filter + "*.posn");
-
+		list(pSim, filter, files);
 
 		JSONWriter json(output);
 		json.add("status", "OK");
 		json.array("entries");
 		for (File::ListT::iterator it = files.begin(); it != files.end(); ++it) {
 
-			File src = p3dFolder.file(*it); // get full path
-
 			std::string title;
 			std::string description;
-			getPositionMetadata(src, title, description);
+			getPositionMetadata(pSim, *it, title, description);
 
 			json.object();
 			json.add("filename", it->name());
@@ -296,11 +367,7 @@ void PositionMessageHandler::list(const std::string& filter, std::string& output
 
 void PositionMessageHandler::up(int feet, std::string& output)
 {
-	SimState::Data data = pSim->getState()->current();
-	
-	data.Altitude += feet;
-	if (data.Altitude < 0) data.Altitude = 0;
-	pSim->getState()->update(data);
+	up(pSim, feet);
 	reportSuccess(output);
 }
 

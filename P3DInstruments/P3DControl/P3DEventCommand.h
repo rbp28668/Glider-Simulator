@@ -7,7 +7,7 @@ class P3DEventCommand
 {
 public:
 	typedef enum EVENT_ID {
-		START_VALUE = Prepar3D::LAST_P3D_EVENT, // Note that without this we get duplicate event ID exeptions. 
+		START_VALUE = Prepar3D::EVENT_ID::LAST_P3D_EVENT, // Note that without this we get duplicate event ID exeptions. 
 
 		THROTTLE_FULL,			// Set throttles max	Shared Cockpit
 		THROTTLE_INCR,			// Increment throttles	Shared Cockpit
@@ -56,11 +56,21 @@ public:
 		ELEV_TRIM_UP,
 		SPOILERS_ON,
 		SPOILERS_OFF,
+		ELEVATOR_SET,			// Sets elevator position (-16383 - +16383)
+		AILERON_SET,			// Sets aileron position (-16383 - +16383)
+		RUDDER_SET,				// Sets rudder position (-16383 - +16383)
 		BAROMETRIC,
 		KOHLSMAN_INC,
 		KOHLSMAN_DEC,
 		KOHLSMAN_SET,
 		RESET_G_FORCE_INDICATOR,
+		TOGGLE_VACUUM_FAILURE,			// Toggle vacuum system failure	Shared Cockpit
+		TOGGLE_ELECTRICAL_FAILURE,		// Toggle electrical system failure	Shared Cockpit
+		TOGGLE_PITOT_BLOCKAGE,			// Toggles blocked pitot tube	Shared Cockpit
+		TOGGLE_STATIC_PORT_BLOCKAGE,	// Toggles blocked static port	Shared Cockpit
+		TOGGLE_HYDRAULIC_FAILURE,		// Toggles hydraulic system failure	Shared Cockpit
+		TOGGLE_TOTAL_BRAKE_FAILURE,		// Toggles brake failure(both)	Shared Cockpit
+		TOGGLE_ENGINE1_FAILURE,
 		GEAR_UP,
 		GEAR_DOWN,
 		TOW_PLANE_RELEASE,
@@ -136,8 +146,8 @@ public:
 
 	P3DEventCommand(Prepar3D* p3d);
 	~P3DEventCommand();
-	bool dispatchEvent(EventID event, DWORD  dwData);
-	bool dispatchEvent(const std::string& eventName, DWORD  dwData);
+	bool dispatchEvent(EventID event, DWORD  dwData, DWORD dwId = SIMCONNECT_OBJECT_ID_USER);
+	bool dispatchEvent(const std::string& eventName, DWORD  dwData, DWORD dwId = SIMCONNECT_OBJECT_ID_USER);
 
 
 };

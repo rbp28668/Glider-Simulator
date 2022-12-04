@@ -13,6 +13,7 @@ WeatherStation::WeatherStation(Prepar3D* p3d, const char* szIcao)
 	, p3d(p3d)
 	, owned(false)
 	, requestId(-1)
+	, updated(false)
 { }
 
 WeatherStation::WeatherStation(Prepar3D* p3d, const char* szIcao, const char* szName, float lat, float lon)
@@ -20,6 +21,7 @@ WeatherStation::WeatherStation(Prepar3D* p3d, const char* szIcao, const char* sz
 	, p3d(p3d)
 	, owned(false)
 	, requestId(-1)
+	, updated(false)
 {
 	HRESULT hr = SimConnect_WeatherCreateStation(
 		p3d->getHandle(),
@@ -61,7 +63,7 @@ void WeatherStation::requestWeather()
 
 }
 
-void WeatherStation::setWeather(const Metar& metar, DWORD seconds)
+void WeatherStation::setWeather(Metar& metar, DWORD seconds)
 {
 	lastWeather = metar;
 	HRESULT hr = ::SimConnect_WeatherSetObservation(
@@ -71,7 +73,7 @@ void WeatherStation::setWeather(const Metar& metar, DWORD seconds)
 	);
 }
 
-void WeatherStation::updateWeather(const Metar& metar, DWORD seconds)
+void WeatherStation::updateWeather(Metar& metar, DWORD seconds)
 {
 	lastWeather.merge(metar);
 	std::cout << lastWeather.text() << std::endl;
@@ -86,5 +88,6 @@ void WeatherStation::updateWeather(const Metar& metar, DWORD seconds)
 void WeatherStation::updateFromSim(const char* pszMetar)
 {
 	lastWeather.parse(pszMetar);
+	updated = true;
 }
 

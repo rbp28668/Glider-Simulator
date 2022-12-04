@@ -24,6 +24,11 @@ EventMessageHandler::~EventMessageHandler()
 void EventMessageHandler::run(const std::string& cmd, const APIParameters& params, std::string& output)
 {
 	DWORD dwData = params.getDWORD("value",0);
+	dispatchEvent(pSim, cmd, dwData, output);
+}
+
+bool EventMessageHandler::dispatchEvent(Simulator* pSim, const std::string& cmd, DWORD dwData, std::string& output)
+{
 	
 	// Force upper case for lookup.
 	std::string asUpper(cmd);
@@ -37,7 +42,10 @@ void EventMessageHandler::run(const std::string& cmd, const APIParameters& param
 	if (failed) {
 		json.add("status", "FAILED")
 			.add("reason", "Unable to run P3D command " + asUpper);
-	} else {
+	}
+	else {
 		json.add("status", "OK");
 	}
+
+	return !failed;
 }

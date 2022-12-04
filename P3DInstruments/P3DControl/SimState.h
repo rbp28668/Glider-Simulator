@@ -1,15 +1,17 @@
 #pragma once
 #include "../P3DCommon/SimObjectData.h"
-#include "CriticalSection.h"
+#include "../P3DCommon/CriticalSection.h"
 #include "InitPosition.h"
 
 class Prepar3D;
+class Simulator;
 
 class SimState : public SimObjectData
 {
 public:
 	
 	struct Data : public SIMCONNECT_DATA_INITPOSITION {
+		int32_t onTow;  // 1 when attached to tug, 0 otherwise.
 		Data();
 	};
 
@@ -24,10 +26,12 @@ public:
 	};
 
 private:
+	Simulator* pSim;
 	static DataItem dataItems[];
 	Data data;
 	CriticalSection csData;
 	InitPosition init;
+	bool tugConnected;
 
 	struct Buffer {
 		Data* buffer;

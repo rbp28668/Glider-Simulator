@@ -3,7 +3,7 @@
 #include "SerialLink.h"
 
 
-SerialLink::SerialLink(const char* pszPort)
+SerialLink::SerialLink(const char* pszPort, int bps)
 	: dwToWrite(0)
 {
 
@@ -28,6 +28,7 @@ SerialLink::SerialLink(const char* pszPort)
 		std::cerr << "Unable to build device control block " << std::endl;
 		exit(3);
    }
+   dcb.BaudRate = bps;
    dcb.fOutxCtsFlow = 0;
    dcb.fOutxDsrFlow = 0;
    dcb.fDtrControl = DTR_CONTROL_ENABLE; // just enable it

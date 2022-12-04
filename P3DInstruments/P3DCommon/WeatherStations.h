@@ -3,14 +3,18 @@
 #include <string>
 #include <map>
 
+
 class Prepar3D;
 
 class WeatherStations
 {
+public:
+	using StationMap = std::map<std::string, WeatherStation*>;
+
+private:
 	Prepar3D* p3d;
 	WeatherStation* globalWeatherStation;
 	int sequence;
-	using StationMap = std::map<std::string, WeatherStation*>;
 	StationMap stations;
 
 public:
@@ -24,6 +28,7 @@ public:
 	std::string add(float lat, float lon);
 	void refresh();
 	WeatherStation* get(const std::string& ICAO);
-
+	StationMap::const_iterator begin() const;
+	StationMap::const_iterator end() const;
 };
 

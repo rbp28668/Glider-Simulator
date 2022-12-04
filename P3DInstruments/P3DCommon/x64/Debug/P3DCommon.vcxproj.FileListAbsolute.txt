@@ -1,0 +1,2 @@
+E:\Git\Glider-Simulator\P3DInstruments\x64\Debug\P3DCommon.pdb
+E:\Git\Glider-Simulator\P3DInstruments\P3DCommon\x64\Debug\P3DCommon.pdb

@@ -20,220 +20,46 @@ WeatherMessageHandler::~WeatherMessageHandler()
 {
 }
 
-void WeatherMessageHandler::run(const std::string& cmd, const APIParameters& params, std::string& output)
-{
-	// List all available themes
-	if (cmd == "themes") {
-		listWeatherThemes(output);
-	}
-	// Select a theme
-	else if (cmd == "theme") {
-		std::string theme = params.getString("name");
-		if (theme.empty()) {
-			reportFailure("Must provide a theme name to set", 0, output);
-		}
-		else {
-			setWeatherTheme(theme, output);
-		}
-	}
-	// Set global weather mode
-	else if (cmd == "global") {
-		setGlobalWeather(output);
-	}
-	// Set custom weather mode
-	else if (cmd == "custom") {
-		setCustomWeather(output);
-	}
-	// Request metar for a given station
-	else if (cmd == "request") {
-		std::string icao = params.getString("name");
-		if (icao.empty()) {
-			reportFailure("Must give icao code to request weather", 0, output);
-		}
-		else {
-			requestWeather(icao, output);
-		}
-	}
-	// request metar for the global weather.
-	else if (cmd == "request_global") { 
-		requestGlobalWeather(output);
-	}
-	// refresh all the registered weather stations
-	else if (cmd == "refresh") {
-		refresh(output);
-	}
-	// Add an existing weather station to the ones we're interested in
-	else if (cmd == "add") {
-		std::string icao = params.getString("icao");
-		if (icao.empty()) {
-			reportFailure("Must give icao code to add weather station", 0, output);
-		}
-		else {
-			addWeatherStation(icao, output);
-		}
-	}
-	// adds a new weather station to the current position
-	else if (cmd == "add_here") {
-		std::string icao = params.getString("icao");
-		std::string name = params.getString("name");
-		addWeatherStationHere(icao, name, output);
-	}
-	// Updates the weather at the given weather station.  Partial updates
-	// are merged with the current state.
-	else if (cmd == "update") {
-		DWORD seconds = params.getDWORD("seconds");
-		Metar m;
-		std::string error("Unable to update weather station");
-		if (buildMetar(params, m, error)) {
-			update(m, seconds, output);
-		}
-		else {
-			reportFailure(error.c_str(), 0, output);
-		}
-	}
-	// Updates the global weather.  Partial updates are merged.
-	else if (cmd == "update_global") {
-		DWORD seconds = params.getDWORD("seconds");
-		Metar m;
-		std::string error("Unable to update global weather");
-		if (buildMetar(params, m, error)) {
-			m.set(Metar::STATION, "GLOB");
-			updateGlobal(m, seconds, output);
-		}
-		else {
-			reportFailure(error.c_str(), 0, output);
-		}
-	}
-	// Sets the weather at the given station completely over-writing
-	// any existing data
-	else if (cmd == "set") {
-		DWORD seconds = params.getDWORD("seconds");
-		Metar m;
-		std::string error("Unable to set weather station");
-		if (buildMetar(params, m, error)) {
-			set(m, seconds, output);
-		}
-		else {
-			reportFailure(error.c_str(), 0, output);
-		}
-	}
-	// Sets the global weather completely over-writing any existing data.
-	else if (cmd == "set_global") {
-		DWORD seconds = params.getDWORD("seconds");
-		Metar m;
-		std::string error("Unable to update global weather");
-		if (buildMetar(params, m, error)) {
-			m.set(Metar::STATION, "GLOB");
-			setGlobal(m, seconds, output);
-		}
-		else {
-			reportFailure(error.c_str(), 0, output);
-		}
-	}
-	// Sets the weather at the given station from a single metar string completely over-writing
-	// any existing data
-	else if (cmd == "set_metar") {
-		std::string metarText = params.getString("metar");
-		DWORD seconds = params.getDWORD("seconds");
-		Metar m;
-		std::string residual = m.parse(metarText);
-		if (residual.empty()) {
-			set(m, seconds, output);
-		}
-		else { // wasn't able to parse whole string so fail...
-			JSONWriter json(output);
-			json.add("status", "FAILED");
-			json.add("reason", "Unable to parse complete metar");
-			json.add("residual", residual);
-			json.add("metar", m.show());
-		}
-	}
-	// Sets the global weather from a single metar string completely over-writing any existing data.
-	else if (cmd == "set_global_metar") {
-		std::string metarText = params.getString("metar");
-		DWORD seconds = params.getDWORD("seconds");
-		Metar m;
-		std::string residual = m.parse(metarText);
-		if (residual.empty()) {
-			m.set(Metar::STATION, "GLOB");
-			setGlobal(m, seconds, output);
-		}
-		else { // wasn't able to parse whole string so fail...
-			JSONWriter json(output);
-			json.add("status", "FAILED");
-			json.add("reason", "Unable to parse complete metar");
-			json.add("residual", residual);
-			json.add("metar", m.show());
-		}
-	}
-
-	else {
-		reportFailure("Unknown weather command", 0, output);
-	}
-}
-
-// Creates a weather station at the given location.
-void WeatherMessageHandler::createStationHere(const std::string& icao, const std::string& name, std::string& output)
+bool WeatherMessageHandler::createStation(Simulator* pSim, const std::string& icao, const std::string& name)
 {
 	SimState::Data currentPosition = pSim->getState()->current();
-	pSim->weatherStations().add(icao.c_str(), name.c_str(), (float) currentPosition.Latitude, (float) currentPosition.Longitude);
-	reportSuccess(output);
+	pSim->weatherStations().add(icao.c_str(), name.c_str(), (float)currentPosition.Latitude, (float)currentPosition.Longitude);
+	return true;
 }
 
-// Enables global weather
-void WeatherMessageHandler::setGlobalWeather(std::string& output)
+bool WeatherMessageHandler::createStation(Simulator* pSim, const std::string& icao, const std::string& name, float latitude, float longitude)
+{
+	pSim->weatherStations().add(icao.c_str(), name.c_str(), latitude, longitude);
+	return true;
+}
+
+bool WeatherMessageHandler::setGlobal(Simulator* pSim)
 {
 	HRESULT hr = ::SimConnect_WeatherSetModeGlobal(pSim->getHandle());
-	if (hr == S_OK) {
-		reportSuccess(output);
-	}
-	else {
-		reportFailure("Unable to set global weather", hr, output);
-	}
-
+	return (hr == S_OK);
 }
 
-// Enables custom weather
-void WeatherMessageHandler::setCustomWeather(std::string& output)
+bool WeatherMessageHandler::setCustom(Simulator* pSim)
 {
-	HRESULT hr = ::SimConnect_WeatherSetModeCustom( pSim->getHandle() );
-	if (hr == S_OK) {
-		reportSuccess(output);
-	}
-	else {
-		reportFailure("Unable to set custom weather", hr, output);
-	}
+	HRESULT hr = ::SimConnect_WeatherSetModeCustom(pSim->getHandle());
+	return (hr == S_OK);
 }
 
-// Sets a standard weather theme
-void WeatherMessageHandler::setWeatherTheme(const std::string& themeName, std::string& output)
+bool WeatherMessageHandler::setTheme(Simulator* pSim, const std::string& themeName)
 {
 	HRESULT hr = ::SimConnect_WeatherSetModeTheme(
 		pSim->getHandle(),
 		themeName.c_str()
 	);
-	if (hr == S_OK) {
-		reportSuccess(output);
-	}
-	else {
-		reportFailure("Unable to set weather theme", hr, output);
-	}
-
+	return (hr == S_OK);
 }
 
-/*
-[Main]
-Title = "Major Thunderstorm"
-Description = "A large area of low pressure has generated a massive storm front with concentrated thunderstorms at its center."
-Version = 9.00
-*/
-void WeatherMessageHandler::processTheme(File& file, JSONWriter& json) {
-	
-	std::ifstream ifs(file);
+void WeatherMessageHandler::processTheme(File& file, std::string& name, std::string& title, std::string& description)
+{
 
-	std::string name = file.name();
-	std::string title;
-	std::string description;
+	name = file.name();
+
+	std::ifstream ifs(file);
 
 	char ch0, ch1;
 	ifs >> ch0 >> ch1;
@@ -302,6 +128,347 @@ void WeatherMessageHandler::processTheme(File& file, JSONWriter& json) {
 	tidy(title);
 	tidy(description);
 
+}
+
+File::ListT& WeatherMessageHandler::listThemes(File::ListT& fileList)
+{
+	P3DInstallationDirectory p3dInstall;
+	Directory themesFolder = p3dInstall.sub("Weather").sub("themes");
+
+	themesFolder.files(fileList, "*.wt");
+	return fileList;
+}
+
+bool WeatherMessageHandler::refresh(Simulator* pSim)
+{
+	pSim->weatherStations().refresh();
+	return true;
+}
+
+std::string WeatherMessageHandler::requestMetar(Simulator* pSim, const std::string& icao, std::string& name)
+{
+	std::string wx;
+	WeatherStation* station = pSim->weatherStations().get(icao);
+	if (station) {
+		Metar& metar = station->lastWeatherReport();
+		name = station->name();
+		wx =  metar.text();
+	}
+	return wx;
+}
+
+std::string WeatherMessageHandler::requestGlobalMetar(Simulator* pSim)
+{
+	WeatherStation* station = pSim->weatherStations().globalWeather();
+	Metar& metar = station->lastWeatherReport();
+	return metar.text();
+}
+
+bool WeatherMessageHandler::addStation(Simulator* pSim, const std::string& icao)
+{
+	pSim->weatherStations().add(icao.c_str());
+	return true;
+}
+
+std::string WeatherMessageHandler::addWeatherStationHere(Simulator* pSim, const std::string& icao, const std::string& name)
+{
+	std::string result;
+	SimState::Data current = pSim->getState()->current();
+	if (icao.empty() && name.empty()) {
+		result = pSim->weatherStations().add((float)current.Latitude, (float)current.Longitude);
+	}
+	else {
+		std::string n = name;
+		if (n.empty()) {
+			n = icao;
+		}
+		pSim->weatherStations().add(icao.c_str(), n.c_str(), (float)current.Latitude, (float)current.Longitude);
+		result = icao;
+	}
+	return result;
+}
+
+std::string WeatherMessageHandler::addWeatherStationAt(Simulator* pSim, const std::string& icao, const std::string& name, float latitude, float longitude)
+{
+	std::string result;
+	if (icao.empty() && name.empty()) {
+		result = pSim->weatherStations().add(latitude, longitude);
+	}
+	else {
+		std::string n = name;
+		if (n.empty()) {
+			n = icao;
+		}
+		pSim->weatherStations().add(icao.c_str(), n.c_str(), latitude, longitude);
+		result = icao;
+	}
+	return result;
+}
+
+bool WeatherMessageHandler::update(Simulator* pSim, Metar& m, DWORD seconds)
+{
+	std::string icao = m.get(Metar::STATION);
+	if (icao.length() > 4) {
+		icao = icao.substr(0, 4);
+	}
+
+	WeatherStation* station = pSim->weatherStations().get(icao);
+	if (station) {
+		station->updateWeather(m, seconds);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool WeatherMessageHandler::updateGlobal(Simulator* pSim, Metar& m, DWORD seconds)
+{
+	m.setField(Metar::STATION, "GLOB");
+	pSim->weatherStations().globalWeather()->updateWeather(m, seconds);
+	return true;
+}
+
+bool WeatherMessageHandler::set(Simulator* pSim, Metar& m, DWORD seconds)
+{
+	std::string icao = m.get(Metar::STATION);
+	if (icao.length() > 4) {
+		icao = icao.substr(0, 4);
+	}
+
+	WeatherStation* station = pSim->weatherStations().get(icao);
+	if (station) {
+		station->setWeather(m, seconds);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool WeatherMessageHandler::setGlobal(Simulator* pSim, Metar& m, DWORD seconds)
+{
+	m.setField(Metar::STATION, "GLOB");
+	pSim->weatherStations().globalWeather()->setWeather(m, seconds);
+	return true;
+}
+
+void WeatherMessageHandler::run(const std::string& cmd, const APIParameters& params, std::string& output)
+{
+	// List all available themes
+	if (cmd == "themes") {
+		listWeatherThemes(output);
+	}
+	// Select a theme
+	else if (cmd == "theme") {
+		std::string theme = params.getString("name");
+		if (theme.empty()) {
+			reportFailure("Must provide a theme name to set", 0, output);
+		}
+		else {
+			setWeatherTheme(theme, output);
+		}
+	}
+	// Set global weather mode
+	else if (cmd == "global") {
+		setGlobalWeather(output);
+	}
+	// Set custom weather mode
+	else if (cmd == "custom") {
+		setCustomWeather(output);
+	}
+	// Request metar for a given station
+	else if (cmd == "request") {
+		std::string icao = params.getString("name");
+		if (icao.empty()) {
+			reportFailure("Must give icao code to request weather", 0, output);
+		}
+		else {
+			requestWeather(icao, output);
+		}
+	}
+	// request metar for the global weather.
+	else if (cmd == "request_global") { 
+		requestGlobalWeather(output);
+	}
+	// refresh all the registered weather stations
+	else if (cmd == "refresh") {
+		refresh(output);
+	}
+	// Add an existing weather station to the ones we're interested in
+	else if (cmd == "add") {
+		std::string icao = params.getString("icao");
+		if (icao.empty()) {
+			reportFailure("Must give icao code to add weather station", 0, output);
+		}
+		else {
+			addWeatherStation(icao, output);
+		}
+	}
+	// adds a new weather station to the current position
+	else if (cmd == "add_here") {
+		std::string icao = params.getString("icao");
+		std::string name = params.getString("name");
+		addWeatherStationHere(icao, name, output);
+	}
+	// Gets list of custom stations.
+	else if (cmd == "stations") {
+		getWeatherStations(output);
+	}
+
+	// Updates the weather at the given weather station.  Partial updates
+	// are merged with the current state.
+	else if (cmd == "update") {
+		DWORD seconds = params.getDWORD("seconds");
+		Metar m;
+		std::string error("Unable to update weather station");
+		if (buildMetar(params, m, error)) {
+			update(m, seconds, output);
+		}
+		else {
+			reportFailure(error.c_str(), 0, output);
+		}
+	}
+	// Updates the global weather.  Partial updates are merged.
+	else if (cmd == "update_global") {
+		DWORD seconds = params.getDWORD("seconds");
+		Metar m;
+		std::string error("Unable to update global weather");
+		if (buildMetar(params, m, error)) {
+			updateGlobal(m, seconds, output);
+		}
+		else {
+			reportFailure(error.c_str(), 0, output);
+		}
+	}
+	// Sets the weather at the given station completely over-writing
+	// any existing data
+	else if (cmd == "set") {
+		DWORD seconds = params.getDWORD("seconds");
+		Metar m;
+		std::string error("Unable to set weather station");
+		if (buildMetar(params, m, error)) {
+			set(m, seconds, output);
+		}
+		else {
+			reportFailure(error.c_str(), 0, output);
+		}
+	}
+	// Sets the global weather completely over-writing any existing data.
+	else if (cmd == "set_global") {
+		DWORD seconds = params.getDWORD("seconds");
+		Metar m;
+		std::string error("Unable to update global weather");
+		if (buildMetar(params, m, error)) {
+			m.setField(Metar::STATION, "GLOB");
+			setGlobal(m, seconds, output);
+		}
+		else {
+			reportFailure(error.c_str(), 0, output);
+		}
+	}
+	// Sets the weather at the given station from a single metar string completely over-writing
+	// any existing data
+	else if (cmd == "set_metar") {
+		std::string metarText = params.getString("metar");
+		DWORD seconds = params.getDWORD("seconds");
+		Metar m;
+		std::string residual = m.parse(metarText);
+		if (residual.empty()) {
+			set(m, seconds, output);
+		}
+		else { // wasn't able to parse whole string so fail...
+			JSONWriter json(output);
+			json.add("status", "FAILED");
+			json.add("reason", "Unable to parse complete metar");
+			json.add("residual", residual);
+			json.add("metar", m.show());
+		}
+	}
+	// Sets the global weather from a single metar string completely over-writing any existing data.
+	else if (cmd == "set_global_metar") {
+		std::string metarText = params.getString("metar");
+		DWORD seconds = params.getDWORD("seconds");
+		Metar m;
+		std::string residual = m.parse(metarText);
+		if (residual.empty()) {
+			m.setField(Metar::STATION, "GLOB");
+			setGlobal(m, seconds, output);
+		}
+		else { // wasn't able to parse whole string so fail...
+			JSONWriter json(output);
+			json.add("status", "FAILED");
+			json.add("reason", "Unable to parse complete metar");
+			json.add("residual", residual);
+			json.add("metar", m.show());
+		}
+	}
+
+	else {
+		reportFailure("Unknown weather command", 0, output);
+	}
+}
+
+// Creates a weather station at the given location.
+void WeatherMessageHandler::createStationHere(const std::string& icao, const std::string& name, std::string& output)
+{
+	if (createStation(pSim, icao, name)) {
+		reportSuccess(output);
+	}
+	else {
+		reportFailure("Unable to create weather station", 0, output);
+	}
+}
+
+// Enables global weather
+void WeatherMessageHandler::setGlobalWeather(std::string& output)
+{
+	if (setGlobal(pSim)) {
+		reportSuccess(output);
+	}
+	else {
+		reportFailure("Unable to set global weather", 0, output);
+	}
+
+}
+
+// Enables custom weather
+void WeatherMessageHandler::setCustomWeather(std::string& output)
+{
+	if (setCustom(pSim)) {
+		reportSuccess(output);
+	}
+	else {
+		reportFailure("Unable to set custom weather", 0, output);
+	}
+}
+
+// Sets a standard weather theme
+void WeatherMessageHandler::setWeatherTheme(const std::string& themeName, std::string& output)
+{
+	if (setTheme(pSim, themeName)) {
+		reportSuccess(output);
+	}
+	else {
+		reportFailure("Unable to set weather theme", 0, output);
+	}
+
+}
+
+/*
+[Main]
+Title = "Major Thunderstorm"
+Description = "A large area of low pressure has generated a massive storm front with concentrated thunderstorms at its center."
+Version = 9.00
+*/
+void WeatherMessageHandler::processTheme(File& file, JSONWriter& json) {
+
+	std::string name;
+	std::string title;
+	std::string description;
+
+	processTheme(file, name, title, description);
+
 	json.object();
 	json.add("name", name);
 	json.add("title", title);
@@ -340,11 +507,8 @@ void WeatherMessageHandler::tidy(std::string& value)
 void WeatherMessageHandler::listWeatherThemes(std::string& output)
 {
 	try {
-		P3DInstallationDirectory p3dInstall;
-		Directory themesFolder = p3dInstall.sub("Weather").sub("themes");
-
 		File::ListT files;
-		themesFolder.files(files,"*.wt");
+		listThemes(files);
 
 		JSONWriter json(output);
 		json.add("status", "OK");
@@ -367,21 +531,24 @@ void WeatherMessageHandler::listWeatherThemes(std::string& output)
 // Refresh the information held by all the weather stations we're monitoring
 void WeatherMessageHandler::refresh(std::string& output)
 {
-	pSim->weatherStations().refresh();
-	reportSuccess(output);
+	if (refresh(pSim)) {
+		reportSuccess(output);
+	}
+	else {
+		reportFailure("Unable to refresh weather", 0, output);
+	}
 }
 
 // Request weather for a given weather station.
 void WeatherMessageHandler::requestWeather(const std::string& icao, std::string& output)
 {
-	WeatherStation* station = pSim->weatherStations().get(icao);
-	if (station) {
-
-		const Metar& metar = station->lastWeatherReport();
+	std::string name;
+	std::string metar = requestMetar(pSim, icao, name);
+	if (!name.empty()) {
 		JSONWriter json(output);
 		json.add("status", "OK");
-		json.add("station", station->name());
-		json.add("metar", metar.text());
+		json.add("station", name);
+		json.add("metar", metar);
 	}
 	else {
 		reportFailure("Unknown weather station", 0, output);
@@ -391,41 +558,52 @@ void WeatherMessageHandler::requestWeather(const std::string& icao, std::string&
 // Convenince function for getting global weather.
 void WeatherMessageHandler::requestGlobalWeather(std::string& output)
 {
-	WeatherStation* station = pSim->weatherStations().globalWeather();
-	const Metar& metar = station->lastWeatherReport();
+	std::string metar = requestGlobalMetar(pSim);
 	JSONWriter json(output);
 	json.add("status", "OK");
-	json.add("station", station->name());
-	json.add("metar", metar.text());
+	json.add("station", "GLOB");
+	json.add("metar", metar);
 }
 
 // Add an existing weather station to the list we're interested in
 void WeatherMessageHandler::addWeatherStation(const std::string& icao, std::string& output)
 {
-	pSim->weatherStations().add(icao.c_str());
-	reportSuccess(output);
+	if (addStation(pSim, icao)) {
+		reportSuccess(output);
+	}
+	else {
+		reportFailure("Unable to add weather st", 0, output);
+	}
 }
 
 // Add a weather station here with the given names.  If icao/name are blank one will be created.
 void WeatherMessageHandler::addWeatherStationHere(const std::string& icao, const std::string& name, std::string& output)
 {
-	std::string result;
-	SimState::Data current = pSim->getState()->current();
-	if (icao.empty() && name.empty()) {
-		result = pSim->weatherStations().add((float)current.Latitude, (float)current.Longitude);
-	}
-	else {
-		std::string n = name;
-		if (n.empty()) {
-			n = icao;
-		}
-		pSim->weatherStations().add(icao.c_str(), n.c_str(), (float)current.Latitude, (float)current.Longitude);
-		result = icao;
-	}
+	std::string result = addWeatherStationHere(pSim, icao, name);
 	JSONWriter json(output);
 	json.add("status", "OK");
 	json.add("icao", result);
 }
+
+// TODO generecise
+void WeatherMessageHandler::getWeatherStations(std::string& output) {
+	JSONWriter json(output);
+	json.add("status", "OK");
+	json.array("stations");
+	for (auto iter = pSim->weatherStations().begin(); iter != pSim->weatherStations().end(); ++iter) {
+		if (iter->first == "GLOB") {
+			continue;
+		}
+
+		json.object();
+		json.add("icao", iter->first);
+		json.add("updated", iter->second->hasUpdate());
+		json.add("metar", iter->second->lastWeatherReport().text());
+		json.end();
+	}
+	json.end();
+}
+
 
 // Processes the parameter(s) for a single metar field.
 // params holds the params.
@@ -436,34 +614,16 @@ void WeatherMessageHandler::addWeatherStationHere(const std::string& icao, const
 // valid is set if there is a failure
 // returns valid.
 bool WeatherMessageHandler::processMetarParam(const APIParameters& params, Metar::FieldType type, const char* pszName,  Metar& metar, std::ostringstream& errorMessage, bool& valid) {
-
 	std::string value = params.getString(pszName);
-	if (!metar.set(type, value)) {
+	if (value.empty()) {
+		return true; // empty is valid (i.e. no value supplied).
+	}
+
+	if (!metar.setField(type, value)) {
 		errorMessage << (valid ? "Metar error " : ", ");
 		errorMessage << "Invalid " << metar.typeName(type) << " : " << value;
 		valid = false;
 	}
-
-	// So if we read in one good non empty value and there may be multiple ones, go look...
-	else if(!value.empty() && metar.multiple(type)) {
-		for (int idx = 0; valid; ++idx) {
-			std::ostringstream os;
-			os << pszName << idx;
-			value = params.getString(os.str());
-			if (value.empty()) {
-				break;
-			}
-			else {
-				if (!metar.add(type, value)) {
-					errorMessage << (valid ? "Metar error " : ", ");
-					errorMessage << "Invalid " << metar.typeName(type) << " : " << value;
-					valid = false;
-				}
-
-			}
-		}
-	}
-
 	return valid;
 }
 // Builds a metar out of its different parameters.
@@ -503,16 +663,9 @@ bool WeatherMessageHandler::buildMetar(const APIParameters& params, Metar& metar
 }
 
 // Updates the weather station identified by its icao code.
-void WeatherMessageHandler::update(const Metar& m, DWORD seconds, std::string& output)
+void WeatherMessageHandler::update(Metar& m, DWORD seconds, std::string& output)
 {
-	std::string icao = m.get(Metar::STATION);
-	if (icao.length() > 4) {
-		icao = icao.substr(0, 4);
-	}
-	
-	WeatherStation* station = pSim->weatherStations().get(icao);
-	if (station) {
-		station->updateWeather(m, seconds);
+	if(update(pSim, m, seconds)){
 		reportSuccess(output);
 	}
 	else {
@@ -521,23 +674,20 @@ void WeatherMessageHandler::update(const Metar& m, DWORD seconds, std::string& o
 }
 
 // Update the global weather.
-void WeatherMessageHandler::updateGlobal(const Metar& m, DWORD seconds, std::string& output)
+void WeatherMessageHandler::updateGlobal(Metar& m, DWORD seconds, std::string& output)
 {
-	pSim->weatherStations().globalWeather()->updateWeather(m, seconds);
-	reportSuccess(output);
+	if (updateGlobal(pSim, m, seconds)) {
+		reportSuccess(output);
+	}
+	else {
+		reportFailure("Unable to update global weather", 0, output);
+	}
 }
 
 // Sets the weather station identified by its icao code.
-void WeatherMessageHandler::set(const Metar& m, DWORD seconds, std::string& output)
+void WeatherMessageHandler::set(Metar& m, DWORD seconds, std::string& output)
 {
-	std::string icao = m.get(Metar::STATION);
-	if (icao.length() > 4) {
-		icao = icao.substr(0, 4);
-	}
-
-	WeatherStation* station = pSim->weatherStations().get(icao);
-	if (station) {
-		station->setWeather(m, seconds);
+	if(set(pSim, m, seconds)){
 		reportSuccess(output);
 	}
 	else {
@@ -546,9 +696,13 @@ void WeatherMessageHandler::set(const Metar& m, DWORD seconds, std::string& outp
 }
 
 // Sets the global weather.
-void WeatherMessageHandler::setGlobal(const Metar& m, DWORD seconds, std::string& output)
+void WeatherMessageHandler::setGlobal(Metar& m, DWORD seconds, std::string& output)
 {
-	pSim->weatherStations().globalWeather()->setWeather(m, seconds);
-	reportSuccess(output);
+	if (setGlobal(pSim, m, seconds)) {
+		reportSuccess(output);
+	}
+	else {
+		reportFailure("Unable to set global weather", 0, output);
+	}
 }
 
