@@ -128,7 +128,7 @@ namespace CGC_Sim_IOS
 
 
         private Scenario selectedScenario = null;
-        private bool p3DAlreadyRunning = false;
+        private bool p3DAlreadyConnected = false;
 
         private bool simPausedOnStartingSlew = false;
         private bool simSlewing = false;
@@ -151,13 +151,13 @@ namespace CGC_Sim_IOS
             {
                 if (sim.SimConnection == null)
                 {
-                    if (!p3DAlreadyRunning)
+                    if (!p3DAlreadyConnected)
                     {
                         if (sim.OpenSimConnection(handle))
                         {
                             System.Threading.Thread.Sleep(5000);
                             InitSimConnectionEvents();
-                            p3DAlreadyRunning = true;
+                            p3DAlreadyConnected = true;
                         }
                     }                    
                 }
@@ -313,17 +313,15 @@ namespace CGC_Sim_IOS
 
         #endregion
 
-        private void LaunchP3D()
+        private async Task<bool> LaunchP3D()
         {
             Process[] p = Process.GetProcessesByName("Prepar3D");
             if (p.Count() == 0)
             {
+                // P3D isn't running so need to launch
                 sim.StartP3D(defaultScenario);
-            }
+                p3DAlreadyConnected = false;
 
-            if (!p3DAlreadyRunning)
-            {
-                //p3DAlreadyRunning = true;
                 closeWinchXDialog = new Thread(closeWinchXDialogTask);
                 closeWinchXDialog.Start();
 
@@ -336,15 +334,13 @@ namespace CGC_Sim_IOS
                 minimiseP3DToPDA = new Thread(minimiseTask);
                 minimiseP3DToPDA.Start("P3DToPDA");
 
-                SimConnect temp = SimConnection;
-                // Toggling Pause twice is a bodge to update the Pause button without changing the state of Pause.                Thread.Sleep(5000);
-                //simRest.CMD_Pause();
-                //Thread.Sleep(1000);
-                //simRest.CMD_Pause();
-                //BuildAircraftList();
-
+                while (SimConnection == null)
+                {
+                    Thread.Sleep(1000);
+                    Console.WriteLine("Waiting for Simulator Connection");
+                }
             }
-            UpdateFailureButtons();
+            return true;
         }
 
 
@@ -533,7 +529,9 @@ namespace CGC_Sim_IOS
                     currentAirspeed = (float)jRep["current"]["airspeed"];
                     currentAltitude = (float)jRep["current"]["altitude"];
                     if (statusOnGround)
+                    {
                         fieldHeight = currentAltitude;
+                    }
                 }
             }
             catch (Exception ex)
@@ -562,10 +560,12 @@ namespace CGC_Sim_IOS
                     SimConnection.RequestDataOnSimObjectType(DataRequestID.Aircraft_Data, DEFINITIONS.Struct1, 0, SIMCONNECT_SIMOBJECT_TYPE.USER);
                     CheckPosition();
                     UpdateInstruments();
-                    break;
-                case (uint)EVENTS.FOURSECS:
-//                    SimConnection.RequestDataOnSimObject(DataRequestID.Aircraft_Data, DEFINITIONS.Struct1, 0, SIMCONNECT_PERIOD.SIM_FRAME, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 0, 0);
+                    UpdateEngineControls();
                     UpdateFailureButtons();
+                     break;
+                case (uint)EVENTS.FOURSECS:
+                    //SimConnection.RequestDataOnSimObject(DataRequestID.Aircraft_Data, DEFINITIONS.Struct1, 0, SIMCONNECT_PERIOD.SIM_FRAME, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 0, 0);
+                    //UpdateFailureButtons();
                     break;
                 case (uint)EVENTS.SITUATION_RESET:
                     System.Console.WriteLine("Situation reset");
@@ -627,7 +627,7 @@ namespace CGC_Sim_IOS
                     //Debug.WriteLine("Lon:   " + s1.longitude);
                     //Debug.WriteLine("Alt:   " + s1.altitude);
                     //Debug.WriteLine("Number of Engines: " + s1.engines);
-                    Debug.WriteLine("Turn coordinator ball: " + s1.turnCoardinator + " Yaw Angle: " + (Math.Sign(s1.yawAngle)*(Math.Abs(s1.yawAngle)-Math.PI)) + " Yaw Angle: " + (s1.yawAngle)/ Math.Abs(s1.yawAngle) * (Math.Abs(s1.yawAngle) - Math.PI));
+                    //Debug.WriteLine("Turn coordinator ball: " + s1.turnCoardinator + " Yaw Angle: " + (Math.Sign(s1.yawAngle)*(Math.Abs(s1.yawAngle)-Math.PI)) + " Yaw Angle: " + (s1.yawAngle)/ Math.Abs(s1.yawAngle) * (Math.Abs(s1.yawAngle) - Math.PI));
                     //Debug.WriteLine("Yaw String: " + s1.yawString);
                     sim.Engines = (int)s1.engines;
                     break;
@@ -659,7 +659,7 @@ namespace CGC_Sim_IOS
         {
             CloseSimConnection();
             sim.KillP3D();
-            p3DAlreadyRunning = false;
+            p3DAlreadyConnected = false;
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
