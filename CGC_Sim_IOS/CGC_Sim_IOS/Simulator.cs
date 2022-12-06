@@ -213,8 +213,11 @@ namespace CGC_Sim_IOS
                 // Do you want to show a console window?
                 start.WindowStyle = ProcessWindowStyle.Hidden;
                 start.CreateNoWindow = false;
+#if(P3Dv5)
                 start.FileName = "C:\\SimP3Dv5\\Lockheed Martin\\Prepar3D v5\\Prepar3D.exe";
-
+#else
+                start.FileName = "C:\\SimP3D\\Lockheed Martin\\Prepar3D v4\\Prepar3D.exe";
+#endif
                 if (initialScenario == "")
                 {
                     Process proc = Process.Start(start);
