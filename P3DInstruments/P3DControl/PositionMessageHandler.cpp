@@ -20,6 +20,7 @@ void PositionMessageHandler::write(const SimState::Data& data, JSONWriter& json)
 	json.add("heading", data.Heading);
 	json.add("on_ground", data.OnGround);
 	json.add("airspeed", data.Airspeed);
+	json.add("on_tow", data.onTow);
 }
 
 void PositionMessageHandler::getPositionMetadata(Simulator* pSim, File& f, std::string& title, std::string& description)
