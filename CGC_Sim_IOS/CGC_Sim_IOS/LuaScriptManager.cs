@@ -7,6 +7,12 @@ using System.Collections.ObjectModel;
 
 namespace CGC_Sim_IOS
 {
+    public enum LuaScriptType
+    {
+        Undefined,
+        Aerotow,
+    }
+
     class LuaScriptManager
     {
         private ObservableCollection<LuaScriptFile> scriptFiles = new ObservableCollection<LuaScriptFile>();
