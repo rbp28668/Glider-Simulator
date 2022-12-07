@@ -89,10 +89,7 @@ namespace CGC_Sim_IOS
         private string lastTabName = "";
 
         private bool statusOnGround = true;
-        private bool statusAerotowRequested = false;
-        private bool statusWinchLaunchRequested = false;
-        private int statusAerotowAbandon = 0;
-        private uint statusLatLongFrozen = 1;
+        private bool statusTugConnected = false;
 
         private float currentLatitude = 0.0f;
         private float currentLongitude = 0.0f;
@@ -529,6 +526,7 @@ namespace CGC_Sim_IOS
                     currentLongitude = (float) jRep["current"]["longitude"];
                     currentAirspeed = (float)jRep["current"]["airspeed"];
                     currentAltitude = (float)jRep["current"]["altitude"];
+                    statusTugConnected = (1 == (int)jRep["current"]["on_tow"]);
                     if (statusOnGround)
                     {
                         fieldHeight = currentAltitude;
@@ -816,14 +814,59 @@ namespace CGC_Sim_IOS
             comboAirfields.SelectedItem = defaultAirfield;
             activeAirfield = defaultAirfield;
 
-         }
+        }
 
+
+        #endregion
+        
+        #region Aerotows
+
+        private void Button_Request_Aerotow_Click(object sender, RoutedEventArgs e)
+        {
+            if (!statusTugConnected)
+            {
+                simRest.CMD_Position_Clear_History();
+                if (comboAerotows.SelectedIndex == -1)
+                {
+                    SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.TOW_PLANE_REQUEST, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
+                }
+                else
+                {
+                    LuaScriptFile item = (LuaScriptFile)comboAerotows.SelectedItem;
+                    string[] cmd = { "script", "run", "script=" + item.FileName };
+                    dynamic response = simRest.RunCmdAsync(cmd);
+                }
+            }
+            else
+            {
+                // Tug waves us off
+                string[] cmd = { "tug", "wave"};
+                dynamic response = simRest.RunCmdAsync(cmd);
+            }
+        }
+
+        public void UpdateEngineControls()
+        {
+            Button_Engine_Start.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            Button_Engine_Stop.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            Slider_Throttle.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            Button_Engine_Stop.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            Button_Throttle_Min.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            Button_Throttle_Decrease.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            Button_Throttle_Increase.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            Button_Throttle_Max.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+
+            if (statusTugConnected /* && !statusOnGround*/)
+                Button_Request_Aerotow.Content = "Waggle tugs wings";
+            else
+                Button_Request_Aerotow.Content = "Request Aerotow";
+        }
 
         #endregion
 
         #region igcTraffic
 
-       
+
        private void BtnIGCTraffic_Launch_Click(object sender, RoutedEventArgs e)
        {
             bool loop = false;
@@ -873,6 +916,12 @@ namespace CGC_Sim_IOS
                 handleSource = HwndSource.FromHwnd(handle); // Get source of handle in order to add event handlers to it
                 handleSource.AddHook(HandleSimConnectEvents);
                 BuildScenarioLists();
+                luaScriptManager.BuildScriptList();
+                comboAerotows.ItemsSource = luaScriptManager.AerotowScriptFiles;
+                comboAerotows.DisplayMemberPath = "Description";
+                comboAerotows.SelectedValuePath = "FileName";
+                comboAerotows.SelectedIndex = 0;
+
                 LaunchP3D();
                 Slider_Throttle.Minimum = 0;
                 Slider_Throttle.Maximum = 16383;
@@ -1123,17 +1172,10 @@ namespace CGC_Sim_IOS
         private void Button_Request_Winch_Click(object sender, RoutedEventArgs e)
         {
             simRest.CMD_Position_Clear_History();
-            //statusWinchLaunchRequested = true;
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.TOW_PLANE_RELEASE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
         }
 
-        private void Button_Request_Aerotow_Click(object sender, RoutedEventArgs e)
-        {
-            simRest.CMD_Position_Clear_History();
-            //statusAerotowRequested = true;
-            SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.TOW_PLANE_REQUEST, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
-        }
-
+ 
         private void Button_Release_Cable_Click(object sender, RoutedEventArgs e)
         {
             SimConnection.TransmitClientEvent(SIMCONNECT_OBJECT_ID_USER, EVENTS.TOW_PLANE_RELEASE, DATA, GROUP_IDS.GROUP_1, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
@@ -1273,14 +1315,6 @@ namespace CGC_Sim_IOS
                 Button_Fail_Altimeter.Content = simRest.AltimeterFailed ? "Clear Altimeter" : "Fail Altimeter";
                 Button_Fail_Pitot.Content = simRest.PitotFailed ? "Clear Pitot" : "Fail Pitot";
                 Button_Fail_Electrical.Content = simRest.ElectricsFailed ? "Clear Electrics" : "Fail Electrics";
-                Button_Engine_Start.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-                Button_Engine_Stop.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-                Slider_Throttle.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-                Button_Engine_Stop.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-                Button_Throttle_Min.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-                Button_Throttle_Decrease.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-                Button_Throttle_Increase.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-                Button_Throttle_Max.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
             }
             response = changed;
             return response;

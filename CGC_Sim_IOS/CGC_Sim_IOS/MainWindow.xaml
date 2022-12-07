@@ -50,7 +50,8 @@
                     <Button x:Name="Button_Throttle_Decrease" Content="&lt;" HorizontalAlignment="Left" Height="40" Margin="135,482,0,0" VerticalAlignment="Top" Width="95" Click="Button_Throttle_Decrease_Click" FontSize="20" RenderTransformOrigin="0.576,0.773"/>
                     <Button x:Name="Button_Throttle_Increase" Content="&gt;" HorizontalAlignment="Left" Height="40" Margin="20,482,0,0" VerticalAlignment="Top" Width="95" Click="Button_Throttle_Increase_Click" FontSize="20" RenderTransformOrigin="0.576,0.773" Grid.Column="3"/>
                     <Button x:Name="Button_Throttle_Max" Content="&gt;&gt;&gt;" HorizontalAlignment="Left" Height="40" Margin="135,482,0,0" VerticalAlignment="Top" Width="95" Click="Button_Throttle_Max_Click" FontSize="20" RenderTransformOrigin="0.576,0.773" Grid.Column="3"/>
-                 </Grid>
+                    <ComboBox x:Name="comboAerotows" Grid.ColumnSpan="2" Grid.Column="2" HorizontalAlignment="Left" Height="41" Margin="10,177,0,0" VerticalAlignment="Top" Width="460"/>
+                </Grid>
             </TabItem>
             <TabItem Header="Scenarios" Background="Black" FontSize="20">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FF1E1E1E" OpacityMask="Black" Margin="0,0,-0.857,1.714">
