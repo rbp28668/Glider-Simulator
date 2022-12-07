@@ -143,7 +143,7 @@ namespace CGC_Sim_IOS
         const int SW_SHOWMINNOACTIVE = 7;
 
         private IgcManager igcManager = new IgcManager();
-
+        private LuaScriptManager luaScriptManager = new LuaScriptManager();
 
         public SimConnect SimConnection
         {
