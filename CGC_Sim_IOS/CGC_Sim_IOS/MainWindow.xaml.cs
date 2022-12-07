@@ -233,7 +233,6 @@ namespace CGC_Sim_IOS
 #else
             CloseSimConnection();
             sim.KillP3D();
-            p3DAlreadyRunning = false;
 #endif
 
             if (handleSource != null)
