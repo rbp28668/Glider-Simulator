@@ -288,6 +288,7 @@ bool Tug::RudderWaggleFeature::isComplete()
 Tug::WingWaggleFeature::WingWaggleFeature()
 	: complete(false)
 	, startTime(0)
+	, initalBank(0)
 {
 }
 
@@ -299,6 +300,7 @@ Tug::WingWaggleFeature::WingWaggleFeature()
 void Tug::WingWaggleFeature::start(Tug* pTug, TugInputDataT& initialState)
 {
 	startTime = pTug->runTime();
+	initalBank = pTug->getBankAngle();
 	pTug->dispatchEvent(P3DEventCommand::FREEZE_ATTITUDE_SET, 1);
 }
 
@@ -316,7 +318,7 @@ bool Tug::WingWaggleFeature::tick(Tug* pTug, const TugInputDataT& input, TugOutp
 
 	// Complete cycle in 2 seconds.
 	double aileron = complete ? 0 : cos(t * 3.1415926535);  // (pi radians per second
-	double bank = complete ? 0 : 0.5 *sin(t * 3.1415926535);  // (pi radians per second
+	double bank = complete ? initalBank : initalBank + (0.5 *sin(t * 3.1415926535));  // (pi radians per second
 
 	// 0.5 radians about 30 degrees
 	pTug->setControlPositions(aileron, bank, 0);
