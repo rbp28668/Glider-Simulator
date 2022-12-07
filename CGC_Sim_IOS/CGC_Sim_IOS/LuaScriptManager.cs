@@ -36,44 +36,56 @@ namespace CGC_Sim_IOS
 
         public void BuildScriptList()
         {
-            var value = System.Environment.GetEnvironmentVariable("USERPROFILE");
-            string path = value + "\\Documents\\Prepar3D v4 Files\\Script";
-            string[] fileArray = System.IO.Directory.GetFiles(@path, "*.lua");
-            foreach (string fileName in fileArray)
+            try
             {
-                Console.WriteLine(fileName);
-            }
-
-            // Parse file names rejecting any that don't start with "IOS_"
-            scriptFiles.Clear();
-            scriptAerotowFiles.Clear();
-
-            foreach (string fileName in fileArray)
-            {
-                string strScript = fileName.Substring(path.Length + 1);
-                if (strScript.StartsWith("IOS_"))
+                var value = System.Environment.GetEnvironmentVariable("USERPROFILE");
+                string path;
+#if (P3Dv5)
+                path = value + "\\Documents\\Prepar3D v5 Files\\Script";
+#else
+                path = value + "\\Documents\\Prepar3D v4 Files\\Script";
+#endif
+                string[] fileArray = System.IO.Directory.GetFiles(@path, "*.lua");
+                foreach (string fileName in fileArray)
                 {
-                    char[] delimiterChars = { '_' };
+                    Console.WriteLine(fileName);
+                }
 
-                    string[] words = strScript.Split(delimiterChars);
-                    if (words.Count() > 2)
+                // Parse file names rejecting any that don't start with "IOS_"
+                scriptFiles.Clear();
+                scriptAerotowFiles.Clear();
+
+                foreach (string fileName in fileArray)
+                {
+                    string strScript = fileName.Substring(path.Length + 1);
+                    if (strScript.StartsWith("IOS_"))
                     {
-                        if (words[1] == "Aerotow")
-                        {
-                            LuaScriptFile item = new LuaScriptFile(strScript, words[2],LuaScriptType.Aerotow);
-                            scriptAerotowFiles.Add(item);
-                            scriptFiles.Add(item);
-                        }
-                        else
-                        {
-                            LuaScriptFile item = new LuaScriptFile(strScript, words[2]);
-                            scriptFiles.Add(item);
-                        }
+                        char[] delimiterChars = { '_' };
 
+                        string[] words = strScript.Split(delimiterChars);
+                        if (words.Count() > 2)
+                        {
+                            if (words[1] == "Aerotow")
+                            {
+                                LuaScriptFile item = new LuaScriptFile(strScript, words[2], LuaScriptType.Aerotow);
+                                scriptAerotowFiles.Add(item);
+                                scriptFiles.Add(item);
+                            }
+                            else
+                            {
+                                LuaScriptFile item = new LuaScriptFile(strScript, words[2]);
+                                scriptFiles.Add(item);
+                            }
+
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            { 
+            }
         }
+
     }
 
     public class LuaScriptFile

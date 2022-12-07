@@ -761,59 +761,69 @@ namespace CGC_Sim_IOS
 
         private void BuildScenarioLists()
         {
-            var value = System.Environment.GetEnvironmentVariable("USERPROFILE");
-            string path = value + "\\Documents\\Prepar3D v4 Files";
-            string[] fileArray = Directory.GetFiles(@path, "*.fxml");
-            foreach (string fileName in fileArray)
+            try
             {
-                Console.WriteLine(fileName);
-            }
-
-            // Parse file names rejecting any that don't start with "IOS_"
-            Scenarios.Clear();
-            Scenario_Airfields.Clear();
-            defaultScenario = "";
-            defaultAirfield = "";
-
-            foreach (string fileName in fileArray)
-            {
-                string strScenario = fileName.Substring(path.Length + 1);
-                if (strScenario.StartsWith("IOS_"))
+                var value = System.Environment.GetEnvironmentVariable("USERPROFILE");
+                string path;
+#if(P3Dv5)
+                path = value + "\\Documents\\Prepar3D v5 Files";
+#else
+                path = value + "\\Documents\\Prepar3D v4 Files";
+#endif
+                string[] fileArray = Directory.GetFiles(@path, "*.fxml");
+                foreach (string fileName in fileArray)
                 {
-                    Scenario scenario = new Scenario(fileName);
-                    Scenarios.Add(scenario);
-
-                    char[] delimiterChars = { '_' };
-
-                    string[] words = strScenario.Split(delimiterChars);
-
-                    string airfield = words[1];
-                    bool bAlreadyInList = false;
-                    foreach (var entry in Scenario_Airfields)
-                    {
-                        if (entry == airfield)
-                        {
-                            bAlreadyInList = true;
-                        }
-                    }
-                    if (bAlreadyInList == false)
-                    {
-                        Scenario_Airfields.Add(airfield);
-                    }
-
-                    if (strScenario.Contains("_DEFAULT_"))
-                    {
-                        defaultScenario = strScenario;
-                        defaultAirfield = airfield;
-                        selectedAirfield = defaultAirfield;
-                    }
-
+                    Console.WriteLine(fileName);
                 }
-            }
-            comboAirfields.ItemsSource = Scenario_Airfields;
-            comboAirfields.SelectedItem = defaultAirfield;
-            activeAirfield = defaultAirfield;
 
+                // Parse file names rejecting any that don't start with "IOS_"
+                Scenarios.Clear();
+                Scenario_Airfields.Clear();
+                defaultScenario = "";
+                defaultAirfield = "";
+
+                foreach (string fileName in fileArray)
+                {
+                    string strScenario = fileName.Substring(path.Length + 1);
+                    if (strScenario.StartsWith("IOS_"))
+                    {
+                        Scenario scenario = new Scenario(fileName);
+                        Scenarios.Add(scenario);
+
+                        char[] delimiterChars = { '_' };
+
+                        string[] words = strScenario.Split(delimiterChars);
+
+                        string airfield = words[1];
+                        bool bAlreadyInList = false;
+                        foreach (var entry in Scenario_Airfields)
+                        {
+                            if (entry == airfield)
+                            {
+                                bAlreadyInList = true;
+                            }
+                        }
+                        if (bAlreadyInList == false)
+                        {
+                            Scenario_Airfields.Add(airfield);
+                        }
+
+                        if (strScenario.Contains("_DEFAULT_"))
+                        {
+                            defaultScenario = strScenario;
+                            defaultAirfield = airfield;
+                            selectedAirfield = defaultAirfield;
+                        }
+
+                    }
+                }
+                comboAirfields.ItemsSource = Scenario_Airfields;
+                comboAirfields.SelectedItem = defaultAirfield;
+                activeAirfield = defaultAirfield;
+            }
+            catch (Exception ex)
+            {
+            }
         }
 
 
