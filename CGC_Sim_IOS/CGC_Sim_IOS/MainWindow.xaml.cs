@@ -155,7 +155,7 @@ namespace CGC_Sim_IOS
                     {
                         if (sim.OpenSimConnection(handle))
                         {
-                            System.Threading.Thread.Sleep(5000);
+                            System.Threading.Thread.Sleep(1000);
                             InitSimConnectionEvents();
                             p3DAlreadyConnected = true;
                         }
@@ -334,13 +334,14 @@ namespace CGC_Sim_IOS
                 minimiseP3DToPDA = new Thread(minimiseTask);
                 minimiseP3DToPDA.Start("P3DToPDA");
 
-                while (SimConnection == null)
-                {
-                    Thread.Sleep(1000);
-                    Console.WriteLine("Waiting for Simulator Connection");
-                }
+             }
+
+            while (SimConnection == null)
+            {
+                Thread.Sleep(1000);
+                Console.WriteLine("Waiting for Simulator Connection");
             }
-            return true;
+           return true;
         }
 
 
