@@ -48,6 +48,29 @@ void TugMessageHandler::steerTug(const APIParameters& params, std::string& outpu
 	}
 }
 
+/// <summary>
+/// Manages the /tug/steer message
+/// </summary>
+/// <param name="params">should contain speed or heading parameters</param>
+/// <param name="output">is the string to write any JSON output to.</param>
+void TugMessageHandler::turn(const APIParameters& params, std::string& output)
+{
+
+	JSONWriter json(output);
+
+	Tug* pTug = pSim->tug();
+
+	if (pTug) {
+		double degrees = params.getFloat("degrees", 0);
+		turnTug(pSim, degrees);
+		json.add("status", "OK");
+	}
+	else {
+		json.add("status", "FAILED")
+			.add("reason", "No tug defined ");
+	}
+}
+
 
 void TugMessageHandler::waveOff(const APIParameters& params, std::string& output)
 {
@@ -73,6 +96,33 @@ void TugMessageHandler::waggle(const APIParameters& params, std::string& output)
 		json.add("status", "FAILED")
 			.add("reason", "No tug defined ");
 	}
+}
+
+void TugMessageHandler::reportPosition(const APIParameters& params, std::string& output)
+{
+	JSONWriter json(output);
+
+	Tug* pTug = pSim->tug();
+
+	if (pTug) {
+			json.add("status", "OK");
+			json.object("position");
+
+			json.add("latitude", pTug->getLatitude());
+			json.add("longitude", pTug->getLongitude());
+			json.add("altitude", pTug->getAltitude());
+			json.add("pitch", pTug->getPitch());
+			json.add("bank", pTug->getBank());
+			json.add("heading", pTug->getHeading());
+			json.add("on_tow", !pTug->hasReleased());
+
+			json.end(); // of position
+	}
+	else {
+		json.add("status", "FAILED")
+			.add("reason", "No tug defined ");
+	}
+
 }
 
 bool TugMessageHandler::sendCommand(const std::string& cmd, const APIParameters& params, std::string& output) {
@@ -133,6 +183,16 @@ bool TugMessageHandler::setDesiredHeading(Simulator* pSim, double heading)
 		}
 	}
 	return pTug != 0;
+}
+
+bool TugMessageHandler::turnTug(Simulator* pSim, double degrees) {
+	Tug* pTug = pSim->tug();
+
+	if (pTug) {
+		pTug->turn(degrees);
+	}
+	return pTug != 0;
+
 }
 
 /// <summary>
@@ -216,11 +276,17 @@ void TugMessageHandler::run(const std::string& cmd, const APIParameters& params,
 	if (cmd == "steer") {
 		steerTug(params, output);
 	}
+	if (cmd == "turn") {
+		turn(params, output);
+	}
 	else if (cmd == "wave") {
 		waveOff(params, output);
 	}
 	else if (cmd == "waggle") {
 		waggle(params, output);
+	}
+	else if (cmd == "position") {
+		reportPosition(params, output);
 	}
 	else {
 		sendCommand(cmd, params, output);

@@ -7,6 +7,7 @@ void TugScripting::registerMethods(Lua& lua)
     Lua::Module module = lua.startModule("tug");
     module.add("setDesiredSpeed", TugScripting::setDesiredSpeed);
     module.add("setDesiredHeading", TugScripting::setDesiredHeading);
+    module.add("turn", TugScripting::turn);
     module.add("waveOff", TugScripting::waveOff);
     module.add("waggle", TugScripting::waggle);
     module.add("sendCommand", TugScripting::sendCommand);
@@ -48,6 +49,24 @@ int TugScripting::setDesiredHeading(lua_State* L)
     Tug* tug = pSim->tug();
     if (tug) {
         tug->setDesiredHeading(heading);
+    }
+    return 0;
+}
+
+/// <summary>
+/// Lua C function to make the tug turn from its current course.  Similar to setDesiredHeading except the heading is relative
+/// to the current heading.
+/// </summary>
+/// <param name="L">is the Lua state. Function reads a single numerical value from Lua stack which is the number of degrees to turn left or right.
+/// Positive turns right, negative left.</param>
+/// <returns>0 - no lua values returned</returns>
+int TugScripting::turn(lua_State* L)
+{
+    Simulator* pSim = *(Simulator**)lua_getextraspace(L);
+    double degrees = luaL_checknumber(L, 1);
+    Tug* tug = pSim->tug();
+    if (tug) {
+        tug->turn(degrees);
     }
     return 0;
 }

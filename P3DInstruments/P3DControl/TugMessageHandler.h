@@ -8,14 +8,17 @@ class TugMessageHandler :
 	Simulator* pSim;
 
 	void steerTug(const APIParameters& params, std::string& output);
+	void turn(const APIParameters& params, std::string& output);
 	void waveOff(const APIParameters& params, std::string& output);
 	void waggle(const APIParameters& params, std::string& output);
+	void reportPosition(const APIParameters& params, std::string& output);
 	bool sendCommand(const std::string& cmd, const APIParameters& params, std::string& output);
 public:
 
 	// Static entry points to support scripting
 	static bool setDesiredSpeed(Simulator* pSim, double kts);
 	static bool setDesiredHeading(Simulator* pSim, double heading);
+	static bool turnTug(Simulator* pSim, double degrees);
 	static bool waveOff(Simulator* pSim);
 	static bool waggle(Simulator* pSim);
 	static bool sendCommand(Simulator* pSim, const std::string& cmd, DWORD dwData);

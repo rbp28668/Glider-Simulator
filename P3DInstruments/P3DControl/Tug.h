@@ -114,15 +114,9 @@ public:
 	void dispatchEvent(P3DEventCommand::EventID event, DWORD dwData);
 	void dispatchEvent(const std::string& event, DWORD dwData);
 
-	void setDesiredSpeed(double kts) {
-		outputValues.desiredSpeedKnots = kts;
-		speedSet = true;
-	}
-
-	void setDesiredHeading(double degrees) {
-		outputValues.desiredHeading = degrees;
-		headingSet = true;
-	}
+	void setDesiredSpeed(double kts);
+	void setDesiredHeading(double degrees);
+	void turn(double degrees);
 
 	void setControlPositions(double aileron, double bank, double rudder);
 	void waggleWings();
@@ -133,8 +127,11 @@ public:
 	double getHeading() { return inputValues.heading; }
 	double getLatitude() { return inputValues.latitude; }
 	double getLongitude() { return inputValues.longitude; }
+	double getPitch() { return inputValues.pitch; }
+	double getBank() { return inputValues.bank; }
 	double getDesiredSpeed() { return inputValues.desiredSpeedKnots; }
 	double getDesiredHeading() { return inputValues.desiredHeading; }
 	double getBankAngle() { return inputValues.bank; }
+	bool towAttached() { return inputValues.towAttached != 0; }
 };
 

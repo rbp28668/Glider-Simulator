@@ -117,6 +117,34 @@ void Tug::simulate(TugInputDataT* inputData)
 
 }
 
+void Tug::setDesiredSpeed(double kts) {
+	outputValues.desiredSpeedKnots = kts;
+	speedSet = true;
+
+	if (!headingSet) {
+		setDesiredHeading(inputValues.desiredHeading);
+	}
+}
+
+void Tug::setDesiredHeading(double degrees) {
+	outputValues.desiredHeading = degrees;
+	headingSet = true;
+
+	if (!speedSet) {
+		setDesiredSpeed(inputValues.desiredSpeedKnots);
+	}
+
+}
+
+void Tug::turn(double degrees) {
+	if (headingSet) {
+		outputValues.desiredHeading += degrees;
+	}
+	else {
+		setDesiredHeading(inputValues.desiredHeading + degrees);
+	}
+}
+
 /// <summary>
 /// Sends an event/command to the tug.
 /// </summary>

@@ -9,6 +9,7 @@ public:
 private:
 	static int setDesiredSpeed(lua_State* L);
 	static int setDesiredHeading(lua_State* L);
+	static int turn(lua_State* L);
 	static int waveOff(lua_State* L);
 	static int waggle(lua_State* L);
 	static int sendCommand(lua_State* L);
