@@ -5,13 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CGC_Sim_IOS"
         mc:Ignorable="d"
-        Title="MainWindow v1.09" Height="727.2" Width="1124" SizeToContent="Manual" BorderBrush="IndianRed" Initialized="Window_Initialized" Activated="Window_Activated" WindowState="Maximized" Closing="Window_Closing">
+        Title="MainWindow v1.21 v5" Height="727.2" Width="1350" SizeToContent="Manual" BorderBrush="IndianRed" Initialized="Window_Initialized" Activated="Window_Activated" WindowState="Maximized" Closing="Window_Closing">
     <Grid Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Window}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Window}}}" HorizontalAlignment="Left" Margin="0,0,2.571,-1" VerticalAlignment="Top" RenderTransformOrigin="0.429,0.489" Background="#FF1E1E1E">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="350*"/>
             <ColumnDefinition Width="81*"/>
+            <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
-        <TabControl Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Grid}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Grid}}}" Margin="5,5,4.857,5.286" SelectionChanged="TabControl_SelectionChanged" RenderTransformOrigin="0.503,0.5" Grid.ColumnSpan="2" >
+        <TabControl Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Grid}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Grid}}}" Margin="5,5,4.857,5.286" SelectionChanged="TabControl_SelectionChanged" RenderTransformOrigin="0.503,0.5" Grid.Column="0" Grid.ColumnSpan="1" >
             <TabItem Header="Flight" Background="Black" FontSize="20" RenderTransformOrigin="-1.373,0.407" Margin="-0.571,0,-0.429,-0.429">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FF1E1E1E" OpacityMask="Black" Margin="5">
                     <Grid.ColumnDefinitions>
@@ -39,6 +40,17 @@
                     <Button x:Name="Button_Fail_Electrical" Content="Button" Grid.Column="3" HorizontalAlignment="Left" Height="40" Margin="20,338,0,0" VerticalAlignment="Top" Width="210" Click="Button_Fail_Electrical_Click" RenderTransformOrigin="-0.839,0.976"/>
                     <ComboBox x:Name="sessionPayingAccountCombo" HorizontalAlignment="Left" Height="40" Margin="20,558,0,0" VerticalAlignment="Top" Width="210" Grid.Column="1" IsEditable="True" IsSynchronizedWithCurrentItem="False" GotKeyboardFocus="SessionPayingAccountCombo_GotKeyboardFocus" LostKeyboardFocus="SessionPayingAccountCombo_LostKeyboardFocus" LostFocus="SessionPayingAccountCombo_LostFocus" GotFocus="SessionPayingAccountCombo_GotFocus"/>
                     <Button x:Name="Button_Session" Content="Start Session" HorizontalAlignment="Left" Height="40" Margin="20,558,0,0" VerticalAlignment="Top" Width="210"/>
+                    <Button x:Name="Button_Engine_Start" Content="Engine Start" HorizontalAlignment="Left" Height="40" Margin="20,417,0,0" VerticalAlignment="Top" Width="210" Click="Button_Engine_Start_Click" FontSize="20" RenderTransformOrigin="0.576,0.773"/>
+                    <Button x:Name="Button_Engine_Stop" Content="Engine Stop" HorizontalAlignment="Left" Height="40" Margin="20,417,0,0" VerticalAlignment="Top" Width="210" Click="Button_Engine_Stop_Click" FontSize="20" RenderTransformOrigin="0.576,0.773" Grid.Column="1"/>
+                    <Slider x:Name="Slider_Throttle" HorizontalAlignment="Left" Height="30" Margin="20,492,0,0" VerticalAlignment="Top" Width="450" RenderTransformOrigin="0.808,0.5" ValueChanged="Slider_Throttle_ValueChanged" Grid.Column="1" Grid.ColumnSpan="2"/>
+                    <Border x:Name="Border_Rewind_Copy" BorderBrush="Gray" BorderThickness="3" Grid.ColumnSpan="3" Grid.Column="1" HorizontalAlignment="Left" Height="145" Margin="10,3,0,0" VerticalAlignment="Top" Width="720">
+                        <Label x:Name="Label_Rewind1" Content="" HorizontalAlignment="Left" Height="40" Margin="17.8,91.8,0,0" VerticalAlignment="Top" Width="294"/>
+                    </Border>
+                    <Button x:Name="Button_Throttle_Min" Content="&lt;&lt;&lt;" HorizontalAlignment="Left" Height="40" Margin="20,482,0,0" VerticalAlignment="Top" Width="95" Click="Button_Throttle_Min_Click" FontSize="20" RenderTransformOrigin="0.576,0.773"/>
+                    <Button x:Name="Button_Throttle_Decrease" Content="&lt;" HorizontalAlignment="Left" Height="40" Margin="135,482,0,0" VerticalAlignment="Top" Width="95" Click="Button_Throttle_Decrease_Click" FontSize="20" RenderTransformOrigin="0.576,0.773"/>
+                    <Button x:Name="Button_Throttle_Increase" Content="&gt;" HorizontalAlignment="Left" Height="40" Margin="20,482,0,0" VerticalAlignment="Top" Width="95" Click="Button_Throttle_Increase_Click" FontSize="20" RenderTransformOrigin="0.576,0.773" Grid.Column="3"/>
+                    <Button x:Name="Button_Throttle_Max" Content="&gt;&gt;&gt;" HorizontalAlignment="Left" Height="40" Margin="135,482,0,0" VerticalAlignment="Top" Width="95" Click="Button_Throttle_Max_Click" FontSize="20" RenderTransformOrigin="0.576,0.773" Grid.Column="3"/>
+                    <ComboBox x:Name="comboAerotows" Grid.ColumnSpan="2" Grid.Column="2" HorizontalAlignment="Left" Height="41" Margin="10,177,0,0" VerticalAlignment="Top" Width="460"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Scenarios" Background="Black" FontSize="20">
@@ -51,30 +63,8 @@
                         <ColumnDefinition Width="671*"/>
                     </Grid.ColumnDefinitions>
                     <ComboBox x:Name="comboAirfields" HorizontalAlignment="Left" Height="40" Margin="4.8,42,0,0" VerticalAlignment="Top" Width="519" IsSynchronizedWithCurrentItem="False" SelectionChanged="ComboAirfields_SelectionChanged" Grid.ColumnSpan="4" Grid.Column="1" MaxDropDownHeight="700"/>
-                    <ListBox x:Name="listScenariosForAirField" HorizontalAlignment="Left" Height="504" Margin="5.8,98,0,0" VerticalAlignment="Top" Width="742" RenderTransformOrigin="0.5,0.781" Grid.ColumnSpan="4" SelectionChanged="ListScenariosForAirField_SelectionChanged" Grid.Column="1"/>
+                    <ListBox x:Name="listScenariosForAirField" HorizontalAlignment="Left" Height="504" Margin="5.8,98,0,0" VerticalAlignment="Top" Width="742" RenderTransformOrigin="0.5,0.781" Grid.ColumnSpan="4" SelectionChanged="ListScenariosForAirField_SelectionChanged" Grid.Column="1" SelectionMode="Single"/>
                     <Button x:Name="Button_Load_Scenario" Content="Load" Grid.Column="3" HorizontalAlignment="Left" Height="40" Margin="399,42,0,0" VerticalAlignment="Top" Width="200" Click="Button_Load_Scenario_Click" IsEnabled="{Binding ElementName=listScenariosForAirField,Path=SelectedItems.Count}" Grid.ColumnSpan="2"/>
-                </Grid>
-            </TabItem>
-            <TabItem Header="Traffic" Name ="TabTraffic" Background="Black" FontSize="20" RenderTransformOrigin="-1.373,0.407" Margin="-0.571,0,-0.429,-0.429">
-                <Grid Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Grid}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Grid}}}" HorizontalAlignment="Left" VerticalAlignment="Top" Background="#FF1E1E1E" OpacityMask="Black" Margin="1,-1,-0.8,-384.286">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="75*" MinWidth="250" MaxWidth="250"/>
-                        <ColumnDefinition Width="75*" MinWidth="250" MaxWidth="250"/>
-                        <ColumnDefinition Width="75*" MinWidth="250" MaxWidth="250"/>
-                        <ColumnDefinition Width="75*" MinWidth="250" MaxWidth="250"/>
-                        <ColumnDefinition Width="257*" MinWidth="100"/>
-                    </Grid.ColumnDefinitions>
-                    <Button x:Name="Button_Traffic_Launch" Content="Launch Traffic" HorizontalAlignment="Left" Height="40" Margin="5.4,443,0,0" VerticalAlignment="Top" Width="299" Click="Button_Traffic_Launch_Click" Grid.Column="1" Grid.ColumnSpan="2"/>
-                    <ComboBox x:Name="comboTrafficAircraft" Grid.ColumnSpan="2" Grid.Column="1" HorizontalAlignment="Left" Height="40" Margin="5.4,43,0,0" VerticalAlignment="Top" Width="379" SelectionChanged="ComboTrafficAircraft_SelectionChanged" MaxDropDownHeight="600"/>
-                    <ComboBox x:Name="comboTrafficSpeed" Grid.Column="1" HorizontalAlignment="Left" Height="40" Margin="5.4,123,0,0" VerticalAlignment="Top" Width="299" Grid.ColumnSpan="2" MaxDropDownHeight="500"/>
-                    <Label Content="Aircraft:" HorizontalAlignment="Left" Height="40" Margin="20,43,0,0" VerticalAlignment="Top" Width="154"/>
-                    <Label Content="Speed:" HorizontalAlignment="Left" Height="40" Margin="20,123,0,0" VerticalAlignment="Top" Width="154"/>
-                    <Label Content="Range:" HorizontalAlignment="Left" Height="40" Margin="20,203,0,0" VerticalAlignment="Top" Width="154"/>
-                    <Label Content="Relative heading:" HorizontalAlignment="Left" Height="42" Margin="20,363,0,0" VerticalAlignment="Top" Width="154"/>
-                    <ComboBox x:Name="comboTrafficRange" Grid.Column="1" HorizontalAlignment="Left" Height="40" Margin="5.4,203,0,0" VerticalAlignment="Top" Width="299" Grid.ColumnSpan="2" MaxDropDownHeight="500"/>
-                    <Label Content="Relative height:" HorizontalAlignment="Left" Height="40" Margin="20,283,0,0" VerticalAlignment="Top" Width="154" RenderTransformOrigin="0.573,0.992"/>
-                    <ComboBox x:Name="comboTrafficHeight" HorizontalAlignment="Left" Height="40" Margin="5.4,283,0,0" VerticalAlignment="Top" Width="299" Grid.ColumnSpan="2" Grid.Column="1" MaxDropDownHeight="500"/>
-                    <ComboBox x:Name="comboTrafficRelativeHeading" Grid.Column="1" HorizontalAlignment="Left" Height="42" Margin="5.4,363,0,0" VerticalAlignment="Top" Width="299" Grid.ColumnSpan="2" MaxDropDownHeight="500"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Weather" Name="TabWeather" Background="Black" FontSize="20">
@@ -99,6 +89,38 @@
                     <Label x:Name="label_gust" Content="Surface wind gusts" HorizontalAlignment="Left" Height="40" Margin="35,222,0,0" VerticalAlignment="Top" Width="210" RenderTransformOrigin="0.966,0.608" Grid.Column="2"/>
                     <Label x:Name="label_gust_Copy" Content="Turbulance" HorizontalAlignment="Left" Height="40" Margin="35,282,0,0" VerticalAlignment="Top" Width="210" RenderTransformOrigin="0.966,0.608" Grid.Column="2"/>
                     <ComboBox x:Name="comboWindTurbulance" Grid.ColumnSpan="3" HorizontalAlignment="Left" Height="40" Margin="315,282,0,0" VerticalAlignment="Top" Width="240" SelectionChanged="ComboWindTurbulance_SelectionChanged"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Traffic" Name ="TabTraffic" Background="Black" FontSize="20" RenderTransformOrigin="-1.373,0.407" Margin="-0.571,0,-0.429,-0.429">
+                <Grid Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Grid}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Grid}}}" HorizontalAlignment="Left" VerticalAlignment="Top" Background="#FF1E1E1E" OpacityMask="Black" Margin="1,-1,-0.8,-384.286">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="75*" MinWidth="250" MaxWidth="250"/>
+                        <ColumnDefinition Width="75*" MinWidth="250" MaxWidth="250"/>
+                        <ColumnDefinition Width="75*" MinWidth="250" MaxWidth="250"/>
+                        <ColumnDefinition Width="75*" MinWidth="250" MaxWidth="250"/>
+                        <ColumnDefinition Width="257*" MinWidth="100"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="Button_Traffic_Launch" Content="Launch Traffic" HorizontalAlignment="Left" Height="40" Margin="5.4,443,0,0" VerticalAlignment="Top" Width="299" Click="Button_Traffic_Launch_Click" Grid.Column="1" Grid.ColumnSpan="2"/>
+                    <ComboBox x:Name="comboTrafficAircraft" Grid.ColumnSpan="2" Grid.Column="1" HorizontalAlignment="Left" Height="40" Margin="5.4,43,0,0" VerticalAlignment="Top" Width="379" SelectionChanged="ComboTrafficAircraft_SelectionChanged" MaxDropDownHeight="600"/>
+                    <ComboBox x:Name="comboTrafficSpeed" Grid.Column="1" HorizontalAlignment="Left" Height="40" Margin="5.4,123,0,0" VerticalAlignment="Top" Width="299" Grid.ColumnSpan="2" MaxDropDownHeight="500"/>
+                    <Label Content="Aircraft:" HorizontalAlignment="Left" Height="40" Margin="20,43,0,0" VerticalAlignment="Top" Width="154"/>
+                    <Label Content="Speed:" HorizontalAlignment="Left" Height="40" Margin="20,123,0,0" VerticalAlignment="Top" Width="154"/>
+                    <Label Content="Range:" HorizontalAlignment="Left" Height="40" Margin="20,203,0,0" VerticalAlignment="Top" Width="154"/>
+                    <Label Content="Relative heading:" HorizontalAlignment="Left" Height="42" Margin="20,363,0,0" VerticalAlignment="Top" Width="154"/>
+                    <ComboBox x:Name="comboTrafficRange" Grid.Column="1" HorizontalAlignment="Left" Height="40" Margin="5.4,203,0,0" VerticalAlignment="Top" Width="299" Grid.ColumnSpan="2" MaxDropDownHeight="500"/>
+                    <Label Content="Relative height:" HorizontalAlignment="Left" Height="40" Margin="20,283,0,0" VerticalAlignment="Top" Width="154" RenderTransformOrigin="0.573,0.992"/>
+                    <ComboBox x:Name="comboTrafficHeight" HorizontalAlignment="Left" Height="40" Margin="5.4,283,0,0" VerticalAlignment="Top" Width="299" Grid.ColumnSpan="2" Grid.Column="1" MaxDropDownHeight="500"/>
+                    <ComboBox x:Name="comboTrafficRelativeHeading" Grid.Column="1" HorizontalAlignment="Left" Height="42" Margin="5.4,363,0,0" VerticalAlignment="Top" Width="299" Grid.ColumnSpan="2" MaxDropDownHeight="500"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Recorded Traffic" Name ="TabRecordedTraffic" Background="Black" FontSize="20" RenderTransformOrigin="-1.373,0.407" Margin="-0.571,0,-0.429,-0.429">
+                <Grid Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Grid}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Grid}}}" HorizontalAlignment="Left" VerticalAlignment="Top" Background="#FF1E1E1E" OpacityMask="Black" Margin="1,-1,-0.8,-384.286">
+                    <ListBox x:Name="listIGCTraffic" SelectionMode="Multiple" HorizontalAlignment="Left" Height="460" Margin="19,123,0,0" VerticalAlignment="Top" Width="765"/>
+                    <Button x:Name="btnIGCTraffic_Launch" Content="Launch traffic" HorizontalAlignment="Left" Height="40" Margin="19,48,0,0" VerticalAlignment="Top" Width="240"
+                            IsEnabled="{Binding ElementName=listIGCTraffic,Path=SelectedItems.Count}" Click="BtnIGCTraffic_Launch_Click" />
+                    <Button x:Name="btnIGCTraffic_Loop" Content="Launch traffic ( looping )" HorizontalAlignment="Left" Height="40" Margin="279,48,0,0" VerticalAlignment="Top" Width="240"
+                            IsEnabled="{Binding ElementName=listIGCTraffic,Path=SelectedItems.Count}" Click="BtnIGCTraffic_Loop_Click" />
+                    <Button x:Name="btnIGCTraffic_Clear" Content="Clear all traffic" HorizontalAlignment="Left" Height="40" Margin="544,48,0,0" VerticalAlignment="Top" Width="240" Click="BtnIGCTraffic_Clear_Click" />
                 </Grid>
             </TabItem>
             <TabItem Header="Slew" Background="Black" FontSize="20" RenderTransformOrigin="-1.373,0.407" Margin="-0.571,0,-0.429,-0.429">
@@ -132,17 +154,25 @@
                     <Button x:Name="Button_Slew_Freeze_Copy" FontFamily="Segoe UI Symbol" Content="&#xE10A;" Margin="20,10" FontSize="36" RenderTransformOrigin="0.5,0.676" PreviewMouseDown="Button_Slew_Freeze_PreviewMouseDown" FontWeight="Bold" Grid.Column="5" Grid.Row="2" Width="80" Height="80"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Tools" Background="Black" FontSize="20">
+            <TabItem Header="Tools" Name ="TabTools" Background="Black" FontSize="20">
                 <Grid Background="#FF1E1E1E" OpacityMask="Black" Margin="0,0,-117,-272.857">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="65"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="Launch_P3D" Content="Launch P3D" HorizontalAlignment="Left" Height="40" Margin="10,37,0,0" VerticalAlignment="Top" Width="160" Click="Button_Launch_P3D_Click" FontSize="20" Grid.Column="1"/>
-                    <Button x:Name="Button_Kill_PSD" Content="Kill P3D" HorizontalAlignment="Left" Height="40" Margin="220,37,0,0" VerticalAlignment="Top" Width="160" Click="Button_Kill_PSD_Click" FontSize="20" RenderTransformOrigin="0.576,0.773" Grid.Column="1"/>
-                    <TextBox HorizontalAlignment="Left" Height="506" Margin="10,121,0,0" TextWrapping="Wrap" Text="TextBox" x:Name="TestBox" VerticalAlignment="Top" Width="1020" Grid.Column="1" FontSize="14"/>
+                    <Button x:Name="Launch_P3D" Content="Launch P3D" HorizontalAlignment="Left" Height="40" Margin="10,37,0,0" VerticalAlignment="Top" Width="160" Click="Button_Launch_P3D_Click" FontSize="20" Grid.Column="3"/>
+                    <Button x:Name="Button_Kill_PSD" Content="Kill P3D" HorizontalAlignment="Left" Height="40" Margin="220,37,0,0" VerticalAlignment="Top" Width="160" Click="Button_Kill_PSD_Click" FontSize="20" RenderTransformOrigin="0.576,0.773" Grid.Column="3"/>
+                    <TextBox HorizontalAlignment="Left" Height="435" Margin="10,192,0,0" TextWrapping="Wrap" Text="TextBox" x:Name="TestBox" VerticalAlignment="Top" Width="1020" Grid.Column="3" FontSize="14"/>
                 </Grid>
             </TabItem>
         </TabControl>
+        <StackPanel Height="{Binding ActualHeight, RelativeSource ={RelativeSource AncestorType = {x:Type Grid}}}" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type Grid}}}" Margin="5,5,4.857,5.286"  RenderTransformOrigin="0.503,0.5" Grid.Column="1" Grid.ColumnSpan="1" Background="#FF1E1E1E" OpacityMask="Black">
+            <TextBlock x:Name="textBlock1" Height="60" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type StackPanel}}}" Margin="0,100,5,0" TextWrapping="Wrap" Text="Airspeed" Background="#FF1E1E1E" OpacityMask="Black" FontSize="24" FontWeight="Bold" Foreground="#FFFDF8F8"/>
+            <TextBlock x:Name="textAirspeed" Height="160" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type StackPanel}}}" Margin="0,5,5,0" TextWrapping="NoWrap" Text="0" Background="#FF1E1E1E" OpacityMask="Black" FontSize="72" FontWeight="Bold" Foreground="#FFFDF8F8" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
+            <TextBlock x:Name="textBlock2" Height="60" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type StackPanel}}}" Margin="0,50,5,0" TextWrapping="Wrap" Text="Altitude QNH" Background="#FF1E1E1E" OpacityMask="Black" FontSize="24" FontWeight="Bold" Foreground="#FFFDF8F8"/>
+            <TextBlock x:Name="textAltitude" Height="160" Width="{Binding ActualWidth, RelativeSource = {RelativeSource AncestorType = {x:Type StackPanel}}}" Margin="0,5,5,0" TextWrapping="NoWrap" Text="0" Background="#FF1E1E1E" OpacityMask="Black" FontSize="72" FontWeight="Bold" Foreground="#FFFDF8F8" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
+        </StackPanel>
     </Grid>
 </Window>

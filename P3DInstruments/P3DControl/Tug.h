@@ -61,6 +61,7 @@ class Tug :
 	/// </summary>
 	class WingWaggleFeature : public Feature{
 		double startTime;
+		double initalBank;
 		bool complete;
 	public:
 		WingWaggleFeature();
@@ -134,5 +135,6 @@ public:
 	double getLongitude() { return inputValues.longitude; }
 	double getDesiredSpeed() { return inputValues.desiredSpeedKnots; }
 	double getDesiredHeading() { return inputValues.desiredHeading; }
+	double getBankAngle() { return inputValues.bank; }
 };
 

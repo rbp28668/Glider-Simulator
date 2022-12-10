@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
+using System.Runtime.InteropServices;
 
 
 //using System.Runtime.InteropServices;
@@ -21,6 +22,7 @@ namespace CGC_Sim_IOS
     {
         Weather_Data = 0,
         Location_Data = 1,
+        Aircraft_Data = 2,
     }
 
     enum REQUESTS
@@ -32,6 +34,7 @@ namespace CGC_Sim_IOS
     enum EVENTS
     {
         SIMSTART,
+        ONESEC,
         FOURSECS,
         SIMSTOP,
         PAUSE,
@@ -94,6 +97,30 @@ namespace CGC_Sim_IOS
         Unknown,
     }
 
+    enum DEFINITIONS
+    {
+        Struct1,
+    }
+
+ 
+    // this is how you declare a data structure so that
+    // simconnect knows how to fill it/read it.
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+    struct Struct1
+    {
+        // this is how you declare a fixed size string
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+        public String title;
+        public double latitude;
+        public double longitude;
+        public double altitude;
+        public double engines;
+        public double yawAngle;
+        public double yawString;
+        public double turnCoardinator;
+    };
+
+
     class Simulator
     {
 
@@ -133,6 +160,8 @@ namespace CGC_Sim_IOS
         }
 
         public bool IsPaused { get; set; } = false;
+
+        public int Engines { get; set; } = 0;
 
         public Metar CurrentMetar
         {
@@ -184,8 +213,11 @@ namespace CGC_Sim_IOS
                 // Do you want to show a console window?
                 start.WindowStyle = ProcessWindowStyle.Hidden;
                 start.CreateNoWindow = false;
+#if(P3Dv5)
+                start.FileName = "C:\\SimP3Dv5\\Lockheed Martin\\Prepar3D v5\\Prepar3D.exe";
+#else
                 start.FileName = "C:\\SimP3D\\Lockheed Martin\\Prepar3D v4\\Prepar3D.exe";
-
+#endif
                 if (initialScenario == "")
                 {
                     Process proc = Process.Start(start);
@@ -215,10 +247,10 @@ namespace CGC_Sim_IOS
             if (simConnection != null)
             {
                 //simConnection.WeatherSetModeGlobal();
-//                simConnection.WeatherRequestObservationAtNearestStation(DataRequestID.Weather_Data, lat, lng);
+                //simConnection.WeatherRequestObservationAtNearestStation(DataRequestID.Weather_Data, lat, lng);
+                //simConnection.WeatherRequestObservationAtStation(DataRequestID.Weather_Data,"GLOB");
                 simConnection.WeatherRequestInterpolatedObservation(DataRequestID.Weather_Data, lat, lng, 0.0f);
                 
-                //simConnection.WeatherRequestObservationAtStation(DataRequestID.Weather_Data,"GLOB");
             }
         }
 
@@ -985,6 +1017,25 @@ namespace CGC_Sim_IOS
             RunCmdAsync(cmd);
         }
 
+        public void CMD_Engine_Auto_Start()
+        {
+
+            string[] cmd = { "cmd", "ENGINE_AUTO_START" };
+            dynamic response = RunCmdAsync(cmd);
+        }
+
+        public void CMD_Engine_Auto_Stop()
+        {
+
+            string[] cmd = { "cmd", "ENGINE_AUTO_SHUTDOWN" };
+            dynamic response = RunCmdAsync(cmd);
+        }
+
+        public void CMD_Throttle_Set(int count = 0)
+        {
+            string[] cmd = { "cmd", "THROTTLE_SET", "value=" + count.ToString() };
+            RunCmdAsync(cmd);
+        }
 
         public async Task<int> CMD_Position_Available()
         {
