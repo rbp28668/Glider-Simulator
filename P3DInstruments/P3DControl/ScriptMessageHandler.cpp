@@ -37,7 +37,7 @@ void ScriptMessageHandler::run(const std::string& cmd, const APIParameters& para
 		}
 	}
 	else {
-		reportFailure("Unknown igc command", 0, output);
+		reportFailure("Unknown script command", 0, output);
 	}
 }
 
@@ -48,7 +48,7 @@ void ScriptMessageHandler::listScriptFiles(const std::string& filter, std::strin
 	try {
 		// E:\Users\rbp28668\Documents\Prepar3D v4 Files
 		DocumentDirectory documents;
-		Directory scriptFolder = documents.sub(Prepar3D::DOCUMENTS).sub("script");
+		Directory scriptFolder = documents.sub(p3d->documentsFolder()).sub("script");
 		files = scriptFolder.files(files, filter + "*.lua");
 	}
 	catch (FileException& fx) {
@@ -66,6 +66,9 @@ void ScriptMessageHandler::listScriptFiles(const std::string& filter, std::strin
 	for (File::ListT::iterator it = files.begin(); it != files.end(); ++it) {
 		json.object();
 		json.add("filename", it->name());
+		// TODO - parse the script files for structured comments.
+		json.add("title", it->name());  
+		json.add("description", "");
 		json.end(); 
 	}
 
@@ -74,7 +77,7 @@ void ScriptMessageHandler::listScriptFiles(const std::string& filter, std::strin
 void ScriptMessageHandler::runScript(const std::string& file, bool threaded,  std::string& output)
 {
 	DocumentDirectory documents;
-	Directory scriptFolder = documents.sub(Prepar3D::DOCUMENTS).sub("script");
+	Directory scriptFolder = documents.sub(p3d->documentsFolder()).sub("script");
 	File f = scriptFolder.file(file);
 
 	if (f.exists()) {

@@ -16,7 +16,7 @@ int LogScripting::info(lua_State* L)
 {
     Simulator* pSim = *(Simulator**)lua_getextraspace(L);
     std::string message(luaL_checkstring(L, 1));
-    pSim->getLogger()->info(message);
+    pSim->getLogger()->info(pSim, message);
     return 0;
 }
 
@@ -24,7 +24,7 @@ int LogScripting::warn(lua_State* L)
 {
     Simulator* pSim = *(Simulator**)lua_getextraspace(L);
     std::string message(luaL_checkstring(L, 1));
-    pSim->getLogger()->warn(message);
+    pSim->getLogger()->warn(pSim,message);
     return 0;
 }
 
@@ -32,6 +32,6 @@ int LogScripting::error(lua_State* L)
 {
     Simulator* pSim = *(Simulator**)lua_getextraspace(L);
     std::string message(luaL_checkstring(L, 1));
-    pSim->getLogger()->error(message);
+    pSim->getLogger()->error(pSim,message);
     return 0;
 }

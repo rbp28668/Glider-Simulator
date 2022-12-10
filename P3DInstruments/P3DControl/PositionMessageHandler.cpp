@@ -170,7 +170,7 @@ void PositionMessageHandler::back(Simulator* pSim, int count)
 bool PositionMessageHandler::load(Simulator* pSim, const std::string& file, std::string& err)
 {
 	DocumentDirectory documents;
-	Directory p3dFolder = documents.sub(Prepar3D::DOCUMENTS);
+	Directory p3dFolder = documents.sub(pSim->documentsFolder());
 	File src = p3dFolder.file(file);
 
 	Json::Value root;
@@ -219,7 +219,7 @@ void PositionMessageHandler::save(Simulator* pSim, const std::string& file, cons
 	json.end();
 
 	DocumentDirectory documents;
-	Directory p3dFolder = documents.sub(Prepar3D::DOCUMENTS);
+	Directory p3dFolder = documents.sub(pSim->documentsFolder());
 	File dest = p3dFolder.file(file);
 	std::ofstream ofs(dest);
 	ofs << contents << std::endl;
@@ -232,7 +232,7 @@ void PositionMessageHandler::list(Simulator* pSim, const std::string& filter, Fi
 {
 	// E:\Users\rbp28668\Documents\Prepar3D v4 Files
 	DocumentDirectory documents;
-	Directory p3dFolder = documents.sub(Prepar3D::DOCUMENTS);
+	Directory p3dFolder = documents.sub(pSim->documentsFolder());
 	files = p3dFolder.files(files, filter + "*.posn");
 }
 

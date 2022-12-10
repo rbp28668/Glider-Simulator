@@ -25,7 +25,7 @@ public:
 	static void readScenario(Simulator* pSim, File& file, FileInfo& fileInfo);
 	static bool load(Simulator* pSim, const std::string& file);
 	static bool save(Simulator* pSim, const std::string& file, const std::string& title, const std::string& description);
-	static void list(const std::string& filter, File::ListT& files);
+	static void list(Simulator* pSim, const std::string& filter, File::ListT& files);
 
 	virtual void run(const std::string& cmd, const APIParameters& params, std::string& output);
 private:

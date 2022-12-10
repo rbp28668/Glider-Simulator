@@ -43,10 +43,10 @@ bool ScenarioMessageHandler::save(Simulator* pSim, const std::string& file, cons
 	return(hr == S_OK);
 }
 
-void ScenarioMessageHandler::list(const std::string& filter, File::ListT& files)
+void ScenarioMessageHandler::list(Simulator* pSim, const std::string& filter, File::ListT& files)
 {
 	DocumentDirectory documents;
-	Directory p3dFolder = documents.sub(Prepar3D::DOCUMENTS);
+	Directory p3dFolder = documents.sub(pSim->documentsFolder());
 	files = p3dFolder.files(files, filter + "*.fxml");
 
 }
@@ -185,7 +185,7 @@ void ScenarioMessageHandler::listScenarios(const std::string& filter, std::strin
 	File::ListT files;
 	Simulator* pSim = static_cast<Simulator*>(p3d);
 	try {
-		list(filter, files);
+		list(pSim, filter, files);
 	}
 	catch (FileException& fx) {
 		JSONWriter json(output);

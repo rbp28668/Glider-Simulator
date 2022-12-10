@@ -12,7 +12,8 @@
 
 
 // Folder in documents that P3D uses for its files.
-const char* Prepar3D::DOCUMENTS = "Prepar3D v4 Files";
+//char* Prepar3D::DOCUMENTS; = "Prepar3D v4 Files";
+//Lockheed Martin« Prepar3D« v5 5.3 Build 17.28160
 
 /// <summary>
 /// Event definitions.  Used as a lookup table to convert event IDs to the corresponding strings
@@ -170,6 +171,13 @@ void Prepar3D::showVersionInformation(SIMCONNECT_RECV* pData)
 		<< pOpen->dwApplicationVersionMajor << "." << pOpen->dwApplicationVersionMinor
 		<< " Build " << pOpen->dwApplicationBuildMajor << "." << pOpen->dwApplicationBuildMinor << std::endl;
 	std::cout << "Sim Connect version " << pOpen->dwSimConnectVersionMajor << "." << pOpen->dwSimConnectBuildMinor << std::endl;
+
+	// Set up the document folder to one that matches the p3d version.
+	std::stringstream ss;
+	ss << "Prepar3D v" << pOpen->dwApplicationVersionMajor << " Files";
+	documents = ss.str();
+	std::cout << "Set documents folder to " << documentsFolder() << std::endl;
+
 }
 
 void Prepar3D::handleSystemEvent(SIMCONNECT_RECV* pData)

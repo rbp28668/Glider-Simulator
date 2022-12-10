@@ -25,7 +25,8 @@ int IgcScripting::list(lua_State* L)
 
 	std::list<std::string> fileList;
 	std::string err;
-	if (IgcMessageHandler::listFiles(filter, fileList, err)) {
+	Simulator* pSim = *(Simulator**)lua_getextraspace(L);
+	if (IgcMessageHandler::listFiles(pSim, filter, fileList, err)) {
 		lua_newtable(L);
 		int idx = 1;
 		for (auto it = fileList.begin(); it != fileList.end(); ++it) {

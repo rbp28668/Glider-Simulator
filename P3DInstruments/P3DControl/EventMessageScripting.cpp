@@ -25,10 +25,10 @@ int EventMessageScripting::dispatchEvent(lua_State* L)
 	}
 
 	if (EventMessageHandler::dispatchEvent(pSim, cmd, dwData, output)) {
-		pSim->getLogger()->info(output);
+		pSim->getLogger()->info(pSim,output);
 	}
 	else {
-		pSim->getLogger()->error(output);
+		pSim->getLogger()->error(pSim,output);
 	}
 
 	return 0; // no results

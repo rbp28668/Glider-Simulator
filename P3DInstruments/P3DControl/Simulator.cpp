@@ -22,7 +22,7 @@ Simulator::Simulator(const char* appName, bool verbose)
 	, pTug(0)
 {
 	logger = new Logger();
-	logger->info("Startup");
+	logger->info(this,"Startup");
 	state = new SimState(this);
 	stateRequest = new SimObjectDataRequest(this, state, &userAircraft(), SIMCONNECT_PERIOD_SECOND);
 	failures = new Failures(this);
@@ -33,7 +33,7 @@ Simulator::Simulator(const char* appName, bool verbose)
 
 Simulator::~Simulator()
 {
-	logger->info("Shutdown");
+	logger->info(this,"Shutdown");
 	delete fr;
 	delete commands;
 	delete failuresRequest;

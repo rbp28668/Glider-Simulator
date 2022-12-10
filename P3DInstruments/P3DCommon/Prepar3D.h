@@ -64,6 +64,7 @@ private:
 	WeatherStations wxStations;
 	ExternalSim* extSim;
 	SimObject userAc;
+	std::string documents = "Prepar3D v4 Files"; // fallback to v4
 
     static void CALLBACK DispatchCallback(SIMCONNECT_RECV *pData, DWORD cbData, void *pContext);
     void Process(SIMCONNECT_RECV *pData, DWORD cbData);
@@ -141,7 +142,8 @@ private:
 
 public:
 
-	const static char* DOCUMENTS;
+	//static char* DOCUMENTS;
+	std::string documentsFolder() { return documents; }
 
 	void showLastRequest(const char* name);
 	HANDLE getHandle() const { return hSimConnect; } 
