@@ -64,6 +64,8 @@ private:
 	WeatherStations wxStations;
 	ExternalSim* extSim;
 	SimObject userAc;
+	int majorVersion;
+	int minorVersion;
 	std::string documents = "Prepar3D v4 Files"; // fallback to v4
 
     static void CALLBACK DispatchCallback(SIMCONNECT_RECV *pData, DWORD cbData, void *pContext);
@@ -160,6 +162,8 @@ public:
     void Dispatch();
 	void DispatchLoop();
 
+	int getMajorVersion() const { return majorVersion; }
+	int getMinorVersion() const { return minorVersion; }
 
 	LONG nextRequestId();	// Threadsafe counter for allocating request IDs.
 	//LONG nextEventId();		// Threadsafe counter for allocating event IDs.

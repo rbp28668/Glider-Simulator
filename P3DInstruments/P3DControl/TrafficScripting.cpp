@@ -33,8 +33,8 @@ int TrafficScripting::aircraft(lua_State* L)
 	int idx = 1;
 
 	try {
-
-		TrafficMessageHandler::listAircraft(aircraft);
+		Simulator* pSim = *(Simulator**)lua_getextraspace(L);
+		TrafficMessageHandler::listAircraft(pSim, aircraft);
 		for (auto it = aircraft.begin(); it != aircraft.end(); ++it) {
 			lua_pushstring(L, it->c_str());
 			lua_seti(L, -2, idx++);
