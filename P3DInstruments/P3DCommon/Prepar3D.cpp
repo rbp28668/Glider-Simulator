@@ -66,7 +66,9 @@ Prepar3D::Prepar3D(const char* appName, bool verbose)
 	simObjects(this),
 	wxStations(this),
 	extSim(0),
-	userAc(this)
+	userAc(this),
+	majorVersion(4), // until proven otherwise
+	minorVersion(0)
 {
 
 	// Create lookup tables for event definitions
@@ -172,12 +174,14 @@ void Prepar3D::showVersionInformation(SIMCONNECT_RECV* pData)
 		<< " Build " << pOpen->dwApplicationBuildMajor << "." << pOpen->dwApplicationBuildMinor << std::endl;
 	std::cout << "Sim Connect version " << pOpen->dwSimConnectVersionMajor << "." << pOpen->dwSimConnectBuildMinor << std::endl;
 
+	majorVersion = pOpen->dwApplicationVersionMajor;
+	minorVersion = pOpen->dwApplicationVersionMinor;
+
 	// Set up the document folder to one that matches the p3d version.
 	std::stringstream ss;
 	ss << "Prepar3D v" << pOpen->dwApplicationVersionMajor << " Files";
 	documents = ss.str();
 	std::cout << "Set documents folder to " << documentsFolder() << std::endl;
-
 }
 
 void Prepar3D::handleSystemEvent(SIMCONNECT_RECV* pData)

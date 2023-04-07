@@ -8,6 +8,8 @@ class RecordMessageHandler :
 	public MessageHandler
 {
 
+	static std::string getSubFolder(Prepar3D* pSim);
+
 public:
 	RecordMessageHandler(Prepar3D* p3d);
 	virtual void run(const std::string& cmd, const APIParameters& params, std::string& output);
@@ -16,7 +18,7 @@ public:
 	static bool stop(Simulator* pSim, const std::string& title, const std::string& description);
 	static bool playback(Simulator* pSim, const std::string& name);
 	static bool analyse(Simulator* pSim);
-	static File::ListT& list(File::ListT& files);
+	static File::ListT& list(Simulator* pSim, File::ListT& files);
 
 private:
 	void startRecording(std::string& output);

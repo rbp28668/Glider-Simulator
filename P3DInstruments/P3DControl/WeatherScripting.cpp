@@ -56,7 +56,7 @@ int WeatherScripting::themes(lua_State* L)
 	try {
 		std::string filter(luaL_checkstring(L, 1));
 		File::ListT files;
-		WeatherMessageHandler::listThemes(files);
+		WeatherMessageHandler::listThemes(pSim, files);
 
 		lua_newtable(L);
 		int idx = 1;

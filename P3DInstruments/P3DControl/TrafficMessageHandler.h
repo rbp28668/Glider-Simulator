@@ -16,7 +16,7 @@ public:
 	virtual ~TrafficMessageHandler();
 
 	static bool launch(Simulator* pSim, const std::string& targetName, const std::string& targetTailNumber, double targetRange, double targetSpeed, double relativeBearing, double relativeTargetHeight);
-	static std::list<std::string>& listAircraft(std::list<std::string>& aircraft);
+	static std::list<std::string>& listAircraft(Simulator* pSim, std::list<std::string>& aircraft);
 
 	virtual void run(const std::string& cmd, const APIParameters& params, std::string& output);
 
