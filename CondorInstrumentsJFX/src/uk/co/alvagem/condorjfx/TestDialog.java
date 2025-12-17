@@ -54,7 +54,7 @@ public class TestDialog extends Stage {
 		setTitle("Control");
 
         BorderPane pane = new BorderPane();
-        Scene scene = new Scene(pane, 250, 150, Color.WHITE);
+        Scene scene = new Scene(pane, 250, 300, Color.WHITE);
         setScene(scene);
 
 		values = new ValuesPanel();
@@ -104,6 +104,18 @@ public class TestDialog extends Stage {
 		final Button  p1Button = new Button("Panel 1");
 		p1Button.setOnAction( ae -> {setPanel(1);});
 		pane.getChildren().add(p1Button);
+
+    	final Button  p2Button = new Button("Panel 2");
+		p2Button.setOnAction( ae -> {setPanel(2);});
+		pane.getChildren().add(p2Button);
+
+  	    final Button  p3Button = new Button("Panel 3");
+		p2Button.setOnAction( ae -> {setPanel(2);});
+		pane.getChildren().add(p3Button);
+
+  	    final Button  p4Button = new Button("Panel 4");
+		p2Button.setOnAction( ae -> {setPanel(2);});
+		pane.getChildren().add(p4Button);
 
 		return pane;
 
@@ -164,6 +176,7 @@ public class TestDialog extends Stage {
 			addField("radiofrequency","131.275",row++);
 			addField("pitch","0.0",row++);
 			addField("bank","0.0",row++);
+			addField("rpm","0.0",row++);
 		}
 		
 		private void addField(String tag, String initialValue, int row){

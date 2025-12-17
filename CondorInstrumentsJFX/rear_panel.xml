@@ -87,7 +87,63 @@
             <param name="fontSize" type="double">20.0</param>
         </instrument>
     </panel>
+    <panel name="MG">
+        <instrument className="uk.co.alvagem.condorjfx.genericInstruments.StripVario" x="5" y="10">
+            <param name="width" type="int">40</param>
+            <param name="height" type="int">460</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21ASIWinter" x="50" y="28">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21Altimeter" x="420" y="28">
+            <param name="width" type="int">350</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="399" y="405">
+            <param name="text" type="string">Toggle Pause</param>
+            <param name="cmd" type="string">cmd/PAUSE_TOGGLE</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="568" y="403">
+            <param name="text" type="string">Restart</param>
+            <param name="cmd" type="string">cmd/SITUATION_RESET</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="85" y="405">
+            <param name="text" type="string">Engine Start</param>
+            <param name="cmd" type="string">cmd/ENGINE_AUTO_START</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="244" y="406">
+            <param name="text" type="string">Engine Stop</param>
+            <param name="cmd" type="string">cmd/ENGINE_AUTO_SHUTDOWN</param>
+            <param name="host" type="string">192.168.2.1</param>
+            <param name="port" type="int">3000</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.SelectPanelButton" x="675" y="404">
+            <param name="text" type="string">Ctrl</param>
+            <param name="panelName" type="string">Control</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.SimpleTextInstrument$Generic" x="331" y="23">
+            <param name="width" type="int">150</param>
+            <param name="height" type="int">40</param>
+        </instrument>
+    </panel>
     <panel name="Control">
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="28" y="40">
+            <param name="text" type="string">Front Panel: IFR</param>
+            <param name="cmd" type="string">Panel 1</param>
+            <param name="host" type="string">192.168.2.2</param>
+            <param name="port" type="int">55278</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
         <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="28" y="98">
             <param name="text" type="string">Front Panel: VFR</param>
             <param name="cmd" type="string">Panel 0</param>
@@ -95,9 +151,9 @@
             <param name="port" type="int">55278</param>
             <param name="fontSize" type="double">20.0</param>
         </instrument>
-        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="28" y="40">
-            <param name="text" type="string">Front Panel: IFR</param>
-            <param name="cmd" type="string">Panel 1</param>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="28" y="156">
+            <param name="text" type="string">Front Panel: Motor Glider</param>
+            <param name="cmd" type="string">Panel 2</param>
             <param name="host" type="string">192.168.2.2</param>
             <param name="port" type="int">55278</param>
             <param name="fontSize" type="double">20.0</param>
@@ -107,19 +163,24 @@
             <param name="panelName" type="string">K21</param>
             <param name="fontSize" type="double">20.0</param>
         </instrument>
-        <instrument className="uk.co.alvagem.condorjfx.control.SelectPanelButton" x="371" y="426">
+        <instrument className="uk.co.alvagem.condorjfx.control.SelectPanelButton" x="396" y="427">
             <param name="text" type="string">Go to IFR Panel</param>
             <param name="panelName" type="string">IFR</param>
             <param name="fontSize" type="double">20.0</param>
         </instrument>
-        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="28" y="201">
+        <instrument className="uk.co.alvagem.condorjfx.control.SelectPanelButton" x="203" y="427">
+            <param name="text" type="string">Go to MG Panel</param>
+            <param name="panelName" type="string">MG</param>
+            <param name="fontSize" type="double">20.0</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="25" y="214">
             <param name="text" type="string">Engine Start</param>
             <param name="cmd" type="string">cmd/ENGINE_AUTO_START</param>
             <param name="host" type="string">192.168.2.1</param>
             <param name="port" type="int">3000</param>
             <param name="fontSize" type="double">20.0</param>
         </instrument>
-        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="28" y="256">
+        <instrument className="uk.co.alvagem.condorjfx.control.ActionButton" x="27" y="272">
             <param name="text" type="string">Engine Stop</param>
             <param name="cmd" type="string">cmd/ENGINE_AUTO_SHUTDOWN</param>
             <param name="host" type="string">192.168.2.1</param>

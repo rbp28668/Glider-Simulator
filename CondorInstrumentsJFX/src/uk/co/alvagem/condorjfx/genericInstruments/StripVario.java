@@ -1,13 +1,13 @@
 package uk.co.alvagem.condorjfx.genericInstruments;
 
-import com.sun.javafx.tk.FontMetrics;
-import com.sun.javafx.tk.Toolkit;
-
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextBoundsType;
+import javafx.geometry.Bounds;
 import uk.co.alvagem.condorjfx.AbstractInstrument;
 import uk.co.alvagem.condorjfx.Instrument;
 
@@ -46,9 +46,11 @@ public class StripVario extends AbstractInstrument implements Instrument {
 		double fontSize = height / 30; // font size of 20 about right for 600 high vario
 		Font font = new Font("SansSerif", fontSize);
 		gc.setFont(font);
-		Toolkit tk = Toolkit.getToolkit();
-		FontMetrics fm = tk.getFontLoader().getFontMetrics(font);
-		float h = fm.getAscent();
+		Text t = new Text("0");
+		t.setFont(font);
+		t.setBoundsType(TextBoundsType.LOGICAL);
+		Bounds b = t.getLayoutBounds();
+		double h = t.getBaselineOffset();
 
 		double dy = height / (1 + MAX_ENDSTOP - MIN_ENDSTOP);
 		double y = dy/2; // start height for first tick.

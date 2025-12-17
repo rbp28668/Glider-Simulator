@@ -21,6 +21,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.scene.transform.Translate;
 
 import javax.imageio.ImageIO;
@@ -28,8 +29,9 @@ import javax.imageio.ImageIO;
 import uk.co.alvagem.condorjfx.AbstractInstrument;
 import uk.co.alvagem.condorjfx.Instrument;
 
-import com.sun.javafx.tk.FontMetrics;
-import com.sun.javafx.tk.Toolkit;
+import javafx.geometry.Bounds;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextBoundsType;
 
 /**
  * @author bruce.porteous
@@ -174,8 +176,6 @@ public class K21Compass extends AbstractInstrument implements Instrument {
 
 		Font f = new Font("Arial Rounded MT Bold",128);
 		gc.setFont(f);
-		Toolkit tk = Toolkit.getToolkit();
-		FontMetrics fm = tk.getFontLoader().getFontMetrics(f);
 
 		
 		final double y = baseline - 20; //
@@ -198,7 +198,12 @@ public class K21Compass extends AbstractInstrument implements Instrument {
 				} else {
 					label = Integer.toString(hdg/10);
 				}
-				float sw = fm.computeStringWidth(label);
+				// Old API (kept for reference / older JavaFX platforms):
+				// float sw = fm.computeStringWidth(label);
+				// Use a Text node to measure string width in a platform-independent way:
+				Text tmpText = new Text(label);
+				tmpText.setFont(f);
+				float sw = (float) tmpText.getLayoutBounds().getWidth();
 
 				gc.fillText(label, x-sw/2, y-100);
 				
