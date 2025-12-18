@@ -111,30 +111,19 @@
         </configuration>
       </plugin>
 
+      <!-- Build a standard JAR file in line with original CIJFX.jar -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.4.1</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <createDependencyReducedPom>false</createDependencyReducedPom>
-              <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>java8</shadedClassifierName>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>uk.co.alvagem.condorjfx.Main</mainClass>
-                </transformer>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-jar-plugin</artifactId>
+              <version>3.5.0</version>
+              <configuration>
+                <archive>
+                   <manifest>
+                       <mainClass>uk.co.alvagem.condorjfx.Main</mainClass>
+                   </manifest>
+                </archive>
+              </configuration>
+          </plugin>
     </plugins>
   </build>
 
