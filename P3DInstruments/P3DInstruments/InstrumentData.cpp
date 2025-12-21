@@ -23,6 +23,10 @@ SimObjectData::DataItem InstrumentData::dataItems[] = {
 	{ "TURN INDICATOR RATE", "Radians per second", SIMCONNECT_DATATYPE_FLOAT64},
 	{ "TURN INDICATOR SWITCH", "Bool", SIMCONNECT_DATATYPE_FLOAT64},
 	{ "YAW STRING ANGLE", "Radians", SIMCONNECT_DATATYPE_FLOAT64},
+	{ "GENERAL ENG RPM:1","Rpm", SIMCONNECT_DATATYPE_FLOAT64},
+	{ "GENERAL ENG OIL PRESSURE:1","Psf",SIMCONNECT_DATATYPE_FLOAT64},
+	{ "GENERAL ENG OIL TEMPERATURE:1","Celsius", SIMCONNECT_DATATYPE_FLOAT64},
+	{ "RECIP ENG CYLINDER HEAD TEMPERATURE:1","Celsius", SIMCONNECT_DATATYPE_FLOAT64 },
 };
 
 /*
@@ -101,6 +105,13 @@ void InstrumentData::onData(void *pData, SimObject* pObject) {
 		DWORD now = ::GetTickCount();
 		pInstruments->vario = mechanicalVario.update(data.altitudeMetres, data.tasMetresPerSec, now);
 		pInstruments->evario = electronicVario.update(data.altitudeMetres, data.tasMetresPerSec, now);
+
+
+		// Motorglider
+		pInstruments->rpm = data.rpm;
+		pInstruments->oilPressure = data.oilPressure / 144; // PSF to PSI
+		pInstruments->oilTemp = data.oilTemp;
+		pInstruments->cht = data.cht;
 
 
 		pInstruments->send();

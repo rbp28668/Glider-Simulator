@@ -67,6 +67,7 @@ public class Main extends Application {
 		}
 		catch(Exception e) {
 			System.err.println("Unable to start " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
