@@ -69,7 +69,8 @@
             <param name="key" type="string">rpm</param>
             <param name="width" type="int">250</param>
             <param name="height" type="int">100</param>
-            <param name="fontHeight" type="int">100</param>
+            <param name="fontHeight" type="int">70</param>
+            <param name="format" type="string">%4.0f</param>
         </instrument>
     </panel>
 </panelConfiguration>

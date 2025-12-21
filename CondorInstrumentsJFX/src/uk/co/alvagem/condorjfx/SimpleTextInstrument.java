@@ -279,8 +279,13 @@ private void draw(GraphicsContext gc) {
 		}
 	}
 
+    // Generic text instrument for any purpose. By default it just displays the raw value sent.
+	// If however you provide a fontHeight in the constructor it will use that for the text size.
+	// Similarly a format string will format the value if provided.
 	public static class Generic extends SimpleTextInstrument{
 		
+		private String format = null;
+
 		public Generic(String key, int width, int height){
 			super(key,width, height);
 		}
@@ -290,10 +295,28 @@ private void draw(GraphicsContext gc) {
 			this.fontHeight = fontHeight;
 		}
 
+		public Generic(String key, int width, int height, int fontHeight, String format){
+			super(key,width, height);
+			this.fontHeight = fontHeight;
+			format = format.trim();
+			this.format = format;
+		}
+
 		protected String getValue() {
 			String result = "------";
 			if(this.value != null){
 				result = this.value;
+
+				if(format != null) {
+					try {
+						double val = Double.parseDouble(this.value);
+						result = String.format(format, val);
+					} catch (NumberFormatException nfe) {
+						// ignore - just use raw value
+					}
+				}
+
+
 			}
 			return result;
 		}
