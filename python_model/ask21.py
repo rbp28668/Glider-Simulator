@@ -16,6 +16,7 @@ class ASK21:
         pass
         # Initialize ASK21-specific parameters here
 
+        #Moments of inertia about principal axes through center of gravity (roll, pitch, yaw)
         self.Ixx = 1285.0  # kg·m²
         self.Iyy = 1824.0  # kg·m²
         self.Izz = 2663.0  # kg·m²
@@ -27,11 +28,11 @@ class ASK21:
         # Panels:  area, mid-span, quarter-chord position, incidence angle
         # mid-span is distance from centerline to panel center
         # quarter-chord is distance from root leading edge (datum) to quarter-chord of panel
-        rootPanel =     Panel( 3.215313306, 1.545740741, 0.3368518519, 0.0)
-        airbrakePanel = Panel( 1.648746982, 3.440925926, 0.2935648148, 0.0)  # Placeholder for airbrake panel
-        outerPanel =    Panel( 1.112233745, 4.668703704, 0.2644444444, 0.0)
-        aileronPanel =  Panel( 2.216578464, 6.585925926, 0.211712963, 0.0)  # Placeholder for aileron panel
-        tipPanel =      Panel( 0.287909808, 8.238703704, 0.1629166667, 0.0)  # Placeholder for tip panel
+        rootPanel =     Panel( 3.215313306, 1.545740741, 0.3368518519, 3.192472613)
+        airbrakePanel = Panel( 1.648746982, 3.440925926, 0.2935648148, 3.192472613)  
+        outerPanel =    Panel( 1.112233745, 4.668703704, 0.2644444444, 3.192472613)
+        aileronPanel =  Panel( 2.216578464, 6.585925926, 0.211712963, 3.192472613)  
+        tipPanel =      Panel( 0.287909808, 8.238703704, 0.1629166667, 3.192472613)  
         self.wing = [
             rootPanel,
             airbrakePanel,
@@ -42,18 +43,15 @@ class ASK21:
         
         self.dihedral_angle = 4.0  # degrees (under each tip)
         
-
-
-        # TODO: Fill in tail and fin panels with accurate data
-        self.tailplane_area = 2.96  # m²
-        self.tailplane_span = 4.8   # m
+        # Tailplane area and moment
+        self.tailplane_area = 1.796160768  # m²
         self.tailplane_incidence = 0.0  # degrees
-        self.tailplane_quarter_chord = 6.5  # m from datum
+        self.tailplane_quarter_chord = -5.210185185  # m from datum
 
-        self.fin_area = 1.44  # m²
-        self.fin_height = 2.4  # m
+        # Fin area and moment
+        self.fin_area = 1.412849246  # m²
         self.fin_incidence = 0.0  # degrees
-        self.fin_quarter_chord = 6.0  # m from datum
+        self.fin_quarter_chord = -5.082685185  # m from datum
 
         self.wing_span = 17.0  # m
 
