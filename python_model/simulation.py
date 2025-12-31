@@ -25,7 +25,7 @@ class Simulation:
         self.total_time = 0.0
         self.state = StateVector()
 
-    def update(self):
+    def update(self) -> StateVector:
         # Update aircraft state based on physics, control inputs, and world conditions
 
         """

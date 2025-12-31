@@ -52,7 +52,8 @@ class StateVector:
     def __init__(self):
         X = Y = Z = 0.0          # Position in inertial (world) frame (m)
         u = v = w = 0.0          # Velocity in body frame (m/s)
-        qw = qx = qy = qz = 0.0  # Orientation (quaternion)
+        qw = 1.0
+        qx = qy = qz = 0.0       # Orientation (quaternion)
         p = q = r = 0.0          # Angular rates in body frame (rad/s)
         self.state = [X, Y, Z, u, v, w, qw, qx, qy, qz, p, q, r]
 

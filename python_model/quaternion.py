@@ -30,6 +30,8 @@ def quaternion_normalize(q: Quaternion) -> Quaternion:
     Normalize quaternion to unit length
     """
     norm = sqrt(q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2)
+    if norm == 0:
+        return (1.0, 0.0, 0.0, 0.0)  # Default to no rotation
     return (q[0]/norm, q[1]/norm, q[2]/norm, q[3]/norm)
 
 # Euler Angles to Quaternion

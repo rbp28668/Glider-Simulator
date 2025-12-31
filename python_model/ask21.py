@@ -45,17 +45,20 @@ class ASK21:
         
         self.dihedral_angle = radians(4.0)  # degrees (under each tip)
         
-        self.tail = Aerofoil('NACA0010.txt')
+        # Tailplane and fin aerofoils
+        tail = Aerofoil('NACA0010.txt')
 
         # Tailplane area and moment
         self.tailplane_area = 1.796160768  # m²
         self.tailplane_incidence = 0.0  # degrees
         self.tailplane_quarter_chord = -5.210185185  # m from datum
+        self.tailplane = tail
 
         # Fin area and moment
         self.fin_area = 1.412849246  # m²
         self.fin_incidence = 0.0  # degrees
         self.fin_quarter_chord = -5.082685185  # m from datum
+        self.fin = tail
 
         self.wing_span = 17.0  # m
 
