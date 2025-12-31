@@ -1,8 +1,9 @@
 from math import sin, cos, atan2, asin, sqrt, copysign, pi
-import numpy as np
+
+type Quaternion = tuple[float, float, float, float]  # (qw, qx, qy, qz)
 
 # Quaternion Multiplication
-def quaternion_multiply(q1, q2):
+def quaternion_multiply(q1: Quaternion, q2: Quaternion) -> Quaternion:
     """
     Multiply two quaternions: q = q1 ⊗ q2
     """
@@ -14,25 +15,25 @@ def quaternion_multiply(q1, q2):
     y = w1*y2 - x1*z2 + y1*w2 + z1*x2
     z = w1*z2 + x1*y2 - y1*x2 + z1*w2
     
-    return [w, x, y, z]
+    return (w, x, y, z)
 
 # Quaternion Conjugate
-def quaternion_conjugate(q):
+def quaternion_conjugate(q: Quaternion) -> Quaternion:
     """
     Conjugate of quaternion: q* = [qw, -qx, -qy, -qz]
     """
-    return [q[0], -q[1], -q[2], -q[3]]
+    return (q[0], -q[1], -q[2], -q[3])
 
 # Quaternion Normalization
-def quaternion_normalize(q):
+def quaternion_normalize(q: Quaternion) -> Quaternion:
     """
     Normalize quaternion to unit length
     """
     norm = sqrt(q[0]**2 + q[1]**2 + q[2]**2 + q[3]**2)
-    return [q[0]/norm, q[1]/norm, q[2]/norm, q[3]/norm]
+    return (q[0]/norm, q[1]/norm, q[2]/norm, q[3]/norm)
 
 # Euler Angles to Quaternion
-def euler_to_quaternion(phi, theta, psi):
+def euler_to_quaternion(phi: float, theta: float, psi: float) -> Quaternion:
     """
     Convert Euler angles (roll, pitch, yaw) to quaternion
     Convention: ZYX (yaw-pitch-roll)
@@ -57,11 +58,11 @@ def euler_to_quaternion(phi, theta, psi):
     qy = cr * sp * cy + sr * cp * sy
     qz = cr * cp * sy - sr * sp * cy
     
-    return [qw, qx, qy, qz]
+    return (qw, qx, qy, qz)
 
 
 # Quaternion to Euler Angles
-def quaternion_to_euler(qw, qx, qy, qz):
+def quaternion_to_euler(qw: float, qx: float, qy: float, qz: float) -> tuple[float, float, float]:
 
     """
     Convert quaternion to Euler angles (roll, pitch, yaw)
@@ -93,22 +94,22 @@ def quaternion_to_euler(qw, qx, qy, qz):
     return phi, theta, psi
 
 # Quaternion to Rotation Matrix
-def quaternion_to_rotation_matrix(qw, qx, qy, qz):
+#def quaternion_to_rotation_matrix(qw, qx, qy, qz):
 
-    """
-    Convert quaternion to 3x3 rotation matrix
-    Transforms vectors from body frame to Earth frame
-    """
-    R = np.array([
-        [1 - 2*(qy**2 + qz**2),  2*(qx*qy - qw*qz),      2*(qx*qz + qw*qy)],
-        [2*(qx*qy + qw*qz),      1 - 2*(qx**2 + qz**2),  2*(qy*qz - qw*qx)],
-        [2*(qx*qz - qw*qy),      2*(qy*qz + qw*qx),      1 - 2*(qx**2 + qy**2)]
-    ])
+    # """
+    # Convert quaternion to 3x3 rotation matrix
+    # Transforms vectors from body frame to Earth frame
+    # """
+    # R = np.array([
+    #     [1 - 2*(qy**2 + qz**2),  2*(qx*qy - qw*qz),      2*(qx*qz + qw*qy)],
+    #     [2*(qx*qy + qw*qz),      1 - 2*(qx**2 + qz**2),  2*(qy*qz - qw*qx)],
+    #     [2*(qx*qz - qw*qy),      2*(qy*qz + qw*qx),      1 - 2*(qx**2 + qy**2)]
+    # ])
 
-    return R
+    # return R
 
 # Vector Rotation
-def quaternion_rotate_vector(q, v):
+def quaternion_rotate_vector(q: Quaternion, v: tuple[float, float, float]) -> tuple[float, float, float]:
 
     """
     Rotate vector from body frame to Earth frame using quaternion
@@ -123,16 +124,17 @@ def quaternion_rotate_vector(q, v):
     """
 
     # Convert vector to quaternion form [0, vx, vy, vz]
-    v_quat = [0, v[0], v[1], v[2]]
+    v_quat = 0, v[0], v[1], v[2]
     
     # Compute q ⊗ v ⊗ q*
     q_conj = quaternion_conjugate(q)
     temp = quaternion_multiply(q, v_quat)
     result = quaternion_multiply(temp, q_conj)
     
-    return [result[1], result[2], result[3]]
+    return result[1], result[2], result[3]
 
-def quaternion_rotate_vector_inverse(q, v):
+
+def quaternion_rotate_vector_inverse(q: Quaternion, v: tuple[float, float, float]) -> tuple[float, float, float]:
 
     """
     Rotate vector from Earth frame to body frame
@@ -143,8 +145,7 @@ def quaternion_rotate_vector_inverse(q, v):
 
 # Quaternion Derivative
 #The time derivative of a quaternion based on angular velocity:
-
-def quaternion_derivative(q, omega):
+def quaternion_derivative(q: Quaternion, omega: tuple[float, float, float]) -> Quaternion:
 
     """
     Calculate quaternion time derivative
@@ -167,5 +168,5 @@ def quaternion_derivative(q, omega):
     q_dot_y =  0.5 * (qw*q_rate + qz*p - qx*r)
     q_dot_z =  0.5 * (qw*r + qx*q_rate - qy*p)
 
-    return [q_dot_w, q_dot_x, q_dot_y, q_dot_z]
+    return q_dot_w, q_dot_x, q_dot_y, q_dot_z
 
