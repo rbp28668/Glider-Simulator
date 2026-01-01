@@ -157,6 +157,7 @@ class AileronPanel(Panel):
         aoa_beta = atan2(local_airflow[1], local_airflow[0])
 
         local_alpha += self.incidence  # add geometric incidence angle
+        local_alpha -= controls.roll * radians(5) * sign  # TODO properly - aileron effect.  Roll right, reduce AoA on right wing (+sign), increase AoA on left wing (-sign)
         aoa_beta += dihedral  # add dihedral effect
 
         aoa = local_alpha * cos(beta) + aoa_beta * sin(beta)
@@ -225,6 +226,10 @@ def process(self, state: StateVector, relative_airflow: V3d, cg: float, world: W
         aoa = local_alpha * cos(beta) + aoa_beta * sin(beta)
 
         Cl, Cd, Cm = self.coefficients_at(aoa)
+
+        # Modify coefficients based on airbrake extension (Crude!)
+        Cl *= 1-0.8 * controls.spoilers  # reduce lift with airbrake extension
+        Cd *= 1 + 5.0 * controls.spoilers  # increase drag with airbrake extension
 
         q = 0.5 * world.air_density * local_tas**2
         L = Cl * q * self.area

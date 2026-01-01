@@ -6,7 +6,7 @@ from world import World
 from v3d import V3d, TotalAirspeed, AngleOfAttack, SideslipAngle
 
 
-from math import sin, cos, tan, asin, atan2, copysign, pi
+from math import radians, sin, cos, tan, asin, atan2, copysign, pi
 
 
 class Model :
@@ -84,7 +84,9 @@ class Model :
             Tuple with (Lift, Drag, Moment) from tailplane
         """
         tailplane_airflow = ( relative_airflow[0], relative_airflow[1], relative_airflow[2] + state.angular_velocity()[1] * aircraft.tailplane_quarter_chord) # TODO sign?
-        tp_aoa = AngleOfAttack(tailplane_airflow) + aircraft.tailplane_incidence # TODO - elevator effect
+        tp_aoa = AngleOfAttack(tailplane_airflow) + aircraft.tailplane_incidence 
+        tp_aoa -= controls.pitch * radians(5) # TODO properly - elevator effect
+        
         tp_Cl, tp_Cd, tp_Cm = aircraft.tailplane.coefficients_at(tp_aoa)
         tp_tas = TotalAirspeed(tailplane_airflow)
         tp_q = 0.5 * world.air_density * tp_tas**2
@@ -100,7 +102,11 @@ class Model :
   
     def fin_forces(self, state: StateVector, aircraft: ASK21, relative_airflow: V3d, controls: ControlInputs,  world: World) -> V3d:
         fin_airflow = ( relative_airflow[0], relative_airflow[1] + state.angular_velocity()[2] * aircraft.fin_quarter_chord, relative_airflow[2]) # TODO sign?
-        fin_aoa = SideslipAngle(fin_airflow)  # TODO - rudder effect
+        fin_aoa = SideslipAngle(fin_airflow)  
+        
+        # TODO properly!! - rudder effect
+        fin_aoa += controls.rudder * radians(10)  # max 10 degrees deflection
+        
         fin_Cl, fin_Cd, fin_Cm = aircraft.fin.coefficients_at(fin_aoa)
         fin_tas = TotalAirspeed(fin_airflow)
         fin_q = 0.5 * world.air_density * fin_tas**2
