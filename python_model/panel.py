@@ -20,7 +20,23 @@ class Panel:
         self.interp = interp  # interpolation factor between root and tip aerofoils (0.0 = root, 1.0 = tip)
 
 
-    def process(self, state: StateVector, relative_airflow: V3d, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
+
+    def process(self, state: StateVector, relative_airflow: V3d, cg: float, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
+        """
+        Process the panel to calculate forces and moments.
+        Args:
+            state: Current state vector
+            relative_airflow: The airflow vector relative to the aircraft (in body axes, wind corrected)
+            cg: Center of gravity position (m from datum)
+            world: The simulation world
+            dihedral: Dihedral angle of the wing (radians)
+            controls: Current control surface deflections
+            sign: +1 for right wing, -1 for left wing
+
+        Returns:
+            forces_body: [Fx, Fy, Fz] (N)
+            moments_body: [L, M, N] (N·m)
+        """
 
         # Get local airflow at panel due to angular velocity
         local_airflow = self.local_airflow(state, relative_airflow, sign)
@@ -42,19 +58,25 @@ class Panel:
         q = 0.5 * world.air_density * local_tas**2
         L = Cl * q * self.area
         D = Cd * q * self.area
-        M = Cm * q * self.area * self.quater_chord
+        M = Cm * q * self.area 
 
         # convert L, D to body axes and sum
         # Transform to body axes
-        Fx = -D * cos(aoa) + L * sin(aoa)
-        Fz = -D * sin(aoa) - L * cos(aoa)
+        Fx = -D * cos(aoa) - L * sin(aoa)   # drag backwards in S&L flight
+        Fz = -D * sin(aoa) - L * cos(aoa)   # lift is -ve Z in body axes
 
         forces_body = Fx, 0.0, Fz  # drag in body X, side force 0, lift in body z
         
+        dist = self.quater_chord - cg       # calculae moments from c.g. not datum.
+
         # Moments (about c.g.)
         # Assume wing is centered on fuselage centerline (no spanwise moment)
         # Roll moment due to lift at panel mid-span
-        moments_body = Fz * self.mid_span * sign, M, Fx * self.mid_span * sign  # roll moment, pitch moment, yaw moment due to drag at panel mid-span
+        moments_body = (
+            Fz * self.mid_span * sign,  
+            M - Fz * dist,  # pitching moment about c.g., (if quater_chord behind cg then dist is -ve, upward lift also -ve, so nose-down moment)
+            -Fx * self.mid_span * sign  # yaw moment, drag -ve at panel mid-span,  yaw moment positive to right
+            )  # roll moment, pitch moment, yaw moment due to drag at panel mid-span
 
         return (forces_body, moments_body)
 
@@ -107,7 +129,22 @@ class AileronPanel(Panel):
     """
     AileronPanel is a Panel with an aileron control surface.
     """
-    def process(self, state: StateVector, relative_airflow: V3d, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
+    def process(self, state: StateVector, relative_airflow: V3d, cg: float, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
+        """
+        Process the panel to calculate forces and moments.
+        Args:
+            state: Current state vector
+            relative_airflow: The airflow vector relative to the aircraft (in body axes, wind corrected)
+            cg: Center of gravity position (m from datum)
+            world: The simulation world
+            dihedral: Dihedral angle of the wing (radians)
+            controls: Current control surface deflections
+            sign: +1 for right wing, -1 for left wing
+
+        Returns:
+            forces_body: [Fx, Fy, Fz] (N)
+            moments_body: [L, M, N] (N·m)
+        """
 
         # Get local airflow at panel due to angular velocity
         local_airflow = self.local_airflow(state, relative_airflow, sign)
@@ -129,20 +166,25 @@ class AileronPanel(Panel):
         q = 0.5 * world.air_density * local_tas**2
         L = Cl * q * self.area
         D = Cd * q * self.area
-        M = Cm * q * self.area * self.quater_chord
+        M = Cm * q * self.area 
 
         # convert L, D to body axes and sum
         # Transform to body axes
-        Fx = -D * cos(aoa) + L * sin(aoa)
-        Fz = -D * sin(aoa) - L * cos(aoa)
+        Fx = -D * cos(aoa) - L * sin(aoa)   # drag backwards in S&L flight
+        Fz = -D * sin(aoa) - L * cos(aoa)   # lift is -ve Z in body axes
 
         forces_body = Fx, 0.0, Fz  # drag in body X, side force 0, lift in body z
         
+        dist = self.quater_chord - cg       # calculae moments from c.g. not datum.
 
         # Moments (about c.g.)
         # Assume wing is centered on fuselage centerline (no spanwise moment)
         # Roll moment due to lift at panel mid-span
-        moments_body = Fz * self.mid_span * sign, M, Fx * self.mid_span * sign  # roll moment, pitch moment, yaw moment due to drag at panel mid-span
+        moments_body = (
+            Fz * self.mid_span * sign,  
+            M - Fz * dist,  # pitching moment about c.g., (if quater_chord behind cg then dist is -ve, upward lift also -ve, so nose-down moment)
+            -Fx * self.mid_span * sign  # yaw moment, drag -ve at panel mid-span,  yaw moment positive to right
+            )  # roll moment, pitch moment, yaw moment due to drag at panel mid-span
 
         return (forces_body, moments_body)
 
@@ -150,7 +192,22 @@ class AirbrakePanel(Panel):
     """
     AirbrakePanel is a Panel with an airbrake control surface.
     """
-    def process(self, state: StateVector, relative_airflow: V3d, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
+def process(self, state: StateVector, relative_airflow: V3d, cg: float, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
+        """
+        Process the panel to calculate forces and moments.
+        Args:
+            state: Current state vector
+            relative_airflow: The airflow vector relative to the aircraft (in body axes, wind corrected)
+            cg: Center of gravity position (m from datum)
+            world: The simulation world
+            dihedral: Dihedral angle of the wing (radians)
+            controls: Current control surface deflections
+            sign: +1 for right wing, -1 for left wing
+
+        Returns:
+            forces_body: [Fx, Fy, Fz] (N)
+            moments_body: [L, M, N] (N·m)
+        """
 
         # Get local airflow at panel due to angular velocity
         local_airflow = self.local_airflow(state, relative_airflow, sign)
@@ -172,19 +229,24 @@ class AirbrakePanel(Panel):
         q = 0.5 * world.air_density * local_tas**2
         L = Cl * q * self.area
         D = Cd * q * self.area
-        M = Cm * q * self.area * self.quater_chord
+        M = Cm * q * self.area 
 
         # convert L, D to body axes and sum
         # Transform to body axes
-        Fx = -D * cos(aoa) + L * sin(aoa)
-        Fz = -D * sin(aoa) - L * cos(aoa)
+        Fx = -D * cos(aoa) - L * sin(aoa)   # drag backwards in S&L flight
+        Fz = -D * sin(aoa) - L * cos(aoa)   # lift is -ve Z in body axes
 
         forces_body = Fx, 0.0, Fz  # drag in body X, side force 0, lift in body z
         
+        dist = self.quater_chord - cg       # calculae moments from c.g. not datum.
 
         # Moments (about c.g.)
         # Assume wing is centered on fuselage centerline (no spanwise moment)
         # Roll moment due to lift at panel mid-span
-        moments_body = Fz * self.mid_span * sign, M, Fx * self.mid_span * sign # roll moment, pitch moment, yaw moment due to drag at panel mid-span
+        moments_body = (
+            Fz * self.mid_span * sign,  
+            M - Fz * dist,  # pitching moment about c.g., (if quater_chord behind cg then dist is -ve, upward lift also -ve, so nose-down moment)
+            -Fx * self.mid_span * sign  # yaw moment, drag -ve at panel mid-span,  yaw moment positive to right
+            )  # roll moment, pitch moment, yaw moment due to drag at panel mid-span
 
         return (forces_body, moments_body)

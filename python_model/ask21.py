@@ -24,17 +24,19 @@ class ASK21:
         self.Ixz = 100.0     # kg·m² Wild guess
         self.mass = 687.0  # kg
 
+        self.cg = -0.30  # m from datum (negative is aft of datum)
+
         root = Aerofoil('FX-60-126.txt')
         tip = Aerofoil('FX-02-196.txt')
 
-        # Panels:  area, mid-span, quarter-chord position, incidence angle
+        # Panels:  area, mid-span, quarter-chord position (relative to datum), incidence angle
         # mid-span is distance from centerline to panel center
         # quarter-chord is distance from root leading edge (datum) to quarter-chord of panel
-        rootPanel =     Panel( 3.215313306, 1.545740741, 0.3368518519, 3.192472613, root, tip, 0.0)
-        airbrakePanel = AirbrakePanel( 1.648746982, 3.440925926, 0.2935648148, 3.192472613, root, tip, 0.2)  
-        outerPanel =    Panel( 1.112233745, 4.668703704, 0.2644444444, 3.192472613, root, tip, 0.5)
-        aileronPanel =  AileronPanel( 2.216578464, 6.585925926, 0.211712963, 3.192472613, root, tip, 0.7)  
-        tipPanel =      Panel( 0.287909808, 8.238703704, 0.1629166667, 3.192472613, root, tip, 1.0)  
+        rootPanel =     Panel( 3.215313306, 1.545740741, -0.3368518519, 3.192472613, root, tip, 0.0)
+        airbrakePanel = AirbrakePanel( 1.648746982, 3.440925926, -0.2935648148, 3.192472613, root, tip, 0.2)  
+        outerPanel =    Panel( 1.112233745, 4.668703704, -0.2644444444, 3.192472613, root, tip, 0.5)
+        aileronPanel =  AileronPanel( 2.216578464, 6.585925926, -0.211712963, 3.192472613, root, tip, 0.7)  
+        tipPanel =      Panel( 0.287909808, 8.238703704, -0.1629166667, 3.192472613, root, tip, 1.0)  
         self.wing = [
             rootPanel,
             airbrakePanel,
@@ -63,7 +65,7 @@ class ASK21:
         self.wing_span = 17.0  # m
 
 
-        # Contact points for ground detection. Fwd and down are +ve.
+        # Contact points for ground detection. Relative to datum. Fwd and down are +ve.
         noseWheel = ContactPoint(1.64962963, 0.0, 0.6737037037)  
         mainWheelLeft = ContactPoint(-0.6611111111, 0.0, 0.7303703704) 
         tailWheel = ContactPoint(-5.263703704, 0.0, 0.2203703704)  
