@@ -93,12 +93,16 @@ class Panel:
             sign: +1 for right wing, -1 for left wing
         
         Returns:
-            local_airflow: Local airflow vector [u, v, w] at panel in body frame
+            local_airflow: Local airflow vector [u, v, w] at panel in body frame.  Note that this is actually
+            the velocity of the centre of the panel relative to the stationary airmass.
         """
+
+        # Change in z velocity.   If rolling right, panel going down and Z increasing 
         dz = state.angular_velocity()[0] * self.mid_span * sign  # roll rate * mid-span point of panel. Difference in local airflow due to roll rate
+        # Change in x velocity.  If yawing right, right panel retreating and X decreasing
         dx = -state.angular_velocity()[2] * self.mid_span * sign # yaw rate * mid-span point of panel.  Difference in local airflow due to yaw rate
 
-        local_airflow = relative_airflow[0] + dx, relative_airflow[1], relative_airflow[2] - dz
+        local_airflow = relative_airflow[0] + dx, relative_airflow[1], relative_airflow[2] + dz
         return local_airflow
     
 

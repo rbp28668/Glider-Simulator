@@ -1,4 +1,5 @@
-from quaternion import Quaternion, quaternion_normalize
+from math import pi
+from quaternion import Quaternion, quaternion_normalize, quaternion_to_euler
 from v3d import V3d
 
 class StateVector:
@@ -30,9 +31,9 @@ class StateVector:
         Z: Position along Earth's Down axis (altitude = -Z)
 
         Velocity (Body Frame) - u, v, w [m/s]
-        u: Velocity along body X-axis (forward)
-        v: Velocity along body Y-axis (right)
-        w: Velocity along body Z-axis (down)
+        u: Velocity along body X-axis (+ve: forward)
+        v: Velocity along body Y-axis (+ve: right)
+        w: Velocity along body Z-axis (+ve: down)
 
         Orientation (Quaternion) - qw, qx, qy, qz [dimensionless]
         The rotation needed to transform from Earth frame to body frame.
@@ -43,9 +44,9 @@ class StateVector:
         Constraint: qw² + qx² + qy² + qz² = 1 (unit quaternion)
 
         Angular Velocity (Body Frame) - 3 States p, q, r [rad/s]
-        p: Roll rate about body X-axis
-        q: Pitch rate about body Y-axis
-        r: Yaw rate about body Z-axis
+        p: Roll rate about body X-axis   +ve is rolling right
+        q: Pitch rate about body Y-axis  +ve is pitching up
+        r: Yaw rate about body Z-axis    +ve is yawing right
 
 
     """
@@ -154,6 +155,22 @@ class StateVector:
         if V == 0:
             return 0.0
         return asin(v / V)
-
-
     
+    def Altitude(self) -> float:
+        # Altitude is negative Z in NED convention
+        return -self.state[2]   
+
+    def Heading(self) -> float:
+        # Yaw angle from quaternion
+        qw, qx, qy, qz = self.orientation()
+        phi, theta, psi = quaternion_to_euler(qw, qx, qy, qz)
+        heading_deg = psi * 180/pi
+        if heading_deg < 0:
+            heading_deg += 360
+        return heading_deg
+    
+    def Attitude(self) -> tuple[float,float,float]:
+        qw, qx, qy, qz = self.orientation()
+        phi, theta, psi = quaternion_to_euler(qw, qx, qy, qz)
+        return phi,theta,psi
+        

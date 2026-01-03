@@ -1,3 +1,5 @@
+import pyglet
+
 class ControlInputs:
     def __init__(self):
         self.pitch = 0.0  # [-1, +1] fwd/aft
@@ -11,4 +13,6 @@ class ControlInputs:
         self.rudder = max(-1.0, min(1.0, rudder))
         self.spoiler = max(0.0, min(1.0, spoiler))
 
-        
+       
+
+ 

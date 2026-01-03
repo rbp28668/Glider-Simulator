@@ -6,7 +6,7 @@ from world import World
 from v3d import V3d, TotalAirspeed, AngleOfAttack, SideslipAngle
 
 
-from math import radians, sin, cos, tan, asin, atan2, copysign, pi
+from math import degrees, radians, sin, cos, tan, asin, atan2, copysign, pi
 
 
 class Model :
@@ -34,8 +34,11 @@ class Model :
             moments_body: [L, M, N] (N·m)
         """
      
+
         forces_body = [0.0, 0.0, 0.0]
         moments_body = [0.0, 0.0, 0.0]
+
+        print(f'Model Relative Airflow {relative_airflow[0]}, {relative_airflow[1]},{relative_airflow[2]}')
 
    
         #Wings
@@ -58,6 +61,7 @@ class Model :
         # Moments (about c.g.)
         dist = aircraft.tailplane_quarter_chord - aircraft.cg
         moments_body[1] += tp_M + tp_L * dist  # pitch moment due to lift at tailplane quarter chord (-ve lift is tailplene up so nose down)
+        #print(f'Tailplane Effect -  Moment: {moments_body[1]}, L:{tp_L}, D:{tp_D}, M:{tp_M}')
 
         #Fin
         fin_L, fin_D, fin_M = self.fin_forces(state, aircraft, relative_airflow, control_inputs, world)
@@ -83,16 +87,24 @@ class Model :
         Returns:
             Tuple with (Lift, Drag, Moment) from tailplane
         """
-        tailplane_airflow = ( relative_airflow[0], relative_airflow[1], relative_airflow[2] + state.angular_velocity()[1] * aircraft.tailplane_quarter_chord) # TODO sign?
+        #Allow for pitch rate to change airflow at tail.  Pitching up then tail going down (+ve direction)
+        tailplane_airflow = ( 
+            relative_airflow[0],  # u - velocity forward
+            relative_airflow[1],  # v - velocity to right
+            relative_airflow[2] + state.angular_velocity()[1] * aircraft.tailplane_quarter_chord) # w - velocity down
         tp_aoa = AngleOfAttack(tailplane_airflow) + aircraft.tailplane_incidence 
         tp_aoa -= controls.pitch * radians(5) # TODO properly - elevator effect
-        
+
         tp_Cl, tp_Cd, tp_Cm = aircraft.tailplane.coefficients_at(tp_aoa)
+
         tp_tas = TotalAirspeed(tailplane_airflow)
         tp_q = 0.5 * world.air_density * tp_tas**2
         tp_L = tp_Cl * tp_q * aircraft.tailplane_area
         tp_D = tp_Cd * tp_q * aircraft.tailplane_area
         M = 0 # tp_Cm * tp_q * aircraft.tailplane_area * aircraft.tailplane_quarter_chord  TODO - CM
+
+        #print(f"Tailplane AoA: {degrees(tp_aoa)}, Cl,CD: {tp_Cl},{tp_Cd}, L,D: {tp_L},{tp_D}")
+     
 
         # convert L, D to body axes and sum
         # Transform to body axes

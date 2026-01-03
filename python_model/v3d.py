@@ -14,8 +14,8 @@ def TotalAirspeed(velocity: V3d) -> float:
 
 # Angle of attack: α = atan2(w, u)
 def AngleOfAttack(velocity: V3d) -> float:
-    u = velocity[0]
-    w = velocity[2]
+    u = velocity[0] # x +ve forward
+    w = velocity[2] # z +ve down
     from math import atan2
     return atan2(w, u)
 

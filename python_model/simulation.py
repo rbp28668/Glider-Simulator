@@ -3,7 +3,7 @@ from math import sqrt, atan2, asin
 from ask21 import ASK21
 from world import World
 from state_vector import StateVector
-from quaternion import  quaternion_normalize, quaternion_rotate_vector, quaternion_rotate_vector_inverse, quaternion_derivative
+from quaternion import  quaternion_normalize, quaternion_rotate_vector, quaternion_rotate_vector_inverse, quaternion_derivative, quaternion_to_euler
 from control_inputs import ControlInputs
 from model import Model
 from v3d import V3d
@@ -26,6 +26,7 @@ class Simulation:
         self.state = StateVector()
 
     def update(self) -> StateVector:
+
         # Update aircraft state based on physics, control inputs, and world conditions
 
         """
@@ -40,8 +41,24 @@ class Simulation:
             [ self.aircraft.Ixx, self.aircraft.Iyy, self.aircraft.Izz, self.aircraft.Ixz ]
         )
 
+        # Entirely arbitrary damping
+        av = self.state.angular_velocity()
+        self.state.set_angular_velocity( (
+            av[0] * 0.9,
+            av[1] * 0.9,
+            av[2] * 0.9
+        ))
+
         # Update time    
         self.total_time += self.time_step
+
+        # Log state
+        with open("state.txt", "a") as file:
+            pos = self.state.position()
+            vel = self.state.velocity()
+            o = self.state.orientation()
+            r,p,y = quaternion_to_euler(o[0],o[1],o[2],o[3])
+            file.write(f"{self.total_time},{pos[0]},{pos[1]},{pos[2]},{vel[0]},{vel[1]},{vel[2]},{r},{p},{y}\n")
 
         return self.state
     
@@ -88,6 +105,7 @@ class Simulation:
             new_state: Updated state vector
         """
         # k1
+
         forces1, moments1 = forces_moments_func(state)
         k1 = self.state_derivative(state, forces1, moments1, mass, inertia)
         
@@ -205,9 +223,9 @@ class Simulation:
         Returns:
             [ṗ, q̇, ṙ] - angular acceleration (rad/s²)
         """
-        p, q, r = state.angular_velocity()
+        p, q, r = state.angular_velocity() # roll pitch & yaw rates
         Ixx, Iyy, Izz, Ixz = inertia
-        L, M, N = moments_body
+        L, M, N = moments_body             # roll moment, pitch moment, yaw moment
         
         # Inertia determinant
         I_det = Ixx * Izz - Ixz**2
@@ -261,7 +279,7 @@ class Simulation:
            new state object with corrected
            airspeed vector in body frame (m/s)
         """
-        u, v, w = state.position()
+        u, v, w = state.velocity()
         orientation = state.orientation()
         
         # Rotate wind to body frame
