@@ -36,6 +36,13 @@ public:
 	//yawrate=0.0232510436326265
 	double gforce; // =1.17204143123646
 
+	// Motorglider
+	double rpm;
+	double oilPressure;
+	double oilTemp;
+	double cht;
+
+
 	CondorUDP(const char* host, int port);
 	virtual ~CondorUDP(void);
 

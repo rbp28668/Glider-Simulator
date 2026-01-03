@@ -22,6 +22,11 @@ CondorUDP::CondorUDP(const char* host, int port)
 	, pitch(0)
 	, bank(0)
 	, gforce(1.0)
+	, rpm(0)
+	, oilPressure(0)
+	, oilTemp(0)
+	, cht(0)
+
 
 {
 	::strncpy_s(radiofrequency, sizeof(radiofrequency), "131.280", _TRUNCATE);
@@ -55,6 +60,11 @@ void CondorUDP::send() {
 	os << "pitch=" << pitch << cr;
 	os << "bank=" << bank << cr;
 	os << "g=" << gforce << cr;
+
+	os << "rpm=" << rpm << cr;
+	os << "oilp=" << oilPressure << cr;
+	os << "oilt=" << oilTemp << cr;
+	os << "cht=" << cht << cr;
 
 	std::string str = os.str();
 

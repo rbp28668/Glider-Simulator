@@ -29,6 +29,10 @@ class InstrumentData :
 		double turnRate;
 		double turnSwitch;
 		double yawString;
+		double rpm;
+		double oilPressure;
+		double oilTemp;
+		double cht;
 	} data;
 
 	static DataItem dataItems[];

@@ -13,7 +13,7 @@
         <instrument className="uk.co.alvagem.condorjfx.k21.K21Altimeter" x="641" y="367">
             <param name="width" type="int">400</param>
         </instrument>
-        <instrument className="uk.co.alvagem.condorjfx.k21.K21GMeter" x="-1" y="553">
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21GMeter" x="0" y="553">
             <param name="width" type="int">250</param>
         </instrument>
         <instrument className="uk.co.alvagem.condorjfx.k21.K21TurnAndSlip" x="233" y="360">
@@ -27,7 +27,7 @@
         <instrument className="uk.co.alvagem.condorjfx.k21.K21ASIWinter" x="9" y="9">
             <param name="width" type="int">320</param>
         </instrument>
-        <instrument className="uk.co.alvagem.condorjfx.genericInstruments.Horizon" x="341" y="-21">
+        <instrument className="uk.co.alvagem.condorjfx.genericInstruments.Horizon" x="341" y="-19">
             <param name="width" type="int">600</param>
         </instrument>
         <instrument className="uk.co.alvagem.condorjfx.k21.K21VarioWinter" x="290" y="486">
@@ -47,6 +47,30 @@
         </instrument>
         <instrument className="uk.co.alvagem.condorjfx.k21.K21Compass" x="47" y="340">
             <param name="width" type="int">220</param>
+        </instrument>
+    </panel>
+    <panel name="MG">
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21ASIWinter" x="10" y="10">
+            <param name="width" type="int">400</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21VarioWinter" x="443" y="9">
+            <param name="width" type="int">400</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21Altimeter" x="864" y="14">
+            <param name="width" type="int">400</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21TurnAndSlip" x="426" y="420">
+            <param name="width" type="int">400</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.k21.K21Compass" x="945" y="511">
+            <param name="width" type="int">250</param>
+        </instrument>
+        <instrument className="uk.co.alvagem.condorjfx.SimpleTextInstrument$Generic" x="63" y="527">
+            <param name="key" type="string">rpm</param>
+            <param name="width" type="int">250</param>
+            <param name="height" type="int">100</param>
+            <param name="fontHeight" type="int">70</param>
+            <param name="format" type="string">%4.0f</param>
         </instrument>
     </panel>
 </panelConfiguration>
