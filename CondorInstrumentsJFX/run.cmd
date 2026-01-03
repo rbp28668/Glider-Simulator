@@ -31,10 +31,11 @@ set "JAR_PATH=%JAR%"
 
 REM --panel=front_panel.xml --dialog=true --diagnostics=true --drag=true
 set OPTS=
-REM set OPTS=%OPTS% --panel=front_panel.xml
-set OPTS=%OPTS% --panel=rear_panel.xml
-set OPTS=%OPTS% --dialog=true 
+set OPTS=%OPTS% --panel=front_panel.xml
+REM set OPTS=%OPTS% --panel=rear_panel.xml
+REM set OPTS=%OPTS% --dialog=true 
 REM set OPTS=%OPTS% --diagnostics=true 
-set OPTS=%OPTS% --drag=true
+REM set OPTS=%OPTS% --drag=true
+set OPTS=%OPTS% --use=1
 "%JAVA_CMD%" --module-path "%MODULE_PATH%" --add-modules=javafx.controls,javafx.graphics,javafx.swing -jar "%JAR_PATH%" %OPTS%
 

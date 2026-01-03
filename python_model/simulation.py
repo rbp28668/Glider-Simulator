@@ -239,7 +239,12 @@ class Simulation:
         p_dot = (Izz * (L + gyro_L) + Ixz * (N + gyro_N)) / I_det
         q_dot = (M + gyro_M) / Iyy
         r_dot = (Ixz * (L + gyro_L) + Ixx * (N + gyro_N)) / I_det
-        
+
+        # Replace values with simple uncoupled axes
+        p_dot = L / Ixx
+        q_dot = M / Iyy
+        r_dot = N / Izz
+
         return (p_dot, q_dot, r_dot)
 
 

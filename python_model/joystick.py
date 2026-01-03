@@ -6,7 +6,8 @@
 __docformat__ = 'restructuredtext'
 __version__ = '$Id: $'
 
-from math import radians
+from math import pi, radians
+from condor_instruments import CondorInstruments
 import pyglet
 from pyglet.gl import *
 from quaternion import euler_to_quaternion
@@ -43,6 +44,10 @@ sim.state.set_velocity((30.0, 0.0, 0.0))      # Initial forward speed 30 m/s
 sim.state.set_orientation(euler_to_quaternion(0, radians(1.5),0))  # Pointing north, slight pitch up
 sim.state.set_angular_velocity((0.0, 0.0, 0.0))  # No initial rotation
 
+instruments = CondorInstruments("localhost",55278)
+
+count:int = 0
+
 @window.event
 def on_draw():
     # Axes
@@ -68,9 +73,22 @@ def update(dt):
     v = state.velocity()
     att = state.Attitude()
 
-    label1.text = f'Roll: {att[0]:4.2f}, Pitch: {att[1]:4.2f}'
+    roll = att[0]
+    pitch = att[1]
+    if(roll > pi): roll -= 2*pi
+    if(pitch > pi): pitch -= 2*pi
+
+    label1.text = f'Roll: {roll:4.2f}, Pitch: {pitch:4.2f}'
     label2.text = f'pos: x={pos[0]:.1f} y={pos[1]:.1f} z={pos[2]:.1f}'
     label3.text = f'Tas: {state.TotalAirspeed():.1f} m/s, Alt: {state.Altitude():.1f} m, Heading: {state.Heading():.1f}°'
+
+    global count
+    count += 1
+    if(count == 10) :
+        count = 0
+        instruments.set(sim.total_time, sim.state)
+        instruments.send()
+
 
 pyglet.clock.schedule_interval(update, sim.time_step)
 pyglet.app.run()
