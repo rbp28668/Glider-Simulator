@@ -172,7 +172,7 @@ class AileronPanel(Panel):
         q = 0.5 * world.air_density * local_tas**2
         L = Cl * q * self.area
         D = Cd * q * self.area
-        M = Cm * q * self.area 
+        M = Cm * q * self.area * self.mean_chord
 
         # convert L, D to body axes and sum
         # Transform to body axes
@@ -238,7 +238,7 @@ def process(self, state: StateVector, relative_velocity: V3d, cg: float, world: 
         q = 0.5 * world.air_density * local_tas**2
         L = Cl * q * self.area
         D = Cd * q * self.area
-        M = Cm * q * self.area 
+        M = Cm * q * self.area * self.mean_chord
 
         # Now add in drag for spoiler
         Cd_spoiler = 1.8   # flat plate
