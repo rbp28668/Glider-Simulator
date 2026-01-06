@@ -3,7 +3,7 @@ from math import sqrt, atan2, asin
 from ask21 import ASK21
 from world import World
 from state_vector import StateVector
-from quaternion import  quaternion_normalize, quaternion_rotate_vector, quaternion_rotate_vector_inverse, quaternion_derivative, quaternion_to_euler
+from quaternion import  euler_to_quaternion, quaternion_normalize, quaternion_rotate_vector, quaternion_rotate_vector_inverse, quaternion_derivative, quaternion_to_euler
 from control_inputs import ControlInputs
 from model import Model
 from v3d import V3d
@@ -25,7 +25,120 @@ class Simulation:
         self.total_time = 0.0
         self.state = StateVector()
 
-    def update(self) -> StateVector:
+    def update(self, dt : float) -> StateVector:
+        # dt = self.time_step  - now using actual dt
+        state = self.state
+        # Get wind
+        wind_earth = self.world.get_wind_vector(state.position(), self.total_time)
+        
+        # Calculate airspeed with wind
+        V_air_body = self.apply_wind_to_state(state, wind_earth)
+        
+        # Calculate aerodynamics
+        forces_body, moments_body = self.model.calculate_aerodynamics(
+            state, self.aircraft, self.controls, self.world, V_air_body
+        )
+
+
+        # linear acceleration by F=MA in each axis
+        acc_x = forces_body[0] / self.aircraft.mass
+        acc_y = forces_body[1] / self.aircraft.mass
+        acc_z = forces_body[2] / self.aircraft.mass
+
+        orientation = state.orientation()
+        
+        # Gravity in body frame
+        g = 9.81
+        g_earth = (0, 0, g)
+        g_body = quaternion_rotate_vector_inverse(orientation, g_earth)
+
+        acc_x += g_body[0]
+        acc_y += g_body[1]
+        acc_z += g_body[2]
+
+        # Now we've got acceleration in body frame, calculate change in velocity
+        velocity = state.velocity()
+        vx = velocity[0] + acc_x * dt
+        vy = velocity[1] + acc_y * dt
+        vz = velocity[2] + acc_z * dt
+
+
+        # Update location using initial body velocity (suitably rotated)
+
+        v_world = quaternion_rotate_vector(orientation, velocity) # from body to world frame
+        position = state.position()
+        px = position[0] + v_world[0] * dt
+        py = position[1] + v_world[1] * dt
+        pz = position[2] + v_world[2] * dt
+
+        # Moments around roll (x) axis, pitch (y) axis and yaw (z) axis
+        Ixx = self.aircraft.Ixx
+        Iyy = self.aircraft.Iyy
+        Izz = self.aircraft.Izz
+
+        # Get angular velocity and its components
+        angular_velocity = state.angular_velocity()
+        wx = angular_velocity[0]
+        wy = angular_velocity[1]
+        wz = angular_velocity[2]
+
+        full_coupling = True
+
+        if full_coupling :
+            dwx = (moments_body[0] + (Iyy - Izz)*wy*wz) / Ixx
+            dwy = (moments_body[1] + (Izz - Ixx)*wz*wx) / Iyy
+            dwz = (moments_body[2] + (Ixx - Iyy)*wx*wy) / Izz
+        else: 
+            dwx = moments_body[0] / Ixx
+            dwy = moments_body[1] / Iyy
+            dwz = moments_body[2] / Izz
+
+        #Angular velocity
+        av_roll = wx + dwx * dt
+        av_pitch = wy + dwy * dt
+        av_yaw = wz + dwz * dt
+  
+        # Add some pitch & yaw damping due to fuselage 
+        av_pitch *= 0.95 ## arbitrary damping
+        av_yaw *= 0.95
+
+        av_yaw = 0
+        av_roll = 0
+
+        # Orientation
+        # Quaternion derivative
+        quat = state.orientation()
+        quat_dot = quaternion_derivative(quat, angular_velocity)
+        qw = quat[0] + quat_dot[0] * dt
+        qx = quat[1] + quat_dot[1] * dt
+        qy = quat[2] + quat_dot[2] * dt
+        qz = quat[3] + quat_dot[3] * dt
+
+        # Update position using euler angles for DEBUG
+        # Note - provides same behaviour
+        # roll, pitch, yaw = quaternion_to_euler(quat[0],quat[1], quat[2], quat[3])
+        # pitch += angular_velocity[1] * dt
+        # quat = euler_to_quaternion(roll, pitch, yaw)
+        # qw = quat[0] 
+        # qx = quat[1] 
+        # qy = quat[2] 
+        # qz = quat[3] 
+
+        new_state = StateVector()
+
+        new_state.set_position((px,py,pz))
+        new_state.set_velocity((vx,vy,vz))
+        new_state.set_angular_velocity((av_roll, av_pitch, av_yaw))
+        new_state.set_orientation( quaternion_normalize((qw,qx,qy,qz)))
+        new_state.set_forces_moments(forces_body, moments_body)
+
+        self.state = new_state
+
+        return new_state
+
+
+
+    def update_rk4(self) -> StateVector:
 
         # Update aircraft state based on physics, control inputs, and world conditions
 

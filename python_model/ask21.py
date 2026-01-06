@@ -24,19 +24,21 @@ class ASK21:
         self.Ixz = 100.0     # kg·m² Wild guess
         self.mass = 687.0  # kg
 
-        self.cg = -0.30  # m from datum (negative is aft of datum)
+        self.cg = -0.30  # m from datum (negative is aft of datum), was 30 originally
 
         root = Aerofoil('FX-60-126.txt')
         tip = Aerofoil('FX-02-196.txt')
 
-        # Panels:  area, mid-span, quarter-chord position (relative to datum), incidence angle
+        incidenceDegrees = 0.6 # was 3.192472613
+        # Panels:  area, mid-span position from centreline, quarter-chord position (relative to datum), mean chord, incidence angle
         # mid-span is distance from centerline to panel center
         # quarter-chord is distance from root leading edge (datum) to quarter-chord of panel
-        rootPanel =     Panel( 3.215313306, 1.545740741, -0.3368518519, 3.192472613, root, tip, 0.0)
-        airbrakePanel = AirbrakePanel( 1.648746982, 3.440925926, -0.2935648148, 3.192472613, root, tip, 0.2)  
-        outerPanel =    Panel( 1.112233745, 4.668703704, -0.2644444444, 3.192472613, root, tip, 0.5)
-        aileronPanel =  AileronPanel( 2.216578464, 6.585925926, -0.211712963, 3.192472613, root, tip, 0.7)  
-        tipPanel =      Panel( 0.287909808, 8.238703704, -0.1629166667, 3.192472613, root, tip, 1.0)  
+        # root and tip are the root and tip sections and interp determines interpolation between them.
+        rootPanel =     Panel(         3.215313306, 1.545740741, -0.3368518519, 1.347407407, incidenceDegrees, root, tip, 0.0)
+        airbrakePanel = AirbrakePanel( 1.648746982, 3.440925926, -0.2935648148, 1.174259259, incidenceDegrees, root, tip, 0.2)  
+        outerPanel =    Panel(         1.112233745, 4.668703704, -0.2644444444, 1.057777778, incidenceDegrees, root, tip, 0.5)
+        aileronPanel =  AileronPanel(  2.216578464, 6.585925926, -0.211712963, 0.7964814815, incidenceDegrees, root, tip, 0.7)  
+        tipPanel =      Panel(         0.287909808, 8.238703704, -0.1629166667, 0.5509259259, incidenceDegrees, root, tip, 1.0)  
         self.wing = [
             rootPanel,
             airbrakePanel,
@@ -45,6 +47,11 @@ class ASK21:
             tipPanel
         ]  
         
+        
+
+
+
+
         self.dihedral_angle = radians(4.0)  # degrees (under each tip)
         
         # Tailplane and fin aerofoils

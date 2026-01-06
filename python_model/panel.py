@@ -10,7 +10,7 @@ class Panel:
     """
     Panel is part of a wing.  It may be extended to include control surfaces such as ailerons or airbrakes.
     """
-    def __init__(self, span: float, area: float, quater_chord: float, incidenceDegrees: float, rootFoil : Aerofoil , tipFoil : Aerofoil, interp : float = 0.0):
+    def __init__(self, span: float, area: float, quater_chord: float, mean_chord: float,  incidenceDegrees: float, rootFoil : Aerofoil , tipFoil : Aerofoil, interp : float = 0.0):
         self.mid_span = span
         self.area = area
         self.quater_chord = quater_chord
@@ -18,15 +18,16 @@ class Panel:
         self.rootFoil = rootFoil
         self.tipFoil = tipFoil
         self.interp = interp  # interpolation factor between root and tip aerofoils (0.0 = root, 1.0 = tip)
+        self.mean_chord = mean_chord
 
 
 
-    def process(self, state: StateVector, relative_airflow: V3d, cg: float, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
+    def process(self, state: StateVector, relative_velocity: V3d, cg: float, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
         """
         Process the panel to calculate forces and moments.
         Args:
             state: Current state vector
-            relative_airflow: The airflow vector relative to the aircraft (in body axes, wind corrected)
+            relative_velocity: The aircraft velocity relative to the air around it (in body axes, wind corrected)
             cg: Center of gravity position (m from datum)
             world: The simulation world
             dihedral: Dihedral angle of the wing (radians)
@@ -39,14 +40,14 @@ class Panel:
         """
 
         # Get local airflow at panel due to angular velocity
-        local_airflow = self.local_airflow(state, relative_airflow, sign)
+        local_velocity = self.get_local_velocity(state, relative_velocity, sign)
 
-        local_tas = TotalAirspeed(local_airflow)
-        local_alpha = AngleOfAttack(local_airflow)
-        beta = SideslipAngle(local_airflow)
+        local_tas = TotalAirspeed(local_velocity)
+        local_alpha = AngleOfAttack(local_velocity)
+        beta = SideslipAngle(local_velocity)
 
         # Effective AoA for sideslip 
-        aoa_beta = atan2(local_airflow[1], local_airflow[0])
+        aoa_beta = atan2(local_velocity[1], local_velocity[0])
 
         local_alpha += self.incidence  # add geometric incidence angle
         aoa_beta += dihedral  # add dihedral effect
@@ -58,7 +59,7 @@ class Panel:
         q = 0.5 * world.air_density * local_tas**2
         L = Cl * q * self.area
         D = Cd * q * self.area
-        M = Cm * q * self.area 
+        M = Cm * q * self.area * self.mean_chord
 
         # convert L, D to body axes and sum
         # Transform to body axes
@@ -81,15 +82,15 @@ class Panel:
         return (forces_body, moments_body)
 
 
-    def local_airflow(self, state: StateVector, relative_airflow: V3d, sign: float) -> V3d:
+    def get_local_velocity(self, state: StateVector, relative_velocity: V3d, sign: float) -> V3d:
         """
-        Calculate local airflow at panel due to angular velocity. 
+        Calculate local velocity at panel due to angular velocity. 
         Retreating wing has reduced local airflow (), advancing wing has increased local airflow.
         Downgoing wing has increased local airflow, upgoing wing has reduced local airflow.
         
         Args:
             state: Current state vector
-            relative_airflow: Relative airflow vector [u, v, w] in body frame
+            relative_velocity: Relative airframe velocity vector [u, v, w] in body frame relative to air-mass
             sign: +1 for right wing, -1 for left wing
         
         Returns:
@@ -102,7 +103,7 @@ class Panel:
         # Change in x velocity.  If yawing right, right panel retreating and X decreasing
         dx = -state.angular_velocity()[2] * self.mid_span * sign # yaw rate * mid-span point of panel.  Difference in local airflow due to yaw rate
 
-        local_airflow = relative_airflow[0] + dx, relative_airflow[1], relative_airflow[2] + dz
+        local_airflow = relative_velocity[0] + dx, relative_velocity[1], relative_velocity[2] + dz
         return local_airflow
     
 
@@ -133,12 +134,12 @@ class AileronPanel(Panel):
     """
     AileronPanel is a Panel with an aileron control surface.
     """
-    def process(self, state: StateVector, relative_airflow: V3d, cg: float, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
+    def process(self, state: StateVector, relative_velocity: V3d, cg: float, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
         """
         Process the panel to calculate forces and moments.
         Args:
             state: Current state vector
-            relative_airflow: The airflow vector relative to the aircraft (in body axes, wind corrected)
+            relative_velocity: The aircraft velocity relative to the air around it (in body axes, wind corrected)
             cg: Center of gravity position (m from datum)
             world: The simulation world
             dihedral: Dihedral angle of the wing (radians)
@@ -151,14 +152,14 @@ class AileronPanel(Panel):
         """
 
         # Get local airflow at panel due to angular velocity
-        local_airflow = self.local_airflow(state, relative_airflow, sign)
+        local_velocity = self.get_local_velocity(state, relative_velocity, sign)
 
-        local_tas = TotalAirspeed(local_airflow)
-        local_alpha = AngleOfAttack(local_airflow)
-        beta = SideslipAngle(local_airflow)
+        local_tas = TotalAirspeed(local_velocity)
+        local_alpha = AngleOfAttack(local_velocity)
+        beta = SideslipAngle(local_velocity)
 
         # Effective AoA for sideslip 
-        aoa_beta = atan2(local_airflow[1], local_airflow[0])
+        aoa_beta = atan2(local_velocity[1], local_velocity[0])
 
         local_alpha += self.incidence  # add geometric incidence angle
         local_alpha -= controls.roll * radians(5) * sign  # TODO properly - aileron effect.  Roll right, reduce AoA on right wing (+sign), increase AoA on left wing (-sign)
@@ -197,12 +198,12 @@ class AirbrakePanel(Panel):
     """
     AirbrakePanel is a Panel with an airbrake control surface.
     """
-def process(self, state: StateVector, relative_airflow: V3d, cg: float, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
+def process(self, state: StateVector, relative_velocity: V3d, cg: float, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
         """
         Process the panel to calculate forces and moments.
         Args:
             state: Current state vector
-            relative_airflow: The airflow vector relative to the aircraft (in body axes, wind corrected)
+            relative_velocity: The aircraft velocity relative to the air around it (in body axes, wind corrected)
             cg: Center of gravity position (m from datum)
             world: The simulation world
             dihedral: Dihedral angle of the wing (radians)
@@ -215,14 +216,14 @@ def process(self, state: StateVector, relative_airflow: V3d, cg: float, world: W
         """
 
         # Get local airflow at panel due to angular velocity
-        local_airflow = self.local_airflow(state, relative_airflow, sign)
+        local_velocity = self.local_airflow(state, relative_velocity, sign)
 
-        local_tas = TotalAirspeed(local_airflow)
-        local_alpha = AngleOfAttack(local_airflow)
-        beta = SideslipAngle(local_airflow)
+        local_tas = TotalAirspeed(local_velocity)
+        local_alpha = AngleOfAttack(local_velocity)
+        beta = SideslipAngle(local_velocity)
 
         # Effective AoA for sideslip 
-        aoa_beta = atan2(local_airflow[1], local_airflow[0])
+        aoa_beta = atan2(local_velocity[1], local_velocity[0])
 
         local_alpha += self.incidence  # add geometric incidence angle
         aoa_beta += dihedral  # add dihedral effect
@@ -231,14 +232,19 @@ def process(self, state: StateVector, relative_airflow: V3d, cg: float, world: W
 
         Cl, Cd, Cm = self.coefficients_at(aoa)
 
-        # Modify coefficients based on airbrake extension (Crude!)
-        Cl *= 1-0.8 * controls.spoilers  # reduce lift with airbrake extension
-        Cd *= 1 + 5.0 * controls.spoilers  # increase drag with airbrake extension
+        # Modify Cl based on airbrake extension (Crude!)
+        Cl *= 1-0.8 * controls.spoilers  # reduce lift with airbrake extension.  (est)
 
         q = 0.5 * world.air_density * local_tas**2
         L = Cl * q * self.area
         D = Cd * q * self.area
         M = Cm * q * self.area 
+
+        # Now add in drag for spoiler
+        Cd_spoiler = 1.8   # flat plate
+        spoiler_area = 0.3 * self.area   # area of airbrake about 1/3 panel area?
+        d_spoiler = Cd_spoiler * q * spoiler_area * controls.spoilers
+        D += d_spoiler
 
         # convert L, D to body axes and sum
         # Transform to body axes

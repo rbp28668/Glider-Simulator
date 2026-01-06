@@ -64,7 +64,7 @@ class Aerofoil:
                 cds.append(c_d)
                 cms.append(c_m)
 
-                print(f'{a},{c_l},{c_d},{c_m}')
+                #print(f'{a},{c_l},{c_d},{c_m}')
 
         if len(alphas) < 2:
             raise ValueError(f"Not enough data points in {path}")

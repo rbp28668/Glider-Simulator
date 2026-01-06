@@ -58,6 +58,11 @@ class StateVector:
         p = q = r = 0.0          # Angular rates in body frame (rad/s)
         self.state = [X, Y, Z, u, v, w, qw, qx, qy, qz, p, q, r]
 
+        # Not strictly part of the state vector but useful to record instantaneous forces
+        # and moments.
+        self.forces = [0.0,0.0,0.0]
+        self.moments = [0.0,0.0,0.0]
+
     # Accessor methods
 
     # Indexing to allow state_vector[i] access
@@ -102,6 +107,11 @@ class StateVector:
         self.state[11] = av[1]
         self.state[12] = av[2]
 
+
+    def set_forces_moments(self,forces_body: V3d, moments_body: V3d) :
+        self.forces = forces_body
+        self.moments = moments_body
+        
 
     def copy(self) -> StateVector:
         new_sv = StateVector()

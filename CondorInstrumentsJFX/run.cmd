@@ -33,7 +33,7 @@ REM --panel=front_panel.xml --dialog=true --diagnostics=true --drag=true
 set OPTS=
 set OPTS=%OPTS% --panel=front_panel.xml
 REM set OPTS=%OPTS% --panel=rear_panel.xml
-REM set OPTS=%OPTS% --dialog=true 
+set OPTS=%OPTS% --dialog=true 
 REM set OPTS=%OPTS% --diagnostics=true 
 REM set OPTS=%OPTS% --drag=true
 set OPTS=%OPTS% --use=1

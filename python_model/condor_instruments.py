@@ -52,7 +52,7 @@ class CondorInstruments :
         att = state.Attitude()
         self.yaw = att[2]
         self.pitch = att[1]
-        self.roll = att[0]
+        self.bank = att[0]
 
         orientation = state.orientation()
         self.quaternionx = orientation[1]
@@ -76,7 +76,7 @@ class CondorInstruments :
         msg = '\n'.join([
         f'time={self.time}', # in game display time decimal hours 
         f'airspeed={self.airspeed}',
-        f'altitude={self.altitude}', # altimeter reading m or ft 
+        f'altitude={self.altitude * 3.28084}', # altimeter reading ft 
         f'vario={self.vario}', # pneumatic vario reading m/s 
         f'evario={self.evario}', # electronic variometer reading m/s 
         f'nettovario={self.nettovario}', # netto variometer value m/s 
@@ -86,7 +86,7 @@ class CondorInstruments :
         f'turnrate={self.turnrate}', # turn indicator reading rad/s 
         f'yawstringangle={self.yawstringangle}', # yawstring angle rad 
         f'yaw={self.yaw}', # yaw rad 
-        f'pitch={self.pitch}', # pitch rad 
+        f'pitch={-self.pitch}', # pitch rad (note condor expects -ve for pitch up)
         f'bank={self.bank}', # bank rad 
         f'quaternionx={self.quaternionx}', # quaternion x / 
         f'quaterniony={self.quaterniony}', # quaternion y / 
@@ -97,6 +97,6 @@ class CondorInstruments :
         f'rollrate={self.rollrate}', # roll rate (local system x) rad/s 
         f'pitchrate={self.pitchrate}', # pitch rate (local system y) rad/s 
         f'yawrate={self.yawrate}', # yaw rate (local system z) rad/s 
-        f'gforce={self.gforce}', # g force factor /
+        f'g={self.gforce}', # g force factor /
         ])
         self._send(msg)

@@ -63,10 +63,11 @@ def update(dt):
     pitch = joystick.y
     spoiler = (joystick.z +1) /2  # normalize to [0,1]
     rudder = joystick.rz # rudder
+    #roll = rudder = 0 # TODO remove!!
     sim.controls.set_controls(pitch, roll, rudder, spoiler)
 
     # Update simulation
-    state = sim.update()
+    state = sim.update(dt)
 
     #label.text = f'roll: {roll:.2f}, pitch: {pitch:.2f} rudder: {rudder:.2f} spoiler: {spoiler:.2f}'
     pos = state.position()
@@ -79,14 +80,17 @@ def update(dt):
     if(pitch > pi): pitch -= 2*pi
 
     label1.text = f'Roll: {roll:4.2f}, Pitch: {pitch:4.2f}'
-    label2.text = f'pos: x={pos[0]:.1f} y={pos[1]:.1f} z={pos[2]:.1f}'
+    #label2.text = f'pos: x={pos[0]:.1f} y={pos[1]:.1f} z={pos[2]:.1f}'
+    label2.text = f'Moments: roll={state.moments[0]:.1f} pitch={state.moments[1]:.1f} yaw={state.moments[2]:.1f}'
     label3.text = f'Tas: {state.TotalAirspeed():.1f} m/s, Alt: {state.Altitude():.1f} m, Heading: {state.Heading():.1f}°'
 
     global count
     count += 1
-    if(count == 10) :
+    if(count == 2) :
         count = 0
         instruments.set(sim.total_time, sim.state)
+        g = state.forces[2] / sim.aircraft.mass / 9.81
+        instruments.gforce = -g
         instruments.send()
 
 
