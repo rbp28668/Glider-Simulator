@@ -12,6 +12,7 @@ import pyglet
 from pyglet.gl import *
 from quaternion import euler_to_quaternion
 from simulation import Simulation
+from state_log import StateLog
 
 joysticks = pyglet.input.get_joysticks()
 assert joysticks, 'No joystick device is connected'
@@ -46,6 +47,8 @@ sim.state.set_angular_velocity((0.0, 0.0, 0.0))  # No initial rotation
 
 instruments = CondorInstruments("localhost",55278)
 
+log = StateLog('state.txt')
+
 count:int = 0
 
 @window.event
@@ -68,6 +71,8 @@ def update(dt):
 
     # Update simulation
     state = sim.update(dt)
+
+    log.write(sim.total_time, state)
 
     #label.text = f'roll: {roll:.2f}, pitch: {pitch:.2f} rudder: {rudder:.2f} spoiler: {spoiler:.2f}'
     pos = state.position()

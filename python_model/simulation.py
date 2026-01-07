@@ -26,7 +26,8 @@ class Simulation:
         self.state = StateVector()
 
     def update(self, dt : float) -> StateVector:
-        # dt = self.time_step  - now using actual dt
+        self.total_time += dt
+
         state = self.state
         # Get wind
         wind_earth = self.world.get_wind_vector(state.position(), self.total_time)
