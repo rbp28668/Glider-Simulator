@@ -6,7 +6,7 @@
 __docformat__ = 'restructuredtext'
 __version__ = '$Id: $'
 
-from math import pi, radians
+from math import degrees, pi, radians
 from condor_instruments import CondorInstruments
 import pyglet
 from pyglet.gl import *
@@ -21,23 +21,21 @@ joystick.open()
 
 window = pyglet.window.Window()
 
-label1 = pyglet.text.Label('Hello, world',
-                          font_name='Times New Roman',
-                          font_size=36,
-                          x=window.width//2, y=window.height//4,
-                          anchor_x='center', anchor_y='center')
+# Create grid of labels
+idx = 0
+labels = []
+h = window.height
+for iy in range(0,5) :
+    for ix in range(0,3) :
+        xpos = 20 + ix * 400
+        ypos = h - (20 + iy * 70)
+        label = pyglet.text.Label('Hello, world',
+                                font_name='Times New Roman',
+                                font_size=36,
+                                x=xpos, y=ypos,
+                                anchor_x='left', anchor_y='top')
+        labels.append(label)
 
-label2 = pyglet.text.Label('Hello, world 2',
-                          font_name='Times New Roman',
-                          font_size=36,
-                          x=window.width//2, y=window.height//2,
-                          anchor_x='center', anchor_y='center')
-
-label3 = pyglet.text.Label('Hello, world 3',
-                          font_name='Times New Roman',
-                          font_size=36,
-                          x=window.width//2, y=window.height//4*3,
-                          anchor_x='center', anchor_y='center')
 
 sim = Simulation()
 sim.state.set_position((0.0, 0.0, -1000.0))  # Start at 1000m altitude
@@ -55,9 +53,8 @@ count:int = 0
 def on_draw():
     # Axes
     window.clear()
-    label1.draw()
-    label2.draw()
-    label3.draw()
+    for label in labels : 
+        label.draw()
     
 def update(dt):
 
@@ -81,14 +78,37 @@ def update(dt):
 
     roll = att[0]
     pitch = att[1]
+    yaw = att[2]
     if(roll > pi): roll -= 2*pi
     if(pitch > pi): pitch -= 2*pi
+    if(yaw > pi): yaw -= 2*pi
 
-    label1.text = f'Roll: {roll:4.2f}, Pitch: {pitch:4.2f}'
+    pitch = degrees(pitch)
+    roll = degrees(roll)
+    yaw = degrees(yaw)
+
+    labels[0].text = f'Roll: {roll:4.2f}'
+    labels[1].text = f'Pitch: {pitch:4.2f}'
+    labels[2].text = f'Yaw: {yaw:4.2f}'
+
+    labels[3].text = f'Tas: {state.TotalAirspeed():.1f} m/s'
+    labels[4].text = f'Alt: {state.Altitude():.1f} m'
+    labels[5].text = f'Heading: {state.Heading():.1f}°'
     #label2.text = f'pos: x={pos[0]:.1f} y={pos[1]:.1f} z={pos[2]:.1f}'
-    label2.text = f'Moments: roll={state.moments[0]:.1f} pitch={state.moments[1]:.1f} yaw={state.moments[2]:.1f}'
-    label3.text = f'Tas: {state.TotalAirspeed():.1f} m/s, Alt: {state.Altitude():.1f} m, Heading: {state.Heading():.1f}°'
 
+    labels[6].text = f'vx={v[0]:.1f}'
+    labels[7].text = f'vy={v[1]:.1f}'
+    labels[8].text = f'vz={v[2]:.1f}'
+
+    labels[9].text = f'fx={state.forces[0]:.1f}'
+    labels[10].text = f'fy={state.forces[1]:.1f}'
+    labels[11].text = f'fz={state.forces[2]:.1f}'
+
+    labels[12].text = f'M roll={state.moments[0]:.1f}'
+    labels[13].text = f'M pitch={state.moments[1]:.1f}'
+    labels[14].text = f'M yaw={state.moments[2]:.1f}'
+
+    
     global count
     count += 1
     if(count == 2) :

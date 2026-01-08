@@ -1,6 +1,8 @@
+import math
 from aerofoil import Aerofoil
 from math import atan2, cos, radians, sin
 
+from aircraft_params import AircraftParameters
 from control_inputs import ControlInputs
 from state_vector import StateVector
 from v3d import AngleOfAttack, SideslipAngle, TotalAirspeed, V3d
@@ -22,7 +24,7 @@ class Panel:
 
 
 
-    def process(self, state: StateVector, relative_velocity: V3d, cg: float, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
+    def process(self, state: StateVector, relative_velocity: V3d, aircraft: AircraftParameters, world: World,  controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
         """
         Process the panel to calculate forces and moments.
         Args:
@@ -49,12 +51,17 @@ class Panel:
         # Effective AoA for sideslip 
         aoa_beta = atan2(local_velocity[1], local_velocity[0])
 
-        local_alpha += self.incidence  # add geometric incidence angle
-        aoa_beta += dihedral  # add dihedral effect
+        aoa = local_alpha + self.incidence  # add geometric incidence angle
+        aoa_beta += aircraft.dihedral_angle  # add dihedral effect
 
-        aoa = local_alpha * cos(beta) + aoa_beta * sin(beta)
+        aoa = aoa * cos(beta) + aoa_beta * sin(beta)
 
         Cl, Cd, Cm = self.coefficients_at(aoa)
+
+        # lift dependent drag.
+        Cdi = (Cl * Cl ) / ( math.pi * aircraft.AR * aircraft.oswald)
+        Cd += Cdi
+
 
         q = 0.5 * world.air_density * local_tas**2
         L = Cl * q * self.area
@@ -63,12 +70,12 @@ class Panel:
 
         # convert L, D to body axes and sum
         # Transform to body axes
-        Fx = -D * cos(aoa) - L * sin(aoa)   # drag backwards in S&L flight
-        Fz = -D * sin(aoa) - L * cos(aoa)   # lift is -ve Z in body axes
+        Fx = -D * cos(local_alpha) - L * sin(local_alpha)   # drag backwards in S&L flight
+        Fz = -D * sin(local_alpha) - L * cos(local_alpha)   # lift is -ve Z in body axes
 
         forces_body = Fx, 0.0, Fz  # drag in body X, side force 0, lift in body z
         
-        dist = self.quater_chord - cg       # calculae moments from c.g. not datum.
+        dist = self.quater_chord - aircraft.CG      # calculae moments from c.g. not datum.
 
         # Moments (about c.g.)
         # Assume wing is centered on fuselage centerline (no spanwise moment)
@@ -134,7 +141,7 @@ class AileronPanel(Panel):
     """
     AileronPanel is a Panel with an aileron control surface.
     """
-    def process(self, state: StateVector, relative_velocity: V3d, cg: float, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
+    def process(self, state: StateVector, relative_velocity: V3d, aircraft: AircraftParameters, world: World, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
         """
         Process the panel to calculate forces and moments.
         Args:
@@ -161,13 +168,17 @@ class AileronPanel(Panel):
         # Effective AoA for sideslip 
         aoa_beta = atan2(local_velocity[1], local_velocity[0])
 
-        local_alpha += self.incidence  # add geometric incidence angle
-        local_alpha -= controls.roll * radians(5) * sign  # TODO properly - aileron effect.  Roll right, reduce AoA on right wing (+sign), increase AoA on left wing (-sign)
-        aoa_beta += dihedral  # add dihedral effect
+        aoa = local_alpha + self.incidence  # add geometric incidence angle
+        aoa -= controls.roll * radians(5) * sign  # TODO properly - aileron effect.  Roll right, reduce AoA on right wing (+sign), increase AoA on left wing (-sign)
+        aoa_beta += aircraft.dihedral_angle  # add dihedral effect
 
-        aoa = local_alpha * cos(beta) + aoa_beta * sin(beta)
+        aoa = aoa * cos(beta) + aoa_beta * sin(beta)
 
         Cl, Cd, Cm = self.coefficients_at(aoa)
+
+        # lift dependent drag.
+        Cdi = (Cl * Cl ) / ( math.pi * aircraft.AR * aircraft.oswald)
+        Cd += Cdi
 
         q = 0.5 * world.air_density * local_tas**2
         L = Cl * q * self.area
@@ -176,12 +187,12 @@ class AileronPanel(Panel):
 
         # convert L, D to body axes and sum
         # Transform to body axes
-        Fx = -D * cos(aoa) - L * sin(aoa)   # drag backwards in S&L flight
-        Fz = -D * sin(aoa) - L * cos(aoa)   # lift is -ve Z in body axes
+        Fx = -D * cos(local_alpha) - L * sin(local_alpha)   # drag backwards in S&L flight
+        Fz = -D * sin(local_alpha) - L * cos(local_alpha)   # lift is -ve Z in body axes
 
         forces_body = Fx, 0.0, Fz  # drag in body X, side force 0, lift in body z
         
-        dist = self.quater_chord - cg       # calculae moments from c.g. not datum.
+        dist = self.quater_chord - aircraft.CG       # calculae moments from c.g. not datum.
 
         # Moments (about c.g.)
         # Assume wing is centered on fuselage centerline (no spanwise moment)
@@ -198,7 +209,7 @@ class AirbrakePanel(Panel):
     """
     AirbrakePanel is a Panel with an airbrake control surface.
     """
-def process(self, state: StateVector, relative_velocity: V3d, cg: float, world: World, dihedral: float, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
+    def process(self, state: StateVector, relative_velocity: V3d, aircraft: AircraftParameters, world: World, controls: ControlInputs, sign: float) -> tuple[V3d, V3d]:
         """
         Process the panel to calculate forces and moments.
         Args:
@@ -216,7 +227,7 @@ def process(self, state: StateVector, relative_velocity: V3d, cg: float, world: 
         """
 
         # Get local airflow at panel due to angular velocity
-        local_velocity = self.local_airflow(state, relative_velocity, sign)
+        local_velocity = self.get_local_velocity(state, relative_velocity, sign)
 
         local_tas = TotalAirspeed(local_velocity)
         local_alpha = AngleOfAttack(local_velocity)
@@ -225,15 +236,19 @@ def process(self, state: StateVector, relative_velocity: V3d, cg: float, world: 
         # Effective AoA for sideslip 
         aoa_beta = atan2(local_velocity[1], local_velocity[0])
 
-        local_alpha += self.incidence  # add geometric incidence angle
-        aoa_beta += dihedral  # add dihedral effect
+        aoa = local_alpha + self.incidence  # add geometric incidence angle
+        aoa_beta += aircraft.dihedral_angle  # add dihedral effect
 
-        aoa = local_alpha * cos(beta) + aoa_beta * sin(beta)
+        aoa = aoa * cos(beta) + aoa_beta * sin(beta)
 
         Cl, Cd, Cm = self.coefficients_at(aoa)
 
         # Modify Cl based on airbrake extension (Crude!)
         Cl *= 1-0.8 * controls.spoilers  # reduce lift with airbrake extension.  (est)
+
+        # lift dependent drag.
+        Cdi = (Cl * Cl ) / ( math.pi * aircraft.AR * aircraft.oswald)
+        Cd += Cdi
 
         q = 0.5 * world.air_density * local_tas**2
         L = Cl * q * self.area
@@ -248,12 +263,12 @@ def process(self, state: StateVector, relative_velocity: V3d, cg: float, world: 
 
         # convert L, D to body axes and sum
         # Transform to body axes
-        Fx = -D * cos(aoa) - L * sin(aoa)   # drag backwards in S&L flight
-        Fz = -D * sin(aoa) - L * cos(aoa)   # lift is -ve Z in body axes
+        Fx = -D * cos(local_alpha) - L * sin(local_alpha)   # drag backwards in S&L flight
+        Fz = -D * sin(local_alpha) - L * cos(local_alpha)   # lift is -ve Z in body axes
 
         forces_body = Fx, 0.0, Fz  # drag in body X, side force 0, lift in body z
         
-        dist = self.quater_chord - cg       # calculae moments from c.g. not datum.
+        dist = self.quater_chord - aircraft.CG       # calculae moments from c.g. not datum.
 
         # Moments (about c.g.)
         # Assume wing is centered on fuselage centerline (no spanwise moment)

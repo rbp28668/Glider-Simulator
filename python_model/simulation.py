@@ -46,6 +46,8 @@ class Simulation:
         acc_y = forces_body[1] / self.aircraft.mass
         acc_z = forces_body[2] / self.aircraft.mass
 
+        #print(f'Acceleration less G {acc_x},{acc_y},{acc_z}')
+
         orientation = state.orientation()
         
         # Gravity in body frame
@@ -56,6 +58,9 @@ class Simulation:
         acc_x += g_body[0]
         acc_y += g_body[1]
         acc_z += g_body[2]
+
+        #print(f'Acceleration with G {acc_x},{acc_y},{acc_z}')
+
 
         # Now we've got acceleration in body frame, calculate change in velocity
         velocity = state.velocity()
@@ -100,11 +105,13 @@ class Simulation:
         av_yaw = wz + dwz * dt
   
         # Add some pitch & yaw damping due to fuselage 
-        av_pitch *= 0.95 ## arbitrary damping
-        av_yaw *= 0.95
+        av_pitch *= 0.99 ## arbitrary damping
+        av_yaw *= 0.99
 
+        # Just pitch at the moment
         av_yaw = 0
         av_roll = 0
+        vy = 0
 
         # Orientation
         # Quaternion derivative

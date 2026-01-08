@@ -1,4 +1,5 @@
 from math import radians
+from aircraft_params import AircraftParameters
 from panel import Panel, AirbrakePanel, AileronPanel
 from contact_point import ContactPoint
 from aerofoil import Aerofoil
@@ -70,6 +71,7 @@ class ASK21:
         self.fin = tail
 
         self.wing_span = 17.0  # m
+        self.mean_chord = 1.121 # m
 
 
         # Contact points for ground detection. Relative to datum. Fwd and down are +ve.
@@ -89,3 +91,12 @@ class ASK21:
 
         self.aerotow_hook = ContactPoint(2.291851852, 0.0, 0.447037037)  # Approximate position of aerotow hook
         self.winch_hook = ContactPoint(0.1574074074, -0.05, 0.572962963)  # approximate position of winch hook, slightly left of centerline
+
+    def get_params(self) -> AircraftParameters :
+        params = AircraftParameters()
+        params.AR = self.wing_span / self.mean_chord
+        params.oswald = 0.95
+        params.CG = self.cg
+        params.dihedral_angle = self.dihedral_angle
+
+        return params

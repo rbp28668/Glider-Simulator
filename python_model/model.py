@@ -40,14 +40,15 @@ class Model :
 
         #print(f'Model Relative Airflow {relative_airflow[0]}, {relative_airflow[1]},{relative_airflow[2]}')
 
+        params = aircraft.get_params()
    
         #Wings
         for panel in aircraft.wing:
 
             # Right hand side            
-            r_forces_panel, r_moments_panel = panel.process(state, relative_velocity, aircraft.cg, world, aircraft.dihedral_angle, control_inputs, 1.0)
+            r_forces_panel, r_moments_panel = panel.process(state, relative_velocity, params, world, control_inputs, 1.0)
             # Left hand side
-            l_forces_panel, l_moments_panel = panel.process(state, relative_velocity, aircraft.cg, world, aircraft.dihedral_angle, control_inputs, -1.0)
+            l_forces_panel, l_moments_panel = panel.process(state, relative_velocity, params, world, control_inputs, -1.0)
 
             #print(f'Moments: {l_moments_panel[0] + r_moments_panel[0]},{l_moments_panel[1] + r_moments_panel[1]},{l_moments_panel[2] + r_moments_panel[2]},')
             Model.add(forces_body, l_forces_panel, r_forces_panel)
