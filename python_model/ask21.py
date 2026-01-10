@@ -60,7 +60,7 @@ class ASK21:
 
         # Tailplane area and moment
         self.tailplane_area = 1.796160768  # m²
-        self.tailplane_incidence = 0.0  # degrees
+        self.tailplane_incidence = radians(-2.5)  # tailplane incidence relative to fuselage (negative = download at trim)
         self.tailplane_quarter_chord = -5.210185185  # m from datum
         self.tailplane = tail
 
