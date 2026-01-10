@@ -79,7 +79,7 @@ class Model :
         # Fuselage drag approximation
         # ASK-21 fuselage equivalent flat plate area ~0.02 m² (typical for clean glider fuselage)
         # This includes fuselage, canopy, wing-fuselage interference, control surface gaps, etc.
-        fuselage_Cd_S = 0.02  # m² equivalent flat plate area
+        fuselage_Cd_S = 0.025  # m² equivalent flat plate area
         tas = TotalAirspeed(relative_velocity)
         q = 0.5 * world.air_density * tas * tas
         fuselage_drag = fuselage_Cd_S * q
