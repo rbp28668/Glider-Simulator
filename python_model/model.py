@@ -76,7 +76,14 @@ class Model :
         moments_body[2] += fin_L * dist  # yaw moment due to side force at fin quarter chord
 
 
-        # TODO - some approximation of fuselage drag
+        # Fuselage drag approximation
+        # ASK-21 fuselage equivalent flat plate area ~0.02 m² (typical for clean glider fuselage)
+        # This includes fuselage, canopy, wing-fuselage interference, control surface gaps, etc.
+        fuselage_Cd_S = 0.02  # m² equivalent flat plate area
+        tas = TotalAirspeed(relative_velocity)
+        q = 0.5 * world.air_density * tas * tas
+        fuselage_drag = fuselage_Cd_S * q
+        forces_body[0] -= fuselage_drag  # drag acts backward (-X direction)
 
         # TODO - Cm_beta : pitch down with sideslip
 
@@ -122,9 +129,9 @@ class Model :
       
 
         # convert L, D to body axes and sum
-        # Transform to body axes
+        # Transform from wind axes to body axes (rotation by angle of attack about Y)
         D = -tp_D * cos(aoa) - tp_L * sin(aoa)  # drag backwards (hence -ve)
-        L = -tp_D * sin(aoa) - tp_L * cos(aoa)  # lift up but +ve z downwards
+        L =  tp_D * sin(aoa) - tp_L * cos(aoa)  # lift up is -ve Z in body axes
 
         #print(f"Tailplane AoA: {degrees(aoa)},  L,D: {L},{D}, Dist:{dist}, Pitch rate: {pitch_rate}, vz_pitch:{vz_pitch},  V_tp: {tailplane_velocity[0]},{tailplane_velocity[1]},{tailplane_velocity[2]}")
      
@@ -143,9 +150,10 @@ class Model :
         fin_L = fin_Cl * fin_q * aircraft.fin_area 
         fin_D = fin_Cd * fin_q * aircraft.fin_area
 
-        D = -fin_D * cos(fin_aoa) - fin_L * sin(fin_aoa)
-        L = -fin_D * sin(fin_aoa) - fin_L * cos(fin_aoa)  # lift to right should be +ve
-        return (L,D, 0.0)  # No fin moment for now
+        # Transform from wind axes to body axes
+        D = -fin_D * cos(fin_aoa) - fin_L * sin(fin_aoa)  # drag backwards
+        L =  fin_D * sin(fin_aoa) - fin_L * cos(fin_aoa)  # side force (fin "lift")
+        return (L, D, 0.0)  # No fin moment for now
 
     @staticmethod
     def add(acc: list[float], v1: V3d, v2: V3d) -> None:

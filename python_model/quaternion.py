@@ -146,35 +146,29 @@ def quaternion_rotate_vector_inverse(q: Quaternion, v: tuple[float, float, float
     return quaternion_rotate_vector(q_conj, v)
 
 # Quaternion Derivative
-#The time derivative of a quaternion based on angular velocity:
+# The time derivative of a quaternion based on angular velocity:
 def quaternion_derivative(q: Quaternion, omega: tuple[float, float, float]) -> Quaternion:
-
     """
     Calculate quaternion time derivative
     q̇ = 0.5 * q ⊗ ω
-  
+
     Args:
         q: Quaternion [qw, qx, qy, qz]
         omega: Angular velocity [p, q, r] in body frame (rad/s)
+               p = roll rate (about body X)
+               q = pitch rate (about body Y)
+               r = yaw rate (about body Z)
 
     Returns:
         Quaternion derivative [q̇w, q̇x, q̇y, q̇z]
-
     """
-
     qw, qx, qy, qz = q
-    # p, q_rate, r = omega
-    
-    # q_dot_w = -0.5 * (qx*p + qy*q_rate + qz*r)
-    # q_dot_x =  0.5 * (qw*p + qy*r - qz*q_rate)
-    # q_dot_y =  0.5 * (qw*q_rate + qz*p - qx*r)
-    # q_dot_z =  0.5 * (qw*r + qx*q_rate - qy*p)
+    p, q_rate, r = omega  # roll, pitch, yaw rates
 
-    wx, wy, wz = omega  # rate about x axis (roll), y axis (pitch), z axis (yaw)
+    q_dot_w = -0.5 * (qx*p + qy*q_rate + qz*r)
+    q_dot_x =  0.5 * (qw*p + qy*r - qz*q_rate)
+    q_dot_y =  0.5 * (qw*q_rate + qz*p - qx*r)
+    q_dot_z =  0.5 * (qw*r + qx*q_rate - qy*p)
 
-    q_dot_w = 0.5 * ( wz * qx -wy * qy + wx * qz)
-    q_dot_x = 0.5 * (-wz * qw + wx * qy + wy * qz)
-    q_dot_y = 0.5 * (wy * qw -wx * qx +  wz * qz)
-    q_dot_z = 0.5 * (-wx * qw - wy * qx - wz*qy)
     return q_dot_w, q_dot_x, q_dot_y, q_dot_z
 
