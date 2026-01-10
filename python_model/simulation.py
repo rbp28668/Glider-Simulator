@@ -39,94 +39,77 @@ class Simulation:
         state = self.state
         # Get wind
         wind_earth = self.world.get_wind_vector(state.position(), self.total_time)
-        
+
         # Calculate airspeed with wind
         V_air_body = self.apply_wind_to_state(state, wind_earth)
-        
+
         # Calculate aerodynamics
         forces_body, moments_body = self.model.calculate_aerodynamics(
             state, self.aircraft, self.controls, self.world, V_air_body
         )
 
+        # Get current velocity and angular velocity for Coriolis terms
+        u, v, w = state.velocity()
+        p, q, r = state.angular_velocity()
 
-        # linear acceleration by F=MA in each axis
-        acc_x = forces_body[0] / self.aircraft.mass
-        acc_y = forces_body[1] / self.aircraft.mass
-        acc_z = forces_body[2] / self.aircraft.mass
-
-        #print(f'Acceleration less G {acc_x},{acc_y},{acc_z}')
+        # Linear acceleration: F/m + gravity + Coriolis terms
+        # In rotating body frame: a_body = F/m + g_body + ω × v_body
+        # Coriolis: (r*v - q*w, p*w - r*u, q*u - p*v)
+        acc_x = forces_body[0] / self.aircraft.mass + (r*v - q*w)
+        acc_y = forces_body[1] / self.aircraft.mass + (p*w - r*u)
+        acc_z = forces_body[2] / self.aircraft.mass + (q*u - p*v)
 
         orientation = state.orientation()
-        
+
         # Gravity in body frame
         g = 9.81
         g_earth = (0, 0, g) # +ve down
         g_body = quaternion_rotate_vector_inverse(orientation, g_earth)
 
-        print(f'G-Body {g_body[0]},{g_body[1]},{g_body[2]}')
-
         acc_x += g_body[0]
         acc_y += g_body[1]
         acc_z += g_body[2]
 
-        #print(f'Acceleration with G {acc_x},{acc_y},{acc_z}')
+        # Update velocity: v_new = v_old + a * dt
+        vx = u + acc_x * dt
+        vy = v + acc_y * dt
+        vz = w + acc_z * dt
 
-
-        # Now we've got acceleration in body frame, calculate change in velocity
-        velocity = state.velocity()
-        vx = velocity[0] + acc_x * dt
-        vy = velocity[1] + acc_y * dt
-        vz = velocity[2] + acc_z * dt
-
-
-        # Update location using initial body velocity (suitably rotated)
-
-        v_world = quaternion_rotate_vector(orientation, velocity) # from body to world frame
+        # Update position using OLD velocity (standard forward Euler)
+        v_world = quaternion_rotate_vector(orientation, (u, v, w))  # body to world frame
         position = state.position()
         px = position[0] + v_world[0] * dt
         py = position[1] + v_world[1] * dt
         pz = position[2] + v_world[2] * dt
 
-        # Moments around roll (x) axis, pitch (y) axis and yaw (z) axis
+        # Moments of inertia
         Ixx = self.aircraft.Ixx
         Iyy = self.aircraft.Iyy
         Izz = self.aircraft.Izz
 
-        # Get angular velocity and its components
-        angular_velocity = state.angular_velocity()
-        wx = angular_velocity[0]
-        wy = angular_velocity[1]
-        wz = angular_velocity[2]
+        # Angular acceleration with gyroscopic coupling
+        # Using Euler's equations: I * ω̇ = M - ω × (I * ω)
+        dp = (moments_body[0] + (Iyy - Izz) * q * r) / Ixx
+        dq = (moments_body[1] + (Izz - Ixx) * r * p) / Iyy
+        dr = (moments_body[2] + (Ixx - Iyy) * p * q) / Izz
 
-        full_coupling = True
+        # Update angular velocity
+        av_roll = p + dp * dt
+        av_pitch = q + dq * dt
+        av_yaw = r + dr * dt
 
-        if full_coupling :
-            dwx = (moments_body[0] + (Iyy - Izz)*wy*wz) / Ixx
-            dwy = (moments_body[1] + (Izz - Ixx)*wz*wx) / Iyy
-            dwz = (moments_body[2] + (Ixx - Iyy)*wx*wy) / Izz
-        else: 
-            dwx = moments_body[0] / Ixx
-            dwy = moments_body[1] / Iyy
-            dwz = moments_body[2] / Izz
-
-        #Angular velocity
-        av_roll = wx + dwx * dt
-        av_pitch = wy + dwy * dt
-        av_yaw = wz + dwz * dt
-  
-        # Add some pitch & yaw damping due to fuselage 
-        av_pitch *= 0.99 ## arbitrary damping
+        # TODO: Replace artificial damping with proper aerodynamic damping derivatives
+        av_pitch *= 0.99
         av_yaw *= 0.99
 
-        # Just pitch at the moment
+        # DEBUG: Constrain to pitch-only motion
         av_yaw = 0
         av_roll = 0
         vy = 0
 
-        # Orientation
-        # Quaternion derivative
+        # Orientation update via quaternion derivative
         quat = state.orientation()
-        quat_dot = quaternion_derivative(quat, angular_velocity)
+        quat_dot = quaternion_derivative(quat, (p, q, r))
         qw = quat[0] + quat_dot[0] * dt
         qx = quat[1] + quat_dot[1] * dt
         qy = quat[2] + quat_dot[2] * dt
