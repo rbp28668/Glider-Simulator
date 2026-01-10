@@ -2,6 +2,7 @@
 
 
 from math import degrees, radians
+import math
 
 from quaternion import euler_to_quaternion, quaternion_rotate_vector, quaternion_rotate_vector_inverse, quaternion_to_euler
 
@@ -48,3 +49,18 @@ for i in range(0,100) :
     new_state = sim.update(dt)
 av = new_state.angular_velocity()
 print(f'Angular Velocity after 100 run: Roll: {av[0]}, Pitch:{av[1]},Yaw:{av[2]}')
+
+
+
+Vx = 30
+for Vz in [ x / 10 for x in range(-50,50)] :
+    sim.state.set_position((0.0, 0.0, -1000.0))  # Start at 1000m altitude
+    sim.state.set_velocity((Vx, 0.0, Vz))      # Initial forward speed 30 m/s
+    sim.state.set_orientation(euler_to_quaternion(0, radians(1.5),0))  # Pointing north, slight pitch up
+    sim.state.set_angular_velocity((0.0, 0.0, 0.0))  # Rolling right
+
+    sim.update(0.01)
+    alpha = math.degrees(math.atan2(Vz,Vx))
+
+    print(f'{Vx:.1f},{Vz:.1f},{alpha:.2f},{sim.state.forces[0]:.1f},{sim.state.forces[2]:.1f}')
+

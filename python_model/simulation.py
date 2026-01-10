@@ -28,6 +28,14 @@ class Simulation:
     def update(self, dt : float) -> StateVector:
         self.total_time += dt
 
+        simple = True
+        if simple:
+            return self.update_simple(dt)
+        else:
+            return self.update_rk4(dt)
+
+
+    def update_simple(self, dt : float) -> StateVector:
         state = self.state
         # Get wind
         wind_earth = self.world.get_wind_vector(state.position(), self.total_time)
@@ -52,8 +60,10 @@ class Simulation:
         
         # Gravity in body frame
         g = 9.81
-        g_earth = (0, 0, g)
+        g_earth = (0, 0, g) # +ve down
         g_body = quaternion_rotate_vector_inverse(orientation, g_earth)
+
+        print(f'G-Body {g_body[0]},{g_body[1]},{g_body[2]}')
 
         acc_x += g_body[0]
         acc_y += g_body[1]
@@ -146,7 +156,7 @@ class Simulation:
 
 
 
-    def update_rk4(self) -> StateVector:
+    def update_rk4(self, dt : float) -> StateVector:
 
         # Update aircraft state based on physics, control inputs, and world conditions
 

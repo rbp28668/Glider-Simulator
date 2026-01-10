@@ -244,7 +244,7 @@ class AirbrakePanel(Panel):
         Cl, Cd, Cm = self.coefficients_at(aoa)
 
         # Modify Cl based on airbrake extension (Crude!)
-        Cl *= 1-0.8 * controls.spoilers  # reduce lift with airbrake extension.  (est)
+        Cl *= 1-0.8 * controls.spoiler  # reduce lift with airbrake extension.  (est)
 
         # lift dependent drag.
         Cdi = (Cl * Cl ) / ( math.pi * aircraft.AR * aircraft.oswald)
@@ -258,7 +258,7 @@ class AirbrakePanel(Panel):
         # Now add in drag for spoiler
         Cd_spoiler = 1.8   # flat plate
         spoiler_area = 0.3 * self.area   # area of airbrake about 1/3 panel area?
-        d_spoiler = Cd_spoiler * q * spoiler_area * controls.spoilers
+        d_spoiler = Cd_spoiler * q * spoiler_area * controls.spoiler
         D += d_spoiler
 
         # convert L, D to body axes and sum

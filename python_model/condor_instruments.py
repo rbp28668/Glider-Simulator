@@ -59,10 +59,13 @@ class CondorInstruments :
         self.quaterniony = orientation[2]
         self.quaternionz = orientation[3]
 
+        # Reporting velocity in world coordinates
         velocity = quaternion_rotate_vector(orientation, velocity)
         self.vx = velocity[0]
         self.vy = velocity[1]
         self.vz = velocity[2]
+
+        self.vario = -velocity[2] # going up is now +ve
 
         av = state.angular_velocity()
         self.rollrate = av[0]
@@ -92,8 +95,8 @@ class CondorInstruments :
         f'quaterniony={self.quaterniony}', # quaternion y / 
         f'quaternionz={self.quaternionz}', # quaternion z /
         f'vx={self.vx}', # speed vector x m/s 
-        f'vy={self.vy}', # speed vector x m/s 
-        f'vz={self.vz}', # speed vector x m/s 
+        f'vy={self.vy}', # speed vector y m/s 
+        f'vz={self.vz}', # speed vector z m/s 
         f'rollrate={self.rollrate}', # roll rate (local system x) rad/s 
         f'pitchrate={self.pitchrate}', # pitch rate (local system y) rad/s 
         f'yawrate={self.yawrate}', # yaw rate (local system z) rad/s 

@@ -7,6 +7,7 @@ __docformat__ = 'restructuredtext'
 __version__ = '$Id: $'
 
 from math import degrees, pi, radians
+import math
 from condor_instruments import CondorInstruments
 import pyglet
 from pyglet.gl import *
@@ -76,6 +77,8 @@ def update(dt):
     v = state.velocity()
     att = state.Attitude()
 
+    alpha = math.degrees(math.atan2(v[2],v[0]))
+
     roll = att[0]
     pitch = att[1]
     yaw = att[2]
@@ -93,7 +96,8 @@ def update(dt):
 
     labels[3].text = f'Tas: {state.TotalAirspeed():.1f} m/s'
     labels[4].text = f'Alt: {state.Altitude():.1f} m'
-    labels[5].text = f'Heading: {state.Heading():.1f}°'
+    #labels[5].text = f'Heading: {state.Heading():.1f}°'
+    labels[5].text = f'Alpha: {alpha:.2f}°'
     #label2.text = f'pos: x={pos[0]:.1f} y={pos[1]:.1f} z={pos[2]:.1f}'
 
     labels[6].text = f'vx={v[0]:.1f}'
