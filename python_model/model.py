@@ -1,15 +1,32 @@
-
 from state_vector import StateVector
 from ask21 import ASK21
 from control_inputs import ControlInputs
 from world import World
 from v3d import V3d, TotalAirspeed, AngleOfAttack, SideslipAngle
 
+from math import degrees, radians, sin, cos, tan, asin, atan2, copysign, pi, isnan, isinf
 
-from math import degrees, radians, sin, cos, tan, asin, atan2, copysign, pi
+# Minimum airspeed for aerodynamic calculations (m/s)
+MIN_AIRSPEED = 1.0
+
+# Maximum total force/moment to prevent numerical overflow
+MAX_FORCE = 100000.0
+MAX_MOMENT = 500000.0
 
 
-class Model :
+def clamp(value: float, min_val: float, max_val: float) -> float:
+    """Clamp value to range [min_val, max_val]."""
+    return max(min_val, min(max_val, value))
+
+
+def safe_value(value: float, default: float = 0.0) -> float:
+    """Return default if value is NaN or Inf."""
+    if isnan(value) or isinf(value):
+        return default
+    return value
+
+
+class Model:
     """
     This is the aerodynamic model for the simulation.
     """
@@ -81,14 +98,22 @@ class Model :
         # This includes fuselage, canopy, wing-fuselage interference, control surface gaps, etc.
         fuselage_Cd_S = 0.025  # m² equivalent flat plate area
         tas = TotalAirspeed(relative_velocity)
-        q = 0.5 * world.air_density * tas * tas
-        fuselage_drag = fuselage_Cd_S * q
-        forces_body[0] -= fuselage_drag  # drag acts backward (-X direction)
+        if tas > MIN_AIRSPEED:
+            q = 0.5 * world.air_density * tas * tas
+            fuselage_drag = fuselage_Cd_S * q
+            forces_body[0] -= fuselage_drag  # drag acts backward (-X direction)
 
         # TODO - Cm_beta : pitch down with sideslip
 
+        # Sanitize and clamp final forces/moments to prevent numerical overflow
+        fx = clamp(safe_value(forces_body[0]), -MAX_FORCE, MAX_FORCE)
+        fy = clamp(safe_value(forces_body[1]), -MAX_FORCE, MAX_FORCE)
+        fz = clamp(safe_value(forces_body[2]), -MAX_FORCE, MAX_FORCE)
+        mx = clamp(safe_value(moments_body[0]), -MAX_MOMENT, MAX_MOMENT)
+        my = clamp(safe_value(moments_body[1]), -MAX_MOMENT, MAX_MOMENT)
+        mz = clamp(safe_value(moments_body[2]), -MAX_MOMENT, MAX_MOMENT)
 
-        return (forces_body[0], forces_body[1], forces_body[2]), (moments_body[0], moments_body[1], moments_body[2])
+        return (fx, fy, fz), (mx, my, mz)
 
 
     def tailplane_forces(self, state: StateVector, aircraft: ASK21, relative_velocity: V3d, controls: ControlInputs,  world: World) -> V3d:
@@ -116,44 +141,54 @@ class Model :
             relative_velocity[2] + vz_pitch) # add in extra vertical velocity do to pitch rate
         
 
-        aoa = AngleOfAttack(tailplane_velocity) + aircraft.tailplane_incidence 
-        aoa -= controls.pitch * radians(5) # TODO properly - elevator effect, just change AoA up to 5 degrees
+        tas = TotalAirspeed(tailplane_velocity)
+
+        # Low airspeed protection
+        if tas < MIN_AIRSPEED:
+            return (0.0, 0.0, 0.0)
+
+        aoa = AngleOfAttack(tailplane_velocity) + aircraft.tailplane_incidence
+        aoa -= controls.pitch * radians(5)  # TODO properly - elevator effect
 
         Cl, Cd, Cm = aircraft.tailplane.coefficients_at(aoa)
 
-        tas = TotalAirspeed(tailplane_velocity)
         q = 0.5 * world.air_density * tas * tas
         tp_L = Cl * q * aircraft.tailplane_area
         tp_D = Cd * q * aircraft.tailplane_area
-        M = 0 # tp_Cm * tp_q * aircraft.tailplane_area * aircraft.tailplane_quarter_chord  TODO - CM
-      
+        M = 0  # TODO - CM
 
-        # convert L, D to body axes and sum
         # Transform from wind axes to body axes (rotation by angle of attack about Y)
-        D = -tp_D * cos(aoa) - tp_L * sin(aoa)  # drag backwards (hence -ve)
+        D = -tp_D * cos(aoa) - tp_L * sin(aoa)  # drag backwards
         L =  tp_D * sin(aoa) - tp_L * cos(aoa)  # lift up is -ve Z in body axes
 
-        #print(f"Tailplane AoA: {degrees(aoa)},  L,D: {L},{D}, Dist:{dist}, Pitch rate: {pitch_rate}, vz_pitch:{vz_pitch},  V_tp: {tailplane_velocity[0]},{tailplane_velocity[1]},{tailplane_velocity[2]}")
-     
-        return (L,D, M)
+        return (safe_value(L), safe_value(D), safe_value(M))
   
     def fin_forces(self, state: StateVector, aircraft: ASK21, relative_airflow: V3d, controls: ControlInputs,  world: World) -> V3d:
-        fin_airflow = ( relative_airflow[0], relative_airflow[1] + state.angular_velocity()[2] * aircraft.fin_quarter_chord, relative_airflow[2]) # TODO sign?
-        fin_aoa = SideslipAngle(fin_airflow)  
-        
-        # TODO properly!! - rudder effect
-        fin_aoa += controls.rudder * radians(10)  # max 10 degrees deflection
-        
-        fin_Cl, fin_Cd, fin_Cm = aircraft.fin.coefficients_at(fin_aoa)
+        fin_airflow = (relative_airflow[0],
+                       relative_airflow[1] + state.angular_velocity()[2] * aircraft.fin_quarter_chord,
+                       relative_airflow[2])
+
         fin_tas = TotalAirspeed(fin_airflow)
+
+        # Low airspeed protection
+        if fin_tas < MIN_AIRSPEED:
+            return (0.0, 0.0, 0.0)
+
+        fin_aoa = SideslipAngle(fin_airflow)
+
+        # Rudder effect
+        fin_aoa += controls.rudder * radians(10)  # max 10 degrees deflection
+
+        fin_Cl, fin_Cd, fin_Cm = aircraft.fin.coefficients_at(fin_aoa)
         fin_q = 0.5 * world.air_density * fin_tas**2
-        fin_L = fin_Cl * fin_q * aircraft.fin_area 
+        fin_L = fin_Cl * fin_q * aircraft.fin_area
         fin_D = fin_Cd * fin_q * aircraft.fin_area
 
         # Transform from wind axes to body axes
         D = -fin_D * cos(fin_aoa) - fin_L * sin(fin_aoa)  # drag backwards
         L =  fin_D * sin(fin_aoa) - fin_L * cos(fin_aoa)  # side force (fin "lift")
-        return (L, D, 0.0)  # No fin moment for now
+
+        return (safe_value(L), safe_value(D), 0.0)
 
     @staticmethod
     def add(acc: list[float], v1: V3d, v2: V3d) -> None:

@@ -1,12 +1,31 @@
 import math
 from aerofoil import Aerofoil
-from math import atan2, cos, radians, sin
+from math import atan2, cos, radians, sin, isnan, isinf
 
 from aircraft_params import AircraftParameters
 from control_inputs import ControlInputs
 from state_vector import StateVector
 from v3d import AngleOfAttack, SideslipAngle, TotalAirspeed, V3d
 from world import World
+
+# Minimum airspeed for aerodynamic calculations (m/s)
+# Below this, forces are scaled to zero to prevent numerical instability
+MIN_AIRSPEED = 1.0
+
+# Maximum force magnitude per panel (N) - prevents runaway
+MAX_PANEL_FORCE = 50000.0
+
+
+def clamp(value: float, min_val: float, max_val: float) -> float:
+    """Clamp value to range [min_val, max_val]."""
+    return max(min_val, min(max_val, value))
+
+
+def safe_value(value: float, default: float = 0.0) -> float:
+    """Return default if value is NaN or Inf."""
+    if isnan(value) or isinf(value):
+        return default
+    return value
 
 
 class Panel:
@@ -18,10 +37,10 @@ class Panel:
     - modify_coefficients(): Adjust Cl, Cd, Cm (e.g., for spoiler lift reduction)
     - additional_drag(): Add extra drag (e.g., for deployed airbrakes)
     """
-    def __init__(self, span: float, area: float, quater_chord: float, mean_chord: float,
+    def __init__(self, area: float, mid_span: float, quater_chord: float, mean_chord: float,
                  incidenceDegrees: float, rootFoil: Aerofoil, tipFoil: Aerofoil, interp: float = 0.0):
-        self.mid_span = span
         self.area = area
+        self.mid_span = mid_span
         self.quater_chord = quater_chord
         self.incidence = radians(incidenceDegrees)
         self.rootFoil = rootFoil
@@ -50,6 +69,15 @@ class Panel:
         local_velocity = self.get_local_velocity(state, relative_velocity, sign)
 
         local_tas = TotalAirspeed(local_velocity)
+
+        # Protection against very low airspeed (stall/spin conditions)
+        if local_tas < MIN_AIRSPEED:
+            # Scale forces smoothly to zero as airspeed drops
+            airspeed_factor = local_tas / MIN_AIRSPEED
+            local_tas = MIN_AIRSPEED  # Prevent division issues
+        else:
+            airspeed_factor = 1.0
+
         local_alpha = AngleOfAttack(local_velocity)
         beta = SideslipAngle(local_velocity)
 
@@ -86,6 +114,16 @@ class Panel:
         # Body axes: X forward, Z down
         Fx = -D * cos(local_alpha) - L * sin(local_alpha)  # drag backwards in S&L flight
         Fz =  D * sin(local_alpha) - L * cos(local_alpha)  # lift is -ve Z in body axes
+
+        # Apply low-airspeed scaling
+        Fx *= airspeed_factor
+        Fz *= airspeed_factor
+        M *= airspeed_factor
+
+        # Clamp forces to prevent numerical instability
+        Fx = clamp(safe_value(Fx), -MAX_PANEL_FORCE, MAX_PANEL_FORCE)
+        Fz = clamp(safe_value(Fz), -MAX_PANEL_FORCE, MAX_PANEL_FORCE)
+        M = clamp(safe_value(M), -MAX_PANEL_FORCE * 10, MAX_PANEL_FORCE * 10)
 
         forces_body = Fx, 0.0, Fz  # drag in body X, side force 0, lift in body Z
 
