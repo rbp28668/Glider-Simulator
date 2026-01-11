@@ -1,12 +1,48 @@
-from math import sqrt, atan2, asin
+from math import sqrt, atan2, asin, isnan, isinf
 
 from ask21 import ASK21
 from world import World
 from state_vector import StateVector
-from quaternion import  euler_to_quaternion, quaternion_normalize, quaternion_rotate_vector, quaternion_rotate_vector_inverse, quaternion_derivative, quaternion_to_euler
+from quaternion import euler_to_quaternion, quaternion_normalize, quaternion_rotate_vector, quaternion_rotate_vector_inverse, quaternion_derivative, quaternion_to_euler
 from control_inputs import ControlInputs
 from model import Model
 from v3d import V3d
+
+# State limits to prevent numerical divergence
+MAX_VELOCITY = 500.0        # m/s - well beyond any realistic flight speed
+MAX_ANGULAR_RATE = 20.0     # rad/s - about 1150 deg/s
+MAX_POSITION = 1000000.0    # m - 1000 km
+
+
+def clamp(value: float, min_val: float, max_val: float) -> float:
+    """Clamp value to range [min_val, max_val]."""
+    return max(min_val, min(max_val, value))
+
+
+def safe_value(value: float, default: float = 0.0) -> float:
+    """Return default if value is NaN or Inf."""
+    if isnan(value) or isinf(value):
+        return default
+    return value
+
+
+def sanitize_velocity(vx: float, vy: float, vz: float) -> tuple[float, float, float]:
+    """Clamp velocity components to safe range."""
+    return (
+        clamp(safe_value(vx), -MAX_VELOCITY, MAX_VELOCITY),
+        clamp(safe_value(vy), -MAX_VELOCITY, MAX_VELOCITY),
+        clamp(safe_value(vz), -MAX_VELOCITY, MAX_VELOCITY)
+    )
+
+
+def sanitize_angular_velocity(p: float, q: float, r: float) -> tuple[float, float, float]:
+    """Clamp angular velocity components to safe range."""
+    return (
+        clamp(safe_value(p), -MAX_ANGULAR_RATE, MAX_ANGULAR_RATE),
+        clamp(safe_value(q), -MAX_ANGULAR_RATE, MAX_ANGULAR_RATE),
+        clamp(safe_value(r), -MAX_ANGULAR_RATE, MAX_ANGULAR_RATE)
+    )
+
 
 class Simulation:
     """
@@ -98,18 +134,18 @@ class Simulation:
         av_pitch = q + dq * dt
         av_yaw = r + dr * dt
 
-        # TODO: Replace artificial damping with proper aerodynamic damping derivatives
-        av_pitch *= 0.99
-        av_yaw *= 0.99
+        # Note: Artificial damping removed - natural aerodynamic damping comes from:
+        # - Tail seeing different AoA due to pitch rate (modeled in tailplane_forces)
+        # - For proper damping, add Cmq derivative term to pitching moment
 
         # DEBUG: Constrain to pitch-only motion
         av_yaw = 0
         av_roll = 0
         vy = 0
 
-        # Orientation update via quaternion derivative
+        # Orientation update via quaternion derivative (using NEW angular velocity)
         quat = state.orientation()
-        quat_dot = quaternion_derivative(quat, (p, q, r))
+        quat_dot = quaternion_derivative(quat, (av_roll, av_pitch, av_yaw))
         qw = quat[0] + quat_dot[0] * dt
         qx = quat[1] + quat_dot[1] * dt
         qy = quat[2] + quat_dot[2] * dt
@@ -127,10 +163,27 @@ class Simulation:
 
         new_state = StateVector()
 
-        new_state.set_position((px,py,pz))
-        new_state.set_velocity((vx,vy,vz))
-        new_state.set_angular_velocity((av_roll, av_pitch, av_yaw))
-        new_state.set_orientation( quaternion_normalize((qw,qx,qy,qz)))
+        # Sanitize position (allow large range but catch NaN/Inf)
+        new_state.set_position((
+            clamp(safe_value(px), -MAX_POSITION, MAX_POSITION),
+            clamp(safe_value(py), -MAX_POSITION, MAX_POSITION),
+            clamp(safe_value(pz), -MAX_POSITION, MAX_POSITION)
+        ))
+
+        # Sanitize velocity
+        new_state.set_velocity(sanitize_velocity(vx, vy, vz))
+
+        # Sanitize angular velocity
+        new_state.set_angular_velocity(sanitize_angular_velocity(av_roll, av_pitch, av_yaw))
+
+        # Sanitize quaternion (normalize handles most issues, but check for NaN)
+        quat_safe = (
+            safe_value(qw, 1.0),
+            safe_value(qx, 0.0),
+            safe_value(qy, 0.0),
+            safe_value(qz, 0.0)
+        )
+        new_state.set_orientation(quaternion_normalize(quat_safe))
         new_state.set_forces_moments(forces_body, moments_body)
 
         self.state = new_state
