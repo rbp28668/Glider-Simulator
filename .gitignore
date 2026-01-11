@@ -109,3 +109,5 @@ CGC_Sim_IOS/CGC_Sim_IOS/bin/
 CGC_Sim_IOS/CGC_Sim_IOS/obj/
 
 **/enc_temp_folder/**
+python_model/state.txt
+python_model/__pycache__/**
