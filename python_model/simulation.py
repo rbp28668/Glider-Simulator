@@ -56,6 +56,9 @@ class Simulation:
         self.state = StateVector()
         self.controls = ControlInputs()
         self.model = Model()
+        self.pitch_only = False
+        self.use_rk4 = True
+
 
     def reset(self):
         self.total_time = 0.0
@@ -63,12 +66,11 @@ class Simulation:
 
     def update(self, dt : float) -> StateVector:
         self.total_time += dt
-
-        simple = True
-        if simple:
-            return self.update_simple(dt)
-        else:
+       
+        if self.use_rk4:
             return self.update_rk4(dt)
+        else:
+            return self.update_simple(dt)
 
 
     def update_simple(self, dt : float) -> StateVector:
@@ -138,10 +140,11 @@ class Simulation:
         # - Tail seeing different AoA due to pitch rate (modeled in tailplane_forces)
         # - For proper damping, add Cmq derivative term to pitching moment
 
-        # DEBUG: Constrain to pitch-only motion
-        av_yaw = 0
-        av_roll = 0
-        vy = 0
+        # Constrain to pitch-only motion if set
+        if(self.pitch_only):
+            av_yaw = 0
+            av_roll = 0
+            vy = 0
 
         # Orientation update via quaternion derivative (using NEW angular velocity)
         quat = state.orientation()
@@ -207,25 +210,6 @@ class Simulation:
             self.aircraft.mass,
             [ self.aircraft.Ixx, self.aircraft.Iyy, self.aircraft.Izz, self.aircraft.Ixz ]
         )
-
-        # Entirely arbitrary damping
-        av = self.state.angular_velocity()
-        self.state.set_angular_velocity( (
-            av[0] * 0.9,
-            av[1] * 0.9,
-            av[2] * 0.9
-        ))
-
-        # Update time    
-        self.total_time += self.time_step
-
-        # Log state
-        with open("state.txt", "a") as file:
-            pos = self.state.position()
-            vel = self.state.velocity()
-            o = self.state.orientation()
-            r,p,y = quaternion_to_euler(o[0],o[1],o[2],o[3])
-            file.write(f"{self.total_time},{pos[0]},{pos[1]},{pos[2]},{vel[0]},{vel[1]},{vel[2]},{r},{p},{y}\n")
 
         return self.state
     
@@ -406,11 +390,6 @@ class Simulation:
         p_dot = (Izz * (L + gyro_L) + Ixz * (N + gyro_N)) / I_det
         q_dot = (M + gyro_M) / Iyy
         r_dot = (Ixz * (L + gyro_L) + Ixx * (N + gyro_N)) / I_det
-
-        # Replace values with simple uncoupled axes
-        p_dot = L / Ixx
-        q_dot = M / Iyy
-        r_dot = N / Izz
 
         return (p_dot, q_dot, r_dot)
 

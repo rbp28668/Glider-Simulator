@@ -90,7 +90,7 @@ class CondorInstruments :
         f'yawstringangle={self.yawstringangle}', # yawstring angle rad 
         f'yaw={self.yaw}', # yaw rad 
         f'pitch={-self.pitch}', # pitch rad (note condor expects -ve for pitch up)
-        f'bank={self.bank}', # bank rad 
+        f'bank={-self.bank}', # bank rad 
         f'quaternionx={self.quaternionx}', # quaternion x / 
         f'quaterniony={self.quaterniony}', # quaternion y / 
         f'quaternionz={self.quaternionz}', # quaternion z /
