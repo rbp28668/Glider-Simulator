@@ -38,7 +38,9 @@ class ASK21:
         rootPanel =     Panel(         3.215313306, 1.545740741, -0.3368518519, 1.347407407, incidenceDegrees, root, tip, 0.0)
         airbrakePanel = AirbrakePanel( 1.648746982, 3.440925926, -0.2935648148, 1.174259259, incidenceDegrees, root, tip, 0.2)  
         outerPanel =    Panel(         1.112233745, 4.668703704, -0.2644444444, 1.057777778, incidenceDegrees, root, tip, 0.5)
-        aileronPanel =  AileronPanel(  2.216578464, 6.585925926, -0.211712963, 0.7964814815, incidenceDegrees, root, tip, 0.7)  
+        aileronPanel =  AileronPanel(  2.216578464, 6.585925926, -0.211712963, 0.7964814815, incidenceDegrees, root, tip, 0.7,
+                                        max_up_deg=18.0, max_down_deg=12.0,  # differential aileron
+                                        lift_effectiveness=0.6, moment_coeff=-0.4, profile_drag_coeff=0.01)  
         tipPanel =      Panel(         0.287909808, 8.238703704, -0.1629166667, 0.5509259259, incidenceDegrees, root, tip, 1.0)  
         self.wing = [
             rootPanel,
@@ -75,14 +77,19 @@ class ASK21:
 
 
         # Contact points for ground detection. Relative to datum. Fwd and down are +ve.
-        noseWheel = ContactPoint(1.64962963, 0.0, 0.6737037037)  
-        mainWheelLeft = ContactPoint(-0.6611111111, 0.0, 0.7303703704) 
-        tailWheel = ContactPoint(-5.263703704, 0.0, 0.2203703704)  
-        leftTip = ContactPoint(-0.4092592593, -self.wing_span / 2, -0.4533333333)
-        rightTip = ContactPoint(-0.4092592593, self.wing_span / 2, -0.4533333333)
+        # contact_type determines stiffness, damping, friction and max penetration:
+        #   nose_wheel: 5cm max penetration
+        #   main_wheel: 10cm max penetration
+        #   tail_wheel: 5cm max penetration
+        #   wingtip: 2cm max penetration
+        noseWheel = ContactPoint(1.64962963, 0.0, 0.6737037037, contact_type='nose_wheel')
+        mainWheel = ContactPoint(-0.6611111111, 0.0, 0.7303703704, contact_type='main_wheel')
+        tailWheel = ContactPoint(-5.263703704, 0.0, 0.2203703704, contact_type='tail_wheel')
+        leftTip = ContactPoint(-0.4092592593, -self.wing_span / 2, -0.4533333333, contact_type='wingtip')
+        rightTip = ContactPoint(-0.4092592593, self.wing_span / 2, -0.4533333333, contact_type='wingtip')
         self.contact_points = [
             noseWheel,
-            mainWheelLeft,
+            mainWheel,
             tailWheel,
             leftTip,
             rightTip

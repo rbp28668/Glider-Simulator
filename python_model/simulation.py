@@ -6,6 +6,8 @@ from state_vector import StateVector
 from quaternion import euler_to_quaternion, quaternion_normalize, quaternion_rotate_vector, quaternion_rotate_vector_inverse, quaternion_derivative, quaternion_to_euler
 from control_inputs import ControlInputs
 from model import Model
+from ground_contact import GroundContact
+from winch import Winch
 from v3d import V3d
 
 # State limits to prevent numerical divergence
@@ -52,10 +54,13 @@ class Simulation:
         self.time_step = 0.01  # seconds
         self.total_time = 0.0  # seconds
         self.world = World()
-        self.aircraft = ASK21()  
+        self.aircraft = ASK21()
         self.state = StateVector()
         self.controls = ControlInputs()
         self.model = Model()
+        self.ground_contact = GroundContact(self.aircraft.cg)
+        self.winch = Winch()
+        self.winch_info = {}  # Diagnostic info from last winch calculation
         self.pitch_only = False
         self.use_rk4 = True
 
@@ -216,28 +221,54 @@ class Simulation:
 
     def calculate_forces_moments(self, state: StateVector) -> tuple[V3d, V3d]:
         """
-        Calculate aerodynamic forces and moments
-        
+        Calculate total forces and moments (aerodynamic + ground contact + winch)
+
         Args:
             state: Current state vector
-        
+
         Returns:
             forces_body: [Fx, Fy, Fz] (N)
             moments_body: [L, M, N] (N·m)
         """
         # Get wind
         wind_earth = self.world.get_wind_vector(state.position(), self.total_time)
-        
+
         # Calculate airspeed with wind
         V_air_body = self.apply_wind_to_state(state, wind_earth)
-        
+
         # Calculate aerodynamics
-        forces_body, moments_body = self.model.calculate_aerodynamics(
+        aero_forces, aero_moments = self.model.calculate_aerodynamics(
             state, self.aircraft, self.controls, self.world, V_air_body
         )
-        
+
+        # Calculate ground contact forces
+        ground_forces, ground_moments, _ = self.ground_contact.calculate_ground_forces(
+            state, self.aircraft.contact_points, self.world, self.aircraft.cg
+        )
+
+        # Calculate winch forces
+        hook_body = self.aircraft.winch_hook.position_body()
+        winch_forces, winch_moments, self.winch_info = self.winch.calculate_forces(
+            state, hook_body, self.time_step
+        )
+
+        # Accumulate total forces and moments
+        forces_body = (
+            aero_forces[0] + ground_forces[0] + winch_forces[0],
+            aero_forces[1] + ground_forces[1] + winch_forces[1],
+            aero_forces[2] + ground_forces[2] + winch_forces[2]
+        )
+
+        moments_body = (
+            aero_moments[0] + ground_moments[0] + winch_moments[0],
+            aero_moments[1] + ground_moments[1] + winch_moments[1],
+            aero_moments[2] + ground_moments[2] + winch_moments[2]
+        )
+
 
         return forces_body, moments_body
+
+ 
 
 
 
@@ -282,6 +313,9 @@ class Simulation:
         new_state = state.rk4_sum(k1, k2, k3, k4, dt)
         new_state.normalize_orientation()
         
+        # Set final forces and moments for logging / display
+        new_state.set_forces_moments(forces4, moments4)
+
         return new_state
 
     @staticmethod
@@ -443,3 +477,32 @@ class Simulation:
         
         return (u_air, v_air, w_air) 
 
+    def setup_winch_launch(self, winch_distance: float = 1000.0,
+                           max_tension: float = 6000.0,
+                           weak_link: float = 8000.0):
+        """
+        Set up for a winch launch.
+
+        Args:
+            winch_distance: Distance to winch from starting position (m)
+            max_tension: Maximum cable tension (N)
+            weak_link: Weak link breaking tension (N)
+        """
+        # Position winch ahead of glider (in X direction)
+        pos = self.state.position()
+        winch_pos = (pos[0] + winch_distance, pos[1], 0.0)  # On ground
+
+        self.winch = Winch(
+            winch_position=winch_pos,
+            max_tension=max_tension,
+            weak_link=weak_link,
+            cable_length=winch_distance + 200.0
+        )
+
+    def engage_winch(self):
+        """Engage the winch cable."""
+        self.winch.engage()
+
+    def release_winch(self):
+        """Release the winch cable."""
+        self.winch.release("manual")

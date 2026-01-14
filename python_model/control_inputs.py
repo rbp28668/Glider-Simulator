@@ -1,5 +1,3 @@
-import pyglet
-
 class ControlInputs:
     def __init__(self):
         self.pitch = 0.0  # [-1, +1] fwd/aft

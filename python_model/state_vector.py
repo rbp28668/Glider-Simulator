@@ -1,5 +1,5 @@
 from math import pi
-from quaternion import Quaternion, quaternion_normalize, quaternion_to_euler
+from quaternion import Quaternion, quaternion_normalize, quaternion_to_euler, quaternion_rotate_vector
 from v3d import V3d
 
 class StateVector:
@@ -179,8 +179,16 @@ class StateVector:
             heading_deg += 360
         return heading_deg
     
+    # Attitude: roll, pitch, heading in radians
     def Attitude(self) -> tuple[float,float,float]:
         qw, qx, qy, qz = self.orientation()
         phi, theta, psi = quaternion_to_euler(qw, qx, qy, qz)
         return phi,theta,psi
+    
+    def VerticalSpeed(self) -> float:
+        # Vertical speed in m/s (negative w in NED convention)
+        v = self.velocity()
+        q = self.orientation()
+        v = quaternion_rotate_vector(q, v) # Convert body to earth frame
+        return -v[2]   
         

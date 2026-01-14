@@ -200,14 +200,80 @@ class Panel:
 
 
 class AileronPanel(Panel):
-    """Panel with aileron control surface."""
+    """Panel with aileron control surface.
+
+    Models aileron effects including:
+    - Camber change affecting lift (via effective AoA shift)
+    - Pitching moment change due to camber
+    - Differential deflection (up vs down travel)
+    - Profile drag from deflection
+
+    Thin airfoil theory: A plain flap deflection changes:
+    - Zero-lift angle: Δα_0 ≈ -ε * δ (ε = lift_effectiveness, typically 0.5-0.7)
+    - Pitching moment: ΔCm = moment_coeff * δ (typically -0.3 to -0.5 per radian)
+    """
+
+    def __init__(self, area: float, mid_span: float, quater_chord: float, mean_chord: float,
+                 incidenceDegrees: float, rootFoil: Aerofoil, tipFoil: Aerofoil, interp: float = 0.0,
+                 max_up_deg: float = 5.0, max_down_deg: float = 5.0,
+                 lift_effectiveness: float = 0.6, moment_coeff: float = -0.4,
+                 profile_drag_coeff: float = 0.01):
+        """
+        Args:
+            lift_effectiveness: Fraction of deflection that acts as AoA change for lift.
+                               Thin airfoil theory gives ~0.5-0.7 for typical aileron chord ratios.
+            moment_coeff: Change in Cm per radian of deflection (negative = nose down for
+                         trailing-edge-down deflection). Typical range -0.3 to -0.5.
+            profile_drag_coeff: Drag coefficient per radian² of deflection.
+        """
+        super().__init__(area, mid_span, quater_chord, mean_chord, incidenceDegrees, rootFoil, tipFoil, interp)
+        self.max_up = radians(max_up_deg)      # max deflection for up-going aileron
+        self.max_down = radians(max_down_deg)  # max deflection for down-going aileron
+        self.lift_effectiveness = lift_effectiveness  # how much deflection changes effective AoA
+        self.moment_coeff = moment_coeff              # ΔCm per radian of deflection
+        self.profile_drag_coeff = profile_drag_coeff  # drag coefficient per radian² of deflection
+        self._last_deflection = 0.0  # store for drag and moment calculation
 
     def modify_aoa(self, aoa: float, controls: ControlInputs, sign: float) -> float:
-        """Aileron deflection changes effective angle of attack."""
-        # Roll right: reduce AoA on right wing (+sign), increase AoA on left wing (-sign)
-        # TODO: model this more accurately with camber change
-        max_deflection = radians(5)
-        return aoa - controls.roll * max_deflection * sign
+        """Aileron deflection changes effective angle of attack (camber effect on lift).
+
+        Differential: up-going aileron can deflect more than down-going.
+        - controls.roll * sign > 0: aileron goes up (reduces AoA/lift)
+        - controls.roll * sign < 0: aileron goes down (increases AoA/lift)
+
+        The lift_effectiveness factor accounts for the fact that a plain flap
+        is less effective at changing lift than a pure AoA change.
+        """
+        command = controls.roll * sign
+        if command >= 0:
+            # Up-going aileron (reduces lift on this wing)
+            deflection = command * self.max_up
+        else:
+            # Down-going aileron (increases lift on this wing)
+            deflection = command * self.max_down
+
+        self._last_deflection = deflection
+        # Apply lift effectiveness - deflection is less effective than pure AoA change
+        return aoa - deflection * self.lift_effectiveness
+
+    def modify_coefficients(self, Cl: float, Cd: float, Cm: float,
+                            controls: ControlInputs) -> tuple[float, float, float]:
+        """Modify pitching moment due to aileron camber change.
+
+        Trailing-edge-down deflection (positive δ) creates nose-down moment (negative ΔCm).
+        This is because the aft camber increase shifts the center of pressure rearward.
+        """
+        # Moment change due to camber: ΔCm = moment_coeff * δ
+        # Note: _last_deflection is positive for up-aileron (reduces camber)
+        # So we negate it: down deflection should give negative ΔCm
+        delta_Cm = self.moment_coeff * (-self._last_deflection)
+        return Cl, Cd, Cm + delta_Cm
+
+    def additional_drag(self, q: float, controls: ControlInputs) -> float:
+        """Deflected aileron adds profile drag proportional to deflection²."""
+        # Drag increment: Cd = k * δ²
+        Cd_aileron = self.profile_drag_coeff * self._last_deflection * self._last_deflection
+        return Cd_aileron * q * self.area
 
 
 class AirbrakePanel(Panel):

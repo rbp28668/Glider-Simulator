@@ -84,13 +84,14 @@ class Model:
         #print(f'Tailplane Effect -  Moment: {moments_body[1]}, L:{tp_L}, D:{tp_D}, M:{tp_M}')
 
         #Fin
-        fin_L, fin_D, fin_M = self.fin_forces(state, aircraft, relative_velocity, control_inputs, world)
+        fin_L, fin_D, fin_yaw_damping = self.fin_forces(state, aircraft, relative_velocity, control_inputs, world)
         forces_body[0] += fin_D     # drag in body X
         forces_body[1] -= fin_L     # side force in body Y
 
         # Moments (about c.g.)
         dist = aircraft.fin_quarter_chord - aircraft.cg
         moments_body[2] += fin_L * dist  # yaw moment due to side force at fin quarter chord
+        moments_body[2] += fin_yaw_damping  # explicit yaw damping
 
 
         # Fuselage drag approximation
@@ -164,8 +165,14 @@ class Model:
         return (safe_value(L), safe_value(D), safe_value(M))
   
     def fin_forces(self, state: StateVector, aircraft: ASK21, relative_airflow: V3d, controls: ControlInputs,  world: World) -> V3d:
+        # Distance from CG to fin (positive = aft of CG)
+        fin_arm = aircraft.cg - aircraft.fin_quarter_chord  # positive value (~4.78m)
+
+        # Yaw rate effect on fin airflow
+        # Use original sign convention which was stable
+        yaw_rate = state.angular_velocity()[2]
         fin_airflow = (relative_airflow[0],
-                       relative_airflow[1] + state.angular_velocity()[2] * aircraft.fin_quarter_chord,
+                       relative_airflow[1] + yaw_rate * aircraft.fin_quarter_chord,
                        relative_airflow[2])
 
         fin_tas = TotalAirspeed(fin_airflow)
@@ -177,18 +184,24 @@ class Model:
         fin_aoa = SideslipAngle(fin_airflow)
 
         # Rudder effect
-        fin_aoa += controls.rudder * radians(10)  # max 10 degrees deflection
+        fin_aoa += controls.rudder * radians(15)  # max 15 degrees deflection
 
         fin_Cl, fin_Cd, fin_Cm = aircraft.fin.coefficients_at(fin_aoa)
         fin_q = 0.5 * world.air_density * fin_tas**2
         fin_L = fin_Cl * fin_q * aircraft.fin_area
         fin_D = fin_Cd * fin_q * aircraft.fin_area
 
+        # Additional yaw damping (Cnr effect) - opposes yaw rate
+        # This represents damping from fuselage, fin boundary layer, etc.
+        Cnr = 0.05  # yaw damping coefficient
+        yaw_damping = Cnr * yaw_rate * fin_q * aircraft.fin_area * fin_arm
+
         # Transform from wind axes to body axes
         D = -fin_D * cos(fin_aoa) - fin_L * sin(fin_aoa)  # drag backwards
         L =  fin_D * sin(fin_aoa) - fin_L * cos(fin_aoa)  # side force (fin "lift")
 
-        return (safe_value(L), safe_value(D), 0.0)
+        # Return side force, drag, and yaw damping moment
+        return (safe_value(L), safe_value(D), safe_value(yaw_damping))
 
     @staticmethod
     def add(acc: list[float], v1: V3d, v2: V3d) -> None:
