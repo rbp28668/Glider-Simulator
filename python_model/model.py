@@ -4,7 +4,7 @@ from control_inputs import ControlInputs
 from world import World
 from v3d import V3d, TotalAirspeed, AngleOfAttack, SideslipAngle
 
-from math import degrees, radians, sin, cos, tan, asin, atan2, copysign, pi, isnan, isinf
+from math import radians, sin, cos, isnan, isinf
 
 # Minimum airspeed for aerodynamic calculations (m/s)
 MIN_AIRSPEED = 1.0

@@ -3,7 +3,7 @@ from math import sqrt, atan2, asin, isnan, isinf
 from ask21 import ASK21
 from world import World
 from state_vector import StateVector
-from quaternion import euler_to_quaternion, quaternion_normalize, quaternion_rotate_vector, quaternion_rotate_vector_inverse, quaternion_derivative, quaternion_to_euler
+from quaternion import  quaternion_normalize, quaternion_rotate_vector, quaternion_rotate_vector_inverse, quaternion_derivative
 from control_inputs import ControlInputs
 from model import Model
 from ground_contact import GroundContact
@@ -71,6 +71,7 @@ class Simulation:
 
     def update(self, dt : float) -> StateVector:
         self.total_time += dt
+        print(f"DT: {dt}")
        
         if self.use_rk4:
             return self.update_rk4(dt)
@@ -413,7 +414,7 @@ class Simulation:
         L, M, N = moments_body             # roll moment, pitch moment, yaw moment
         
         # Inertia determinant
-        I_det = Ixx * Izz - Ixz**2
+        I_det = Ixx * Izz - Ixz**2         # note - in practice this is fixed
         
         # Gyroscopic terms
         gyro_L = (Izz - Iyy) * q * r - Ixz * p * q

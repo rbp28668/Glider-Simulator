@@ -162,9 +162,9 @@ class StateVector:
         w = self.state[5]
         V = (u**2 + v**2 + w**2)**0.5
         from math import asin
-        if V == 0:
+        if V < 0.001: # zero if very slow
             return 0.0
-        return asin(v / V)
+        return asin(v / V) # must be in range -1..1
     
     def Altitude(self) -> float:
         # Altitude is negative Z in NED convention

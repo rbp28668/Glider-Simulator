@@ -6,6 +6,8 @@ This document describes the winch launch simulation model implemented in `winch.
 
 The winch model simulates a ground-based winch that reels in a cable attached to the glider's winch hook, providing the force for a winch launch. This is a common method of launching gliders where a powerful motor-driven drum winds in a steel cable attached to the glider, pulling it into the air.
 
+The skylaunch winch used has a 450 bhp Big block chevy v8 8.2 litre or (7.4 litre) LPG engine driving through turbo 400, 3 speed automatic gearbox.  The gearbox includes a torque converter.  This allows engine speed to largely operate within the optimum power band irrespective of cable speed.  The ASK21 glider uses a black weak link of 1000kg breaking force.  In a launch, the winch driver will start with full power and then back off the power later in the launch to avoid the glider over-speeding 
+
 ## Physics Model
 
 ### Cable Geometry

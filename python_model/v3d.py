@@ -26,6 +26,6 @@ def SideslipAngle(velocity: V3d) -> float:
     w = velocity[2]
     V = (u**2 + v**2 + w**2)**0.5
     from math import asin
-    if V == 0:
+    if V < 0.001 : # very slow
         return 0.0
     return asin(v / V)

@@ -1,0 +1,31 @@
+Based on exploring the codebase, here are the key aspects impacting numerical stability:
+
+  Critical Issues
+
+  1. Inertia Matrix Singularity (simulation.py:416) - The angular acceleration calculation divides by I_det = Ixx * Izz - Ixz² without checking if it's near zero. Could produce Inf/NaN.
+  2. Quaternion Normalization Edge Case (quaternion.py:33) - Uses exact norm == 0 comparison instead of a tolerance like norm < 1e-10. Near-zero norms could fail silently.
+  3. Ground Contact Hard-Stop (ground_contact.py:220) - Quadratic stiffening beyond max penetration creates rapid discontinuities that could cause oscillation with the 0.01s timestep.
+  4. asin() Domain Violations - Floating-point rounding could push v/V outside [-1, 1] before calling asin() in sideslip angle and pitch extraction.
+
+  Moderate Concerns
+
+  5. Winch Tension Discontinuity (winch.py:206-214) - Jump from power-limited to max tension at v_cable = 1.0 m/s boundary.
+  6. Gyroscopic Coupling - Products of angular rates (p×q, p×r) with inertia differences can create very large moments at high rotation rates.
+  7. Spline Division Safety (spline.py:45-46) - Denominators not checked for near-zero values.
+  8. Contact Damping - Very light damping ratio (ζ ≈ 0.19) means the system will oscillate after ground impacts.
+
+  Good Practices Already in Place
+
+  - RK4 integration (more stable than Euler)
+  - Quaternion normalization after each RK4 stage
+  - MIN_AIRSPEED = 1.0 protection for aerodynamic calculations
+  - safe_value() and clamp() sanitization functions
+  - asin() domain clamping for pitch extraction
+
+  Recommendations
+
+  1. Add check: if abs(I_det) < tolerance: before angular acceleration division
+  2. Use if norm < 1e-8: instead of exact zero comparison
+  3. Clamp sideslip ratio to [-1, 1] before asin()
+  4. Consider smoothing winch power transition
+  5. Increase contact damping or add adaptive timestep for ground contact

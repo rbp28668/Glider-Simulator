@@ -34,9 +34,9 @@ class Winch:
 
     def __init__(self,
                  winch_position: V3d = (1000.0, 0.0, 0.0),
-                 max_tension: float = 6000.0,
-                 weak_link: float = 8000.0,
-                 cable_length: float = 1200.0):
+                 max_tension: float = 9000.0,
+                 weak_link: float = 10000.0,
+                 cable_length: float = 1500.0):
         """
         Initialize winch.
 
@@ -44,11 +44,11 @@ class Winch:
             winch_position: (X, Y, Z) position of winch drum in earth frame (m)
                            Default 1000m ahead (north), on ground
             max_tension: Maximum cable tension from winch power (N)
-                        Default 6000N (~1.3x glider weight for good climb)
+                        Default 9000N (~1.3x glider weight for good climb)
             weak_link: Tension at which weak link breaks (N)
-                      Default 8000N
+                      Default 10000N
             cable_length: Total cable length on drum (m)
-                         Default 1200m
+                         Default 1500m
         """
         self.winch_position = winch_position
         self.max_tension = max_tension
@@ -67,7 +67,7 @@ class Winch:
 
         # Winch drum model
         self.drum_speed = 30.0  # Target reel-in speed (m/s)
-        self.drum_power = 150000.0  # Winch power (W) - ~200 HP
+        self.drum_power = 335000.0  # Winch power (W) - ~450 HP
 
     def engage(self, initial_cable_out: float = None):
         """
