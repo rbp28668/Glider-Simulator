@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P3DWebApiDriverDemo", "P3DW
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lua", "Lua\Lua.vcxproj", "{F3B53C7A-45F6-4047-A76A-8866C7C534F0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "P3DWinch", "P3DWinch\P3DWinch.vcxproj", "{C511AFEB-5E3A-45F7-A657-389EEC8CC51F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,16 @@ Global
 		{F3B53C7A-45F6-4047-A76A-8866C7C534F0}.Release|Win32.Build.0 = Release|Win32
 		{F3B53C7A-45F6-4047-A76A-8866C7C534F0}.Release|x64.ActiveCfg = Release|x64
 		{F3B53C7A-45F6-4047-A76A-8866C7C534F0}.Release|x64.Build.0 = Release|x64
+		{C511AFEB-5E3A-45F7-A657-389EEC8CC51F}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{C511AFEB-5E3A-45F7-A657-389EEC8CC51F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C511AFEB-5E3A-45F7-A657-389EEC8CC51F}.Debug|Win32.Build.0 = Debug|Win32
+		{C511AFEB-5E3A-45F7-A657-389EEC8CC51F}.Debug|x64.ActiveCfg = Debug|x64
+		{C511AFEB-5E3A-45F7-A657-389EEC8CC51F}.Debug|x64.Build.0 = Debug|x64
+		{C511AFEB-5E3A-45F7-A657-389EEC8CC51F}.Release|Any CPU.ActiveCfg = Release|Win32
+		{C511AFEB-5E3A-45F7-A657-389EEC8CC51F}.Release|Win32.ActiveCfg = Release|Win32
+		{C511AFEB-5E3A-45F7-A657-389EEC8CC51F}.Release|Win32.Build.0 = Release|Win32
+		{C511AFEB-5E3A-45F7-A657-389EEC8CC51F}.Release|x64.ActiveCfg = Release|x64
+		{C511AFEB-5E3A-45F7-A657-389EEC8CC51F}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
