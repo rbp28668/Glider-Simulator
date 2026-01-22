@@ -71,7 +71,6 @@ class Simulation:
 
     def update(self, dt : float) -> StateVector:
         self.total_time += dt
-        print(f"DT: {dt}")
        
         if self.use_rk4:
             return self.update_rk4(dt)
