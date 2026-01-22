@@ -199,11 +199,12 @@ class Model{
         auto L =  fin_D * sin(fin_aoa) - fin_L * cos(fin_aoa);  // side force (fin "lift")
 
         forces[0] += D;     // drag in body X
-        forces[1] -= L;     // side force in body Y
+        forces[1] += L;     // side force already in body frame (negative = left)
 
         // Moments (about c.g.)
+        // Yaw moment = position_x × Fy = dist × L
         auto dist = aircraft.fin_quarter_chord - aircraft.cg;
-        moments[2] += L * dist;  // yaw moment due to side force at fin quarter chord
+        moments[2] += L * dist;  // yaw moment from side force at fin
         moments[2] += yaw_damping;  // explicit yaw damping
         }
 

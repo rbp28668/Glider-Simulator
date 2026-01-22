@@ -140,6 +140,24 @@ class StateVector:
         norm = quaternion_normalize(quat)
         self.set_orientation(norm)
 
+    def sanitize(self) -> None:
+        """Clamp velocities and angular rates to prevent numerical overflow."""
+        MAX_VELOCITY = 500.0      # m/s
+        MAX_ANGULAR_RATE = 20.0   # rad/s
+
+        def clamp(value, limit):
+            return max(-limit, min(limit, value))
+
+        # Clamp velocities
+        self.state[3] = clamp(self.state[3], MAX_VELOCITY)
+        self.state[4] = clamp(self.state[4], MAX_VELOCITY)
+        self.state[5] = clamp(self.state[5], MAX_VELOCITY)
+
+        # Clamp angular rates
+        self.state[10] = clamp(self.state[10], MAX_ANGULAR_RATE)
+        self.state[11] = clamp(self.state[11], MAX_ANGULAR_RATE)
+        self.state[12] = clamp(self.state[12], MAX_ANGULAR_RATE)
+
     # Total airspeed: V = √(u² + v² + w²)
     def TotalAirspeed(self) -> float:
         u = self.state[3]

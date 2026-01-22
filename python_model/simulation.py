@@ -294,24 +294,28 @@ class Simulation:
         # k2
         state2 = state.offset(k1, 0.5*dt) #[state[i] + 0.5*dt*k1[i] for i in range(13)]
         state2.normalize_orientation()
+        state2.sanitize()
         forces2, moments2 = forces_moments_func(state2)
         k2 = self.state_derivative(state2, forces2, moments2, mass, inertia)
-        
+
         # k3
         state3 = state.offset(k2, 0.5*dt) #[state[i] + 0.5*dt*k2[i] for i in range(13)]
         state3.normalize_orientation()
+        state3.sanitize()
         forces3, moments3 = forces_moments_func(state3)
         k3 = self.state_derivative(state3, forces3, moments3, mass, inertia)
-        
+
         # k4
         state4 = state.offset(k3, dt) #[state[i] + dt*k3[i] for i in range(13)]
         state4.normalize_orientation()
+        state4.sanitize()
         forces4, moments4 = forces_moments_func(state4)
         k4 = self.state_derivative(state4, forces4, moments4, mass, inertia)
-        
+
         # Combine & normalize
         new_state = state.rk4_sum(k1, k2, k3, k4, dt)
         new_state.normalize_orientation()
+        new_state.sanitize()
         
         # Set final forces and moments for logging / display
         new_state.set_forces_moments(forces4, moments4)

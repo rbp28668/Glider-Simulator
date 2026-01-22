@@ -151,6 +151,8 @@ def on_draw():
         label.draw()
     
 def update(dt):
+    # Clamp dt to prevent instability from large timesteps (e.g., on first frame or lag)
+    dt = min(dt, 0.05)  # Max 50ms per step
 
     # Read joystick inputs
     controls.update()

@@ -84,13 +84,14 @@ class Model:
         #print(f'Tailplane Effect -  Moment: {moments_body[1]}, L:{tp_L}, D:{tp_D}, M:{tp_M}')
 
         #Fin
-        fin_L, fin_D, fin_yaw_damping = self.fin_forces(state, aircraft, relative_velocity, control_inputs, world)
-        forces_body[0] += fin_D     # drag in body X
-        forces_body[1] -= fin_L     # side force in body Y
+        fin_sideforce, fin_D, fin_yaw_damping = self.fin_forces(state, aircraft, relative_velocity, control_inputs, world)
+        forces_body[0] += fin_D           # drag in body X
+        forces_body[1] += fin_sideforce   # side force already in body frame (negative = left)
 
         # Moments (about c.g.)
+        # Yaw moment = position_x × Fy = dist × fin_sideforce
         dist = aircraft.fin_quarter_chord - aircraft.cg
-        moments_body[2] += fin_L * dist  # yaw moment due to side force at fin quarter chord
+        moments_body[2] += fin_sideforce * dist  # yaw moment from side force at fin
         moments_body[2] += fin_yaw_damping  # explicit yaw damping
 
 
