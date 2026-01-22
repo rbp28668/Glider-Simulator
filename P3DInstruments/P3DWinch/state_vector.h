@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include "quaternion.h"
 
 /*
@@ -90,11 +91,26 @@ public:
 
     // Copy constructor
     StateVector(const StateVector &other)
-        : _position(other.position),
-          _velocity(other.velocity),
-          _orientation(other.orientation),
-          _angular_velocity(other.angular_velocity)
+        : _position(other._position),
+          _velocity(other._velocity),
+          _orientation(other._orientation),
+          _angular_velocity(other._angular_velocity)
     {
+    }
+
+    // As we have a copy constructor also need assignment operator otherwise
+    // we get attempting to reference a deleted function
+    StateVector& operator=(const StateVector& other)
+    {
+        // Guard self assignment
+        if (this == &other)
+            return *this;
+
+        _position = other._position;
+        _velocity = other._velocity;
+        _orientation = other._orientation;
+        _angular_velocity = other._angular_velocity;
+        return *this;
     }
 
     // Accessor methods
@@ -149,7 +165,7 @@ public:
 
     // Create a new StateVector offset by a fraction of another StateVector
     // For RK4 integration steps
-    StateVector<T> offset(const StateVector<T> &deltaState, T fraction)
+    StateVector<T> offset(const StateVector<T> &deltaState, T fraction) const
     {
 
         std::array<T, 13> state_array;
@@ -170,7 +186,7 @@ public:
         return StateVector<T>(state_array);
     }
 
-    StateVector<T> rk4_sum(const StateVector &k1, const StateVector &k2, const StateVector &k3, const StateVector &k4, T dt)
+    StateVector<T> rk4_sum(const StateVector &k1, const StateVector &k2, const StateVector &k3, const StateVector &k4, T dt) const
     {
         // Combine RK4 increments to produce new state
         // was:       new_state = [ state[i] + (dt/6)*(k1[i] + 2*k2[i] + 2*k3[i] + k4[i])  for i in range(13)  ]
@@ -184,7 +200,7 @@ public:
         state_array[5] = _velocity[2] + (dt / 6) * (k1._velocity[2] + 2 * k2._velocity[2] + 2 * k3._velocity[2] + k4._velocity[2]);
         state_array[6] = _orientation[0] + (dt / 6) * (k1._orientation[0] + 2 * k2._orientation[0] + 2 * k3._orientation[0] + k4._orientation[0]);
         state_array[7] = _orientation[1] + (dt / 6) * (k1._orientation[1] + 2 * k2._orientation[1] + 2 * k3._orientation[1] + k4._orientation[1]);
-        state_array[8] = _orientation[2] + (dt / 6) * (k1._orientation[2] + 2 * k2._orientation[2] + 2 * k3._orientation[2] + k4.vorientation[2]);
+        state_array[8] = _orientation[2] + (dt / 6) * (k1._orientation[2] + 2 * k2._orientation[2] + 2 * k3._orientation[2] + k4._orientation[2]);
         state_array[9] = _orientation[3] + (dt / 6) * (k1._orientation[3] + 2 * k2._orientation[3] + 2 * k3._orientation[3] + k4._orientation[3]);
         state_array[10] = _angular_velocity[0] + (dt / 6) * (k1._angular_velocity[0] + 2 * k2._angular_velocity[0] + 2 * k3._angular_velocity[0] + k4._angular_velocity[0]);
         state_array[11] = _angular_velocity[1] + (dt / 6) * (k1._angular_velocity[1] + 2 * k2._angular_velocity[1] + 2 * k3._angular_velocity[1] + k4._angular_velocity[1]);

@@ -147,7 +147,9 @@ class GroundContact:
                 total_moment[1] += result.moment_body[1]
                 total_moment[2] += result.moment_body[2]
 
-        return tuple(total_force), tuple(total_moment), results
+        tf = total_force[0], total_force[1], total_force[2]
+        tm = total_moment[0], total_moment[1], total_moment[2]
+        return tf, tm, results
 
     def _calculate_single_contact(self,
                                   state: StateVector,

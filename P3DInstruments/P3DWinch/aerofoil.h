@@ -1,5 +1,6 @@
 // Aerofoil class using natural cubic splines for CL, CD, CM vs Alpha (degrees).
 
+#pragma once
 
 #include <cmath>
 #include <fstream>
@@ -88,7 +89,7 @@ public:
         cms = nullptr;
     }
 
-    Coefficients coefficients_at(float alpha_rad) {
+    Coefficients coefficients_at(float alpha_rad) const {
         //Return (CL, CD, CM) for a given alpha in radians.
         //Alpha is wrapped into [0, 2pi) radians before interpolation.
 

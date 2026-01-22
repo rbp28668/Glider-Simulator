@@ -3,15 +3,15 @@
 
 #include <iostream>
 
-#include "quaternion.h"
-#include "state_vector.h"
+#include "simulation.h"
 
 
 int main(int argc, char* argv[])
 {
-    Quaternion<float> q;
+    
 
-    StateVector<float> state;
+    Simulation simulation;
+
 
     std::cout << "Hello World!\n";
 }

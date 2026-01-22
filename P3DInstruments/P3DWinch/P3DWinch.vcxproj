@@ -153,11 +153,22 @@
     <ClInclude Include="Aerofoil_FX_02_196.h" />
     <ClInclude Include="Aerofoil_FX_60_126.h" />
     <ClInclude Include="Aerofoil_NACA0010.h" />
+    <ClInclude Include="aircraft_params.h" />
+    <ClInclude Include="ask21.h" />
+    <ClInclude Include="contact_point.h" />
+    <ClInclude Include="control_inputs.h" />
+    <ClInclude Include="ground_contact.h" />
+    <ClInclude Include="local_math.h" />
+    <ClInclude Include="model.h" />
+    <ClInclude Include="panel.h" />
     <ClInclude Include="quaternion.h" />
+    <ClInclude Include="simulation.h" />
     <ClInclude Include="Spline.h" />
     <ClInclude Include="state_vector.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="v3d.h" />
+    <ClInclude Include="winch.h" />
+    <ClInclude Include="world.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -211,7 +211,7 @@ class Simulation:
         # Integration
         self.state = self.rk4_step(
             self.state,
-            self.time_step,
+            dt,
             self.calculate_forces_moments,
             self.aircraft.mass,
             [ self.aircraft.Ixx, self.aircraft.Iyy, self.aircraft.Izz, self.aircraft.Ixz ]

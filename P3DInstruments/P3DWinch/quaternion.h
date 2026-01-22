@@ -26,6 +26,24 @@ struct Quaternion
         data[3] = z;
     }
 
+    Quaternion(const Quaternion& q) {
+        data[0] = q.data[0];
+        data[1] = q.data[1];
+        data[2] = q.data[2];
+        data[3] = q.data[3];
+    }
+
+    Quaternion& operator=(const Quaternion& other) {
+        if (this == &other) return *this;
+
+        data[0] = other.data[0];
+        data[1] = other.data[1];
+        data[2] = other.data[2];
+        data[3] = other.data[3];
+        return *this;
+    }
+
+
     T &operator[](int idx)
     {
         return data[idx];
@@ -52,9 +70,9 @@ struct Quaternion
 
     // Quaternion Conjugate
     // Conjugate of quaternion: q* = [qw, -qx, -qy, -qz]
-    Quaternion<T> conjugate(const Quaternion<T> &q)
+    Quaternion<T> conjugate()
     {
-        return Quaternion(q[0], -q[1], -q[2], -q[3]);
+        return Quaternion(data[0], -data[1], -data[2], -data[3]);
     }
 
     // Quaternion Normalization
@@ -64,9 +82,18 @@ struct Quaternion
     {
         T w = data[0], x = data[1], y = data[2], z = data[3];
         T norm = sqrt(w * w + x * x + y * y + z * z);
-        if (norm < 0.0001)                         // very small rather than 0
-            return Quaternion<T>(1.0, 0.0, 0.0, 0.0); // Default to no rotation
-        return Quaternion<T>(w / norm, x / norm, y / norm, z / norm);
+        if (norm < 0.0001f) {                         // very small rather than 0
+            data[0] = 1.0f;
+            data[1] = 0.0f;
+            data[2] = 0.0f;
+            data[3] = 0.0f;
+        }
+        else {
+            data[0] = w / norm;
+            data[1] = x / norm;
+            data[2] = y / norm;
+            data[3] = z / norm;
+        }
     }
 
     // Euler Angles to Quaternion
@@ -142,7 +169,7 @@ struct Quaternion
         Quaternion v_quat = Quaternion(0, v[0], v[1], v[2]);
 
         // Compute q ⊗ v ⊗ q*
-        Quaternion q_conj = conjugate(*this);
+        Quaternion q_conj = conjugate();
         Quaternion temp = (*this) * v_quat; // quaternion_multiply(q, v_quat)
         Quaternion result = temp * q_conj;  // quaternion_multiply(temp, q_conj)
 
@@ -174,10 +201,10 @@ struct Quaternion
         T qw = data[0], qx = data[1], qy = data[2], qz = data[3];
         T p = omega[0], q_rate = omega[1], r = omega[2]; // roll, pitch, yaw rates
 
-        T q_dot_w = -0.5 * (qx * p + qy * q_rate + qz * r);
-        T q_dot_x = 0.5 * (qw * p + qy * r - qz * q_rate);
-        T q_dot_y = 0.5 * (qw * q_rate + qz * p - qx * r);
-        T q_dot_z = 0.5 * (qw * r + qx * q_rate - qy * p);
+        T q_dot_w = -0.5f * (qx * p + qy * q_rate + qz * r);
+        T q_dot_x = 0.5f * (qw * p + qy * r - qz * q_rate);
+        T q_dot_y = 0.5f * (qw * q_rate + qz * p - qx * r);
+        T q_dot_z = 0.5f * (qw * r + qx * q_rate - qy * p);
 
         return Quaternion(q_dot_w, q_dot_x, q_dot_y, q_dot_z);
     }

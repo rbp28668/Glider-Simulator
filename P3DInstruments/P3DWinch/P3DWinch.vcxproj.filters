@@ -62,5 +62,38 @@
     <ClInclude Include="aerofoil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="world.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="aircraft_params.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ask21.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="contact_point.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="control_inputs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ground_contact.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="local_math.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="panel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simulation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="winch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
