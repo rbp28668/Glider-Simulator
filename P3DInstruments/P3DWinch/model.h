@@ -88,6 +88,13 @@ class Model{
             // Damping moment: Clp * (p * b/2V) * q * S * b
             auto roll_damping = Clp * roll_rate * q * wing_area * wing_span / (2.0f * tas);
             moments_body[0] += roll_damping;
+
+            // Adverse yaw from aileron (Cn_δa effect)
+            // Down-going aileron increases lift and induced drag, up-going decreases it
+            // This drag differential creates yaw opposite to roll direction
+            float Cn_da = -0.01f;  // adverse yaw derivative (per unit roll command)
+            auto adverse_yaw = Cn_da * control_inputs.aileron * q * wing_area * wing_span;
+            moments_body[2] += adverse_yaw;
         }
 
         // Fuselage drag approximation
