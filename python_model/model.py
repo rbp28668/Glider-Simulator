@@ -95,13 +95,26 @@ class Model:
         moments_body[2] += fin_yaw_damping  # explicit yaw damping
 
 
+        # Explicit roll damping (Clp effect)
+        # Wing panels provide some damping via local velocity, but add explicit term
+        # for robustness at high rates. Clp is typically -0.4 to -0.5 for gliders.
+        roll_rate = state.angular_velocity()[0]
+        tas = TotalAirspeed(relative_velocity)
+        if tas > MIN_AIRSPEED:
+            q = 0.5 * world.air_density * tas * tas
+            Clp = -0.4  # roll damping derivative
+            wing_span = aircraft.wing_span
+            wing_area = wing_span**2 / aircraft.get_params().AR  # S = b²/AR
+            # Damping moment: Clp * (p * b/2V) * q * S * b
+            # Simplified: Clp * p * q * S * b² / (2V)
+            roll_damping = Clp * roll_rate * q * wing_area * wing_span / (2 * tas)
+            moments_body[0] += roll_damping
+
         # Fuselage drag approximation
         # ASK-21 fuselage equivalent flat plate area ~0.025 m² (typical for training glider)
         # This includes fuselage, canopy, wing-fuselage interference, control surface gaps, etc.
         fuselage_Cd_S = 0.025  # m² equivalent flat plate area
-        tas = TotalAirspeed(relative_velocity)
         if tas > MIN_AIRSPEED:
-            q = 0.5 * world.air_density * tas * tas
             fuselage_drag = fuselage_Cd_S * q
             forces_body[0] -= fuselage_drag  # drag acts backward (-X direction)
 
