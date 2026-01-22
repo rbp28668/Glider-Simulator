@@ -123,19 +123,24 @@ class Model:
         # This includes fuselage, canopy, wing-fuselage interference, control surface gaps, etc.
         fuselage_Cd_S = 0.025  # m² equivalent flat plate area
         if tas > MIN_AIRSPEED:
+            beta = SideslipAngle(relative_velocity)
+            sin_beta = sin(beta)
+            cos_beta = cos(beta)
+
+            # Base forward drag (streamlined flight)
             fuselage_drag = fuselage_Cd_S * q
             forces_body[0] -= fuselage_drag  # drag acts backward (-X direction)
 
-        # Fuselage side-area drag (critical for sideslip dynamics)
-        # ASK-21 fuselage side projected area ~5 m², Cd ~1.0 for bluff body in crossflow
-        # This creates drag proportional to sin²(beta), opposing sideslip
-        fuselage_side_Cd_S = 5.0  # m² effective side area * Cd
-        if tas > MIN_AIRSPEED:
-            beta = SideslipAngle(relative_velocity)
-            sin_beta = sin(beta)
-            # Side drag force opposes sideslip velocity (acts in -Y when v > 0)
-            side_drag = fuselage_side_Cd_S * q * sin_beta * abs(sin_beta)
-            forces_body[1] -= side_drag  # opposes sideslip
+            # Additional forward drag due to sideslip (fuselage no longer streamlined)
+            # Side area ~5 m² contributes to forward drag proportional to sin²(beta)
+            # This causes rapid descent in a full slip - used by glider pilots to lose altitude
+            fuselage_side_Cd_S = 5.0  # m² effective side area * Cd
+            sideslip_drag = fuselage_side_Cd_S * q * sin_beta * sin_beta
+            forces_body[0] -= sideslip_drag  # additional forward drag in sideslip
+
+            # Side force from fuselage (opposes sideslip velocity)
+            side_force = fuselage_side_Cd_S * q * sin_beta * abs(sin_beta)
+            forces_body[1] -= side_force  # opposes sideslip
 
         # TODO - Cm_beta : pitch down with sideslip
 
