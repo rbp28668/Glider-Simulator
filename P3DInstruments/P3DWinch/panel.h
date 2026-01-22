@@ -37,7 +37,7 @@ protected:
     float interp;     // interpolation factor between root and tip aerofoils (0.0 = root, 1.0 = tip)
     float mean_chord; // mean aerodynamic chord (m)
 
-    float clamp(float value, float min_val, float max_val)
+    float clamp(float value, float min_val, float max_val) const
     {
         // Clamp value to range [min_val, max_val].
         return std::max(min_val, std::min(max_val, value));
@@ -74,6 +74,13 @@ public:
         auto local_velocity = get_local_velocity(state, relative_velocity, sign);
 
         auto local_tas = local_velocity.TotalAirspeed();
+
+        // Cap local TAS to prevent runaway at extreme angular rates
+        // At high roll rates, wing tip velocity can dominate, creating unrealistic forces
+        const float MAX_LOCAL_TAS = 100.0f;  // m/s - well beyond glider flight envelope
+        if (local_tas > MAX_LOCAL_TAS) {
+            local_tas = MAX_LOCAL_TAS;
+        }
 
         // Protection against very low airspeed (stall/spin conditions)
         float airspeed_factor = 1.0f;
@@ -187,10 +194,16 @@ public:
     //     local_airflow: Local airflow vector [u, v, w] at panel in body frame.
     V3d<float> get_local_velocity(const StateVector<float> &state, const V3d<float> &relative_velocity, float sign) const
     {
+        // Limit angular rate contribution to prevent runaway at extreme rates
+        // Cap effective rate to ~3 rad/s which gives reasonable tip velocities
+        const float MAX_RATE_EFFECT = 3.0f;  // rad/s
+        auto p = clamp(state.angular_velocity()[0], -MAX_RATE_EFFECT, MAX_RATE_EFFECT);
+        auto r = clamp(state.angular_velocity()[2], -MAX_RATE_EFFECT, MAX_RATE_EFFECT);
+
         // Change in z velocity. If rolling right, panel going down and Z increasing
-        auto dz = state.angular_velocity()[0] * mid_span * sign;
+        auto dz = p * mid_span * sign;
         // Change in x velocity. If yawing right, right panel retreating and X decreasing
-        auto dx = -state.angular_velocity()[2] * mid_span * sign;
+        auto dx = -r * mid_span * sign;
 
         auto local_airflow = V3d<float>(relative_velocity[0] + dx, relative_velocity[1], relative_velocity[2] + dz);
         return local_airflow;

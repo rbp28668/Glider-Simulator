@@ -70,6 +70,12 @@ class Panel:
 
         local_tas = TotalAirspeed(local_velocity)
 
+        # Cap local TAS to prevent runaway at extreme angular rates
+        # At high roll rates, wing tip velocity can dominate, creating unrealistic forces
+        MAX_LOCAL_TAS = 100.0  # m/s - well beyond glider flight envelope
+        if local_tas > MAX_LOCAL_TAS:
+            local_tas = MAX_LOCAL_TAS
+
         # Protection against very low airspeed (stall/spin conditions)
         if local_tas < MIN_AIRSPEED:
             # Scale forces smoothly to zero as airspeed drops
@@ -173,10 +179,16 @@ class Panel:
         Returns:
             local_airflow: Local airflow vector [u, v, w] at panel in body frame.
         """
+        # Limit angular rate contribution to prevent runaway at extreme rates
+        # Cap effective rate to ~3 rad/s which gives reasonable tip velocities
+        MAX_RATE_EFFECT = 3.0  # rad/s
+        p = max(-MAX_RATE_EFFECT, min(MAX_RATE_EFFECT, state.angular_velocity()[0]))
+        r = max(-MAX_RATE_EFFECT, min(MAX_RATE_EFFECT, state.angular_velocity()[2]))
+
         # Change in z velocity. If rolling right, panel going down and Z increasing
-        dz = state.angular_velocity()[0] * self.mid_span * sign
+        dz = p * self.mid_span * sign
         # Change in x velocity. If yawing right, right panel retreating and X decreasing
-        dx = -state.angular_velocity()[2] * self.mid_span * sign
+        dx = -r * self.mid_span * sign
 
         local_airflow = relative_velocity[0] + dx, relative_velocity[1], relative_velocity[2] + dz
         return local_airflow
