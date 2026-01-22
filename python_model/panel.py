@@ -89,7 +89,10 @@ class Panel:
         # Hook: allow subclasses to modify AoA (e.g., aileron deflection)
         aoa = self.modify_aoa(aoa, controls, sign)
 
-        aoa_beta += aircraft.dihedral_angle  # add dihedral effect
+        # Dihedral effect: when slipping right (beta > 0), right wing sees increased AoA,
+        # left wing sees decreased AoA. This creates restoring roll moment (Cl_beta).
+        # The sign parameter differentiates right (+1) from left (-1) wing.
+        aoa_beta += aircraft.dihedral_angle * sign
         aoa = aoa * cos(beta) + aoa_beta * sin(beta)
 
         Cl, Cd, Cm = self.coefficients_at(aoa)
