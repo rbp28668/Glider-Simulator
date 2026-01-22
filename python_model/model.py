@@ -100,6 +100,7 @@ class Model:
         # for robustness at high rates. Clp is typically -0.4 to -0.5 for gliders.
         roll_rate = state.angular_velocity()[0]
         tas = TotalAirspeed(relative_velocity)
+        q = 0 # dynamic pressure
         if tas > MIN_AIRSPEED:
             q = 0.5 * world.air_density * tas * tas
             Clp = -0.4  # roll damping derivative
