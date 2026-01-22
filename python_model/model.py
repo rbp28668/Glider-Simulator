@@ -110,6 +110,13 @@ class Model:
             roll_damping = Clp * roll_rate * q * wing_area * wing_span / (2 * tas)
             moments_body[0] += roll_damping
 
+            # Adverse yaw from aileron (Cn_δa effect)
+            # Down-going aileron increases lift and induced drag, up-going decreases it
+            # This drag differential creates yaw opposite to roll direction
+            Cn_da = -0.01  # adverse yaw derivative (per unit roll command)
+            adverse_yaw = Cn_da * control_inputs.roll * q * wing_area * wing_span
+            moments_body[2] += adverse_yaw
+
         # Fuselage drag approximation
         # ASK-21 fuselage equivalent flat plate area ~0.025 m² (typical for training glider)
         # This includes fuselage, canopy, wing-fuselage interference, control surface gaps, etc.
