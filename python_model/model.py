@@ -169,10 +169,12 @@ class Model:
         fin_arm = aircraft.cg - aircraft.fin_quarter_chord  # positive value (~4.78m)
 
         # Yaw rate effect on fin airflow
-        # Use original sign convention which was stable
+        # When yawing right (r > 0), fin swings left, sees airflow from right (increased v)
+        # Fin velocity = ω × r = (0, r * x_fin, 0) where x_fin < 0, so v_fin < 0
+        # Relative airflow = aircraft_airflow - fin_velocity, so v increases
         yaw_rate = state.angular_velocity()[2]
         fin_airflow = (relative_airflow[0],
-                       relative_airflow[1] + yaw_rate * aircraft.fin_quarter_chord,
+                       relative_airflow[1] - yaw_rate * aircraft.fin_quarter_chord,
                        relative_airflow[2])
 
         fin_tas = TotalAirspeed(fin_airflow)
@@ -193,8 +195,9 @@ class Model:
 
         # Additional yaw damping (Cnr effect) - opposes yaw rate
         # This represents damping from fuselage, fin boundary layer, etc.
+        # Negative sign ensures moment opposes yaw rate (damping, not divergence)
         Cnr = 0.05  # yaw damping coefficient
-        yaw_damping = Cnr * yaw_rate * fin_q * aircraft.fin_area * fin_arm
+        yaw_damping = -Cnr * yaw_rate * fin_q * aircraft.fin_area * fin_arm
 
         # Transform from wind axes to body axes
         D = -fin_D * cos(fin_aoa) - fin_L * sin(fin_aoa)  # drag backwards
