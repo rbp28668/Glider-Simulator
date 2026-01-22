@@ -162,12 +162,11 @@ class Model{
         auto fin_arm = aircraft.cg - aircraft.fin_quarter_chord;  // positive value (~4.78m)
 
         // Yaw rate effect on fin airflow
-        // When yawing right (r > 0), fin swings left, sees airflow from right (increased v)
-        // Fin velocity = ω × r = (0, r * x_fin, 0) where x_fin < 0, so v_fin < 0
-        // Relative airflow = aircraft_airflow - fin_velocity, so v increases
+        // When yawing right (r > 0), fin at x<0 moves left, experiencing "headwind" from left
+        // This reduces the v-component of airflow at fin, creating restoring moment
         auto yaw_rate = state.angular_velocity()[2];
         auto fin_airflow = V3d<float>(relative_velocity[0],
-                       relative_velocity[1] - yaw_rate * aircraft.fin_quarter_chord,
+                       relative_velocity[1] + yaw_rate * aircraft.fin_quarter_chord,
                        relative_velocity[2]);
 
         auto fin_tas = fin_airflow.TotalAirspeed();
