@@ -100,6 +100,19 @@ class Model{
             forces_body[0] -= fuselage_drag;  // drag acts backward (-X direction)
         }
 
+        // Fuselage side-area drag (critical for sideslip dynamics)
+        // ASK-21 fuselage side projected area ~5 m², Cd ~1.0 for bluff body in crossflow
+        // This creates drag proportional to sin²(beta), opposing sideslip
+        float fuselage_side_Cd_S = 5.0f;  // m² effective side area * Cd
+        if (tas > MIN_AIRSPEED) {
+            auto q = 0.5f * world.air_density * tas * tas;
+            auto beta = relative_velocity.SideslipAngle();
+            auto sin_beta = sin(beta);
+            // Side drag force opposes sideslip velocity (acts in -Y when v > 0)
+            auto side_drag = fuselage_side_Cd_S * q * sin_beta * fabs(sin_beta);
+            forces_body[1] -= side_drag;  // opposes sideslip
+        }
+
         // TODO - Cm_beta : pitch down with sideslip
 
         // Sanitize and clamp final forces/moments to prevent numerical overflow

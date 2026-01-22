@@ -265,7 +265,6 @@ class Simulation:
             aero_moments[2] + ground_moments[2] + winch_moments[2]
         )
 
-
         return forces_body, moments_body
 
  

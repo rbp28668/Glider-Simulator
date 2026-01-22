@@ -70,12 +70,6 @@ class Panel:
 
         local_tas = TotalAirspeed(local_velocity)
 
-        # Cap local TAS to prevent runaway at extreme angular rates
-        # At high roll rates, wing tip velocity can dominate, creating unrealistic forces
-        MAX_LOCAL_TAS = 100.0  # m/s - well beyond glider flight envelope
-        if local_tas > MAX_LOCAL_TAS:
-            local_tas = MAX_LOCAL_TAS
-
         # Protection against very low airspeed (stall/spin conditions)
         if local_tas < MIN_AIRSPEED:
             # Scale forces smoothly to zero as airspeed drops
@@ -98,8 +92,11 @@ class Panel:
         # Dihedral effect: when slipping right (beta > 0), right wing sees increased AoA,
         # left wing sees decreased AoA. This creates restoring roll moment (Cl_beta).
         # The sign parameter differentiates right (+1) from left (-1) wing.
-        aoa_beta += aircraft.dihedral_angle * sign
-        aoa = aoa * cos(beta) + aoa_beta * sin(beta)
+        # Simple linear model: delta_aoa = dihedral * beta * sign
+        # Limited to prevent runaway at extreme sideslip
+        MAX_DIHEDRAL_BETA = 0.35  # ~20 degrees - beyond this, flow is separated/nonlinear
+        beta_limited = max(-MAX_DIHEDRAL_BETA, min(MAX_DIHEDRAL_BETA, beta))
+        aoa += aircraft.dihedral_angle * beta_limited * sign
 
         Cl, Cd, Cm = self.coefficients_at(aoa)
 
@@ -179,11 +176,8 @@ class Panel:
         Returns:
             local_airflow: Local airflow vector [u, v, w] at panel in body frame.
         """
-        # Limit angular rate contribution to prevent runaway at extreme rates
-        # Cap effective rate to ~3 rad/s which gives reasonable tip velocities
-        MAX_RATE_EFFECT = 3.0  # rad/s
-        p = max(-MAX_RATE_EFFECT, min(MAX_RATE_EFFECT, state.angular_velocity()[0]))
-        r = max(-MAX_RATE_EFFECT, min(MAX_RATE_EFFECT, state.angular_velocity()[2]))
+        p = state.angular_velocity()[0]
+        r = state.angular_velocity()[2]
 
         # Change in z velocity. If rolling right, panel going down and Z increasing
         dz = p * self.mid_span * sign

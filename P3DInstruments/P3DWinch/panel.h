@@ -75,13 +75,6 @@ public:
 
         auto local_tas = local_velocity.TotalAirspeed();
 
-        // Cap local TAS to prevent runaway at extreme angular rates
-        // At high roll rates, wing tip velocity can dominate, creating unrealistic forces
-        const float MAX_LOCAL_TAS = 100.0f;  // m/s - well beyond glider flight envelope
-        if (local_tas > MAX_LOCAL_TAS) {
-            local_tas = MAX_LOCAL_TAS;
-        }
-
         // Protection against very low airspeed (stall/spin conditions)
         float airspeed_factor = 1.0f;
         if (local_tas < MIN_AIRSPEED)
@@ -94,9 +87,6 @@ public:
         auto local_alpha = local_velocity.AngleOfAttack();
         auto beta = local_velocity.SideslipAngle();
 
-        // Effective AoA for sideslip
-        auto aoa_beta = atan2(local_velocity[1], local_velocity[0]);
-
         auto aoa = local_alpha + incidence; // add geometric incidence angle
 
         // Hook: allow subclasses to modify AoA (e.g., aileron deflection)
@@ -105,8 +95,11 @@ public:
         // Dihedral effect: when slipping right (beta > 0), right wing sees increased AoA,
         // left wing sees decreased AoA. This creates restoring roll moment (Cl_beta).
         // The sign parameter differentiates right (+1) from left (-1) wing.
-        aoa_beta += aircraft.DihedralAngle() * sign;
-        aoa = aoa * cos(beta) + aoa_beta * sin(beta);
+        // Simple linear model: delta_aoa = dihedral * beta * sign
+        // Limited to prevent runaway at extreme sideslip
+        const float MAX_DIHEDRAL_BETA = 0.35f;  // ~20 degrees
+        auto beta_limited = clamp(beta, -MAX_DIHEDRAL_BETA, MAX_DIHEDRAL_BETA);
+        aoa += aircraft.DihedralAngle() * beta_limited * sign;
 
         Aerofoil::Coefficients coeffs = coefficients_at(aoa);
 
@@ -194,11 +187,8 @@ public:
     //     local_airflow: Local airflow vector [u, v, w] at panel in body frame.
     V3d<float> get_local_velocity(const StateVector<float> &state, const V3d<float> &relative_velocity, float sign) const
     {
-        // Limit angular rate contribution to prevent runaway at extreme rates
-        // Cap effective rate to ~3 rad/s which gives reasonable tip velocities
-        const float MAX_RATE_EFFECT = 3.0f;  // rad/s
-        auto p = clamp(state.angular_velocity()[0], -MAX_RATE_EFFECT, MAX_RATE_EFFECT);
-        auto r = clamp(state.angular_velocity()[2], -MAX_RATE_EFFECT, MAX_RATE_EFFECT);
+        auto p = state.angular_velocity()[0];
+        auto r = state.angular_velocity()[2];
 
         // Change in z velocity. If rolling right, panel going down and Z increasing
         auto dz = p * mid_span * sign;
