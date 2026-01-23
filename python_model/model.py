@@ -4,7 +4,7 @@ from control_inputs import ControlInputs
 from world import World
 from v3d import V3d, TotalAirspeed, AngleOfAttack, SideslipAngle
 
-from math import radians, sin, cos, isnan, isinf
+from math import radians, sin, cos, isnan, isinf, copysign
 
 # Minimum airspeed for aerodynamic calculations (m/s)
 MIN_AIRSPEED = 1.0
@@ -99,6 +99,7 @@ class Model:
         # Wing panels provide some damping via local velocity, but add explicit term
         # for robustness at high rates. Clp is typically -0.4 to -0.5 for gliders.
         roll_rate = state.angular_velocity()[0]
+        yaw_rate = state.angular_velocity()[2]
         tas = TotalAirspeed(relative_velocity)
         q = 0 # dynamic pressure
         if tas > MIN_AIRSPEED:
@@ -143,6 +144,23 @@ class Model:
             forces_body[1] -= side_force  # opposes sideslip
 
         # TODO - Cm_beta : pitch down with sideslip
+
+        # High-rate damping to prevent unrealistic spin-up during stall
+        # This always applies, regardless of airspeed, to ensure stability
+        # when normal aero damping breaks down at high AoA
+        HIGH_RATE_THRESHOLD = 0.5  # rad/s (~30 deg/s) - above this, extra damping kicks in
+        HIGH_RATE_DAMP = 8000.0    # N.m.s/rad - strong damping coefficient
+
+        roll_rate = state.angular_velocity()[0]
+        yaw_rate = state.angular_velocity()[2]
+
+        if abs(roll_rate) > HIGH_RATE_THRESHOLD:
+            excess_rate = roll_rate - copysign(HIGH_RATE_THRESHOLD, roll_rate)
+            moments_body[0] -= HIGH_RATE_DAMP * excess_rate
+
+        if abs(yaw_rate) > HIGH_RATE_THRESHOLD:
+            excess_rate = yaw_rate - copysign(HIGH_RATE_THRESHOLD, yaw_rate)
+            moments_body[2] -= HIGH_RATE_DAMP * excess_rate
 
         # Sanitize and clamp final forces/moments to prevent numerical overflow
         fx = clamp(safe_value(forces_body[0]), -MAX_FORCE, MAX_FORCE)

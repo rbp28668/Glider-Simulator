@@ -124,6 +124,25 @@ class Model{
 
         // TODO - Cm_beta : pitch down with sideslip
 
+        // High-rate damping to prevent unrealistic spin-up during stall
+        // This always applies, regardless of airspeed, to ensure stability
+        // when normal aero damping breaks down at high AoA
+        const float HIGH_RATE_THRESHOLD = 0.5f;  // rad/s (~30 deg/s)
+        const float HIGH_RATE_DAMP = 8000.0f;    // N.m.s/rad
+
+        float roll_rate = state.angular_velocity()[0];
+        float yaw_rate = state.angular_velocity()[2];
+
+        if (std::abs(roll_rate) > HIGH_RATE_THRESHOLD) {
+            float excess_rate = roll_rate - std::copysign(HIGH_RATE_THRESHOLD, roll_rate);
+            moments_body[0] -= HIGH_RATE_DAMP * excess_rate;
+        }
+
+        if (std::abs(yaw_rate) > HIGH_RATE_THRESHOLD) {
+            float excess_rate = yaw_rate - std::copysign(HIGH_RATE_THRESHOLD, yaw_rate);
+            moments_body[2] -= HIGH_RATE_DAMP * excess_rate;
+        }
+
         // Sanitize and clamp final forces/moments to prevent numerical overflow
         forces[0] = clamp(safe_value(forces_body[0]), -MAX_FORCE, MAX_FORCE);
         forces[1] = clamp(safe_value(forces_body[1]), -MAX_FORCE, MAX_FORCE);
