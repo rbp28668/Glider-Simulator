@@ -168,11 +168,10 @@ class Model{
 
         auto aoa = tailplane_velocity.AngleOfAttack() + aircraft.tailplane_incidence;
 
-        // Elevator effect: stick back (negative elevator input) raises nose
-        // Back stick → elevator trailing edge UP → reduces effective tailplane AoA
-        // → less lift at tail → tail drops → nose rises
+        // Elevator effect: positive elevator input (forward stick) reduces tailplane AoA
+        // Forward stick → elevator trailing edge DOWN → less lift at tail → nose down
         auto elevator_deflection = control_inputs.elevator * aircraft.elevator_max_deflection;
-        aoa += elevator_deflection * 0.6f;  // Elevator effectiveness ~0.6 (plain flap factor)
+        aoa -= elevator_deflection * 0.6f;  // Elevator effectiveness ~0.6 (plain flap factor)
 
         auto coeffs = aircraft.tailplane.coefficients_at(aoa);
         auto Cl = coeffs.Cl;

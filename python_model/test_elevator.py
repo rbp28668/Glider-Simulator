@@ -23,8 +23,8 @@ def test_elevator():
     p, q, r = sim.state.angular_velocity()
     print(f"  After stabilize: pitch rate = {degrees(q):.2f} deg/s")
 
-    # Apply full back stick
-    sim.controls.pitch = -1.0  # Full back stick
+    # Apply full back stick (positive = back/aft)
+    sim.controls.pitch = 1.0  # Full back stick
 
     print(f"\n  Time   Pitch Rate   Notes")
     print("  " + "-" * 40)
@@ -59,8 +59,8 @@ def test_elevator():
 
     # Progressively pull back
     for phase in range(3):
-        # Increase back stick
-        sim2.controls.pitch = -0.3 * (phase + 1)  # -0.3, -0.6, -0.9
+        # Increase back stick (positive = back/aft)
+        sim2.controls.pitch = 0.3 * (phase + 1)  # +0.3, +0.6, +0.9
 
         for i in range(200):  # 2 seconds each phase
             sim2.update(dt)

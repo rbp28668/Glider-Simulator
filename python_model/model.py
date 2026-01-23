@@ -188,11 +188,10 @@ class Model:
 
         aoa = AngleOfAttack(tailplane_velocity) + aircraft.tailplane_incidence
 
-        # Elevator effect: stick back (negative pitch input) raises nose
-        # Back stick → elevator trailing edge UP → reduces effective tailplane AoA
-        # → less lift at tail → tail drops → nose rises
+        # Elevator effect: positive pitch input (forward stick) reduces tailplane AoA
+        # Forward stick → elevator trailing edge DOWN → less lift at tail → nose down
         elevator_deflection = controls.pitch * aircraft.elevator_max_deflection
-        aoa += elevator_deflection * 0.6  # Elevator effectiveness ~0.6 (plain flap factor)
+        aoa -= elevator_deflection * 0.6  # Elevator effectiveness ~0.6 (plain flap factor)
 
         Cl, Cd, Cm = aircraft.tailplane.coefficients_at(aoa)
 
