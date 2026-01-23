@@ -82,6 +82,11 @@ FRICTION_VELOCITY_THRESHOLD = 0.1  # m/s
 # Maximum force per contact point (numerical stability)
 MAX_CONTACT_FORCE = 100000.0  # N
 
+# Ground settling parameters - when aircraft is nearly stationary, damp strongly
+SETTLE_VELOCITY_THRESHOLD = 0.5   # m/s - below this, apply settle damping
+SETTLE_ANGULAR_THRESHOLD = 0.3    # rad/s - below this, apply settle damping
+SNAP_TO_ZERO_THRESHOLD = 0.05     # m/s and rad/s - below this, force to zero
+
 
 class ContactResult:
     """Result of a single contact point calculation."""
@@ -131,12 +136,14 @@ class GroundContact:
         total_force = [0.0, 0.0, 0.0]
         total_moment = [0.0, 0.0, 0.0]
         results = []
+        contacts_in_ground = 0
 
         for cp in contact_points:
             result = self._calculate_single_contact(state, cp, world, cg_offset)
             results.append(result)
 
             if result.in_contact:
+                contacts_in_ground += 1
                 # Accumulate forces
                 total_force[0] += result.force_body[0]
                 total_force[1] += result.force_body[1]
@@ -146,6 +153,40 @@ class GroundContact:
                 total_moment[0] += result.moment_body[0]
                 total_moment[1] += result.moment_body[1]
                 total_moment[2] += result.moment_body[2]
+
+        # Apply settling forces when 2+ contact points and low velocity
+        # This prevents "fidgeting" when the aircraft should be stationary
+        # (gliders typically sit on 2 points: main wheel + tail skid)
+        if contacts_in_ground >= 2:
+            u, v, w = state.velocity()
+            p, q, r = state.angular_velocity()
+            vel_mag = sqrt(u*u + v*v + w*w)
+            ang_mag = sqrt(p*p + q*q + r*r)
+
+            if vel_mag < SETTLE_VELOCITY_THRESHOLD and ang_mag < SETTLE_ANGULAR_THRESHOLD:
+                # Aircraft is nearly stationary - apply strong damping to settle
+                # Use fixed high damping - this acts like friction/ground resistance
+                settle_damp = 100000.0  # N.s/m - strong ground damping
+                total_force[0] -= settle_damp * u
+                total_force[1] -= settle_damp * v
+                total_force[2] -= settle_damp * w
+
+                # Angular damping: M = -c * omega
+                settle_ang_damp = 50000.0  # N.m.s/rad
+                total_moment[0] -= settle_ang_damp * p
+                total_moment[1] -= settle_ang_damp * q
+                total_moment[2] -= settle_ang_damp * r
+
+                # Very low velocity - apply extreme damping to force to zero
+                if vel_mag < SNAP_TO_ZERO_THRESHOLD and ang_mag < SNAP_TO_ZERO_THRESHOLD:
+                    # Return special marker forces that simulation can detect
+                    # Using very high damping to rapidly approach zero
+                    total_force[0] -= 1000000.0 * u
+                    total_force[1] -= 1000000.0 * v
+                    total_force[2] -= 1000000.0 * w
+                    total_moment[0] -= 500000.0 * p
+                    total_moment[1] -= 500000.0 * q
+                    total_moment[2] -= 500000.0 * r
 
         tf = total_force[0], total_force[1], total_force[2]
         tm = total_moment[0], total_moment[1], total_moment[2]

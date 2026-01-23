@@ -1,6 +1,7 @@
 from math import sqrt, atan2, asin, isnan, isinf
 
 from ask21 import ASK21
+from ground_contact import SNAP_TO_ZERO_THRESHOLD
 from world import World
 from state_vector import StateVector
 from quaternion import  quaternion_normalize, quaternion_rotate_vector, quaternion_rotate_vector_inverse, quaternion_derivative
@@ -196,6 +197,9 @@ class Simulation:
 
         self.state = new_state
 
+        # Apply ground settling - zero velocities if nearly stationary on ground
+        self._apply_ground_settling()
+
         return new_state
 
 
@@ -216,8 +220,36 @@ class Simulation:
             [ self.aircraft.Ixx, self.aircraft.Iyy, self.aircraft.Izz, self.aircraft.Ixz ]
         )
 
+        # Apply ground settling - zero velocities if nearly stationary on ground
+        self._apply_ground_settling()
+
         return self.state
-    
+
+    def _apply_ground_settling(self):
+        """
+        Zero velocities if aircraft is nearly stationary with ground contact.
+        This prevents small oscillations when the aircraft should be at rest.
+        """
+        # Check ground contact
+        _, _, contacts = self.ground_contact.calculate_ground_forces(
+            self.state, self.aircraft.contact_points, self.world, self.aircraft.cg
+        )
+        n_contacts = sum(1 for c in contacts if c.in_contact)
+
+        if n_contacts < 2:
+            return  # Not enough ground contact
+
+        # Check velocity magnitudes
+        u, v, w = self.state.velocity()
+        p, q, r = self.state.angular_velocity()
+        vel_mag = sqrt(u*u + v*v + w*w)
+        ang_mag = sqrt(p*p + q*q + r*r)
+
+        # If below threshold, zero out velocities
+        if vel_mag < SNAP_TO_ZERO_THRESHOLD and ang_mag < SNAP_TO_ZERO_THRESHOLD:
+            self.state.set_velocity((0.0, 0.0, 0.0))
+            self.state.set_angular_velocity((0.0, 0.0, 0.0))
+
 
     def calculate_forces_moments(self, state: StateVector) -> tuple[V3d, V3d]:
         """
