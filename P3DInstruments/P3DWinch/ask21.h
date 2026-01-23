@@ -64,8 +64,10 @@ public:
 
     // Tailplane area and moment
     float tailplane_area = 1.796160768f;           // m²
+    float tailplane_chord = 0.50f;                 // m - mean aerodynamic chord of tailplane
     float tailplane_incidence = radians(-2.5f);    // tailplane incidence relative to fuselage (negative = download at trim)
     float tailplane_quarter_chord = -5.210185185f; // m from datum
+    float elevator_max_deflection = radians(20.0f); // max elevator deflection (±20°)
     Aerofoil& tailplane = tail;
 
     // Fin area and moment

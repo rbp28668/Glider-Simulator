@@ -62,9 +62,11 @@ class ASK21:
 
         # Tailplane area and moment
         self.tailplane_area = 1.796160768  # m²
+        self.tailplane_chord = 0.50  # m - mean aerodynamic chord of tailplane
         self.tailplane_incidence = radians(-2.5)  # tailplane incidence relative to fuselage (negative = download at trim)
         self.tailplane_quarter_chord = -5.210185185  # m from datum
         self.tailplane = tail
+        self.elevator_max_deflection = radians(20)  # max elevator deflection (±20°)
 
         # Fin area and moment
         self.fin_area = 1.412849246  # m²
