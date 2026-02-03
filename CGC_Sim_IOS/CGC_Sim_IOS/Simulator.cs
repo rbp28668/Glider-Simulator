@@ -5,15 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using LockheedMartin.Prepar3D.SimConnect;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using Newtonsoft.Json;
-using System.Runtime.InteropServices;
-
-
-//using System.Runtime.InteropServices;
-
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
+using System.Runtime.InteropServices;
+
+
+//using System.Runtime.InteropServices;
+
 namespace CGC_Sim_IOS
 {
 
@@ -62,8 +62,8 @@ namespace CGC_Sim_IOS
         SITUATION_RESET,
         SITUATION_SAVE,
         FREEZE_LATITUDE_LONGITUDE_TOGGLE,
-    }
-
+    }
+
     enum GROUP_IDS
     {
         GROUP_0,
@@ -95,31 +95,31 @@ namespace CGC_Sim_IOS
         Altimeter,
         WindsToFollow,
         Unknown,
-    }
-
-    enum DEFINITIONS
-    {
-        Struct1,
-    }
-
- 
-    // this is how you declare a data structure so that
-    // simconnect knows how to fill it/read it.
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
-    struct Struct1
-    {
-        // this is how you declare a fixed size string
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
-        public String title;
-        public double latitude;
-        public double longitude;
-        public double altitude;
-        public double engines;
-        public double yawAngle;
-        public double yawString;
-        public double turnCoardinator;
-    };
-
+    }
+
+    enum DEFINITIONS
+    {
+        Struct1,
+    }
+
+ 
+    // this is how you declare a data structure so that
+    // simconnect knows how to fill it/read it.
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+    struct Struct1
+    {
+        // this is how you declare a fixed size string
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+        public String title;
+        public double latitude;
+        public double longitude;
+        public double altitude;
+        public double engines;
+        public double yawAngle;
+        public double yawString;
+        public double turnCoardinator;
+    };
+
 
     class Simulator
     {
@@ -159,9 +159,9 @@ namespace CGC_Sim_IOS
             }
         }
 
-        public bool IsPaused { get; set; } = false;
-
-        public int Engines { get; set; } = 0;
+        public bool IsPaused { get; set; } = false;
+
+        public int Engines { get; set; } = 0;
 
         public Metar CurrentMetar
         {
@@ -212,12 +212,12 @@ namespace CGC_Sim_IOS
                 ProcessStartInfo start = new ProcessStartInfo();
                 // Do you want to show a console window?
                 start.WindowStyle = ProcessWindowStyle.Hidden;
-                start.CreateNoWindow = false;
+                start.CreateNoWindow = false;
 #if(P3Dv5)
-                start.FileName = "C:\\SimP3Dv5\\Lockheed Martin\\Prepar3D v5\\Prepar3D.exe";
-#else
-                start.FileName = "C:\\SimP3D\\Lockheed Martin\\Prepar3D v4\\Prepar3D.exe";
-#endif
+                start.FileName = "C:\\SimP3Dv5\\Lockheed Martin\\Prepar3D v5\\Prepar3D.exe";
+#else
+                start.FileName = "C:\\SimP3D\\Lockheed Martin\\Prepar3D v4\\Prepar3D.exe";
+#endif
                 if (initialScenario == "")
                 {
                     Process proc = Process.Start(start);
@@ -247,10 +247,10 @@ namespace CGC_Sim_IOS
             if (simConnection != null)
             {
                 //simConnection.WeatherSetModeGlobal();
-                //simConnection.WeatherRequestObservationAtNearestStation(DataRequestID.Weather_Data, lat, lng);
-                //simConnection.WeatherRequestObservationAtStation(DataRequestID.Weather_Data,"GLOB");
-                simConnection.WeatherRequestInterpolatedObservation(DataRequestID.Weather_Data, lat, lng, 0.0f);
-                
+                //simConnection.WeatherRequestObservationAtNearestStation(DataRequestID.Weather_Data, lat, lng);
+                //simConnection.WeatherRequestObservationAtStation(DataRequestID.Weather_Data,"GLOB");
+                simConnection.WeatherRequestInterpolatedObservation(DataRequestID.Weather_Data, lat, lng, 0.0f);
+                
             }
         }
 
@@ -258,13 +258,13 @@ namespace CGC_Sim_IOS
         {
             try
             {
-                string newMetar = CurrentMetar.MetarString;
-                string oldMetar = CurrentMetar.SetMetarString;
-                System.Console.WriteLine("Put New Weather Data: " + newMetar);
-                simConnection.WeatherSetObservation(10, newMetar);
-                /*  We need to set the same data at all the local metar stations !!!!!!!!!!!!!!!!!!!!!
-                 *  Check global again
-                 */
+                string newMetar = CurrentMetar.MetarString;
+                string oldMetar = CurrentMetar.SetMetarString;
+                System.Console.WriteLine("Put New Weather Data: " + newMetar);
+                simConnection.WeatherSetObservation(10, newMetar);
+                /*  We need to set the same data at all the local metar stations !!!!!!!!!!!!!!!!!!!!!
+                 *  Check global again
+                 */
             }
             catch (Exception ex)
             {
@@ -282,16 +282,16 @@ namespace CGC_Sim_IOS
         ~Simulator()
         {
             CloseSimConnection();
-        }
-
-
+        }
+
+
         #endregion
-
+
     }
 
     class MetarElement
-    {
-
+    {
+
         public MetarElementType ElementType { get; set; }
 
         public string ElementTypeStr()
@@ -385,7 +385,7 @@ namespace CGC_Sim_IOS
             }
             set
             {
-                if (ElementType == MetarElementType.Station_ID && value != "")
+                if (ElementType == MetarElementType.Station_ID && value != "")
                     subString = value.Substring(0, 4);
                 else
                     subString = value;
@@ -508,13 +508,13 @@ namespace CGC_Sim_IOS
                 if (i >= 0)
                 {
                     extensions.Add(value.Substring(0, 2));
-                    extensions.Add(value.Substring(2, value.Length - 4));
-                    string turbulance = value.Substring(value.Length - 2, 1);
-                    extensions.Add(turbulance);
-                    string shear = value.Substring(value.Length - 3, 1);
-                    extensions.Add(shear);
-                    Turbulance = turbulance;
-                    Shear = shear;
+                    extensions.Add(value.Substring(2, value.Length - 4));
+                    string turbulance = value.Substring(value.Length - 2, 1);
+                    extensions.Add(turbulance);
+                    string shear = value.Substring(value.Length - 3, 1);
+                    extensions.Add(shear);
+                    Turbulance = turbulance;
+                    Shear = shear;
                 }
             }
         }
@@ -529,8 +529,8 @@ namespace CGC_Sim_IOS
         private List<MetarElement> metarElements = new List<MetarElement>();
 
         public string SetMetarString
-        {
-            get { return setMetarString; }
+        {
+            get { return setMetarString; }
         } 
 
         public string MetarString
@@ -577,9 +577,9 @@ namespace CGC_Sim_IOS
                 }
                 ParseCurrentMetarElements();
             }
-        }
-
-        private MetarWind GetFirstMetarWindElement()
+        }
+
+        private MetarWind GetFirstMetarWindElement()
         {
             if (metarElements.Count > 0)
             {
@@ -589,82 +589,82 @@ namespace CGC_Sim_IOS
                     {
                         MetarWind mwItem = (MetarWind)item;
                         return mwItem;
-                    }
-                }
-            }
+                    }
+                }
+            }
             return null;
         }
-
-
+
+
         public int SurfaceWindSpeed
         {
             get
-            {
-                int speed = 0;
+            {
+                int speed = 0;
                 MetarWind mwItem = GetFirstMetarWindElement();
-                if (mwItem != null)
+                if (mwItem != null)
                     speed = mwItem.Speed;
                 return speed;
             }
             set
             {
                 MetarWind mwItem = GetFirstMetarWindElement();
-                if (mwItem != null)
-                    mwItem.Speed = value;
+                if (mwItem != null)
+                    mwItem.Speed = value;
             }
         }
 
         public int SurfaceWindDirection
         {
             get
-            {
-                int direction = 0;
+            {
+                int direction = 0;
                 MetarWind mwItem = GetFirstMetarWindElement();
-                if (mwItem != null)
+                if (mwItem != null)
                     direction = mwItem.Direction;
                 return direction;
             }
             set
             {
                 MetarWind mwItem = GetFirstMetarWindElement();
-                if (mwItem != null)
-                    mwItem.Direction = value;
+                if (mwItem != null)
+                    mwItem.Direction = value;
             }
         }
 
         public int SurfaceWindGust
         {
             get
-            {
-                int gust = 0;
+            {
+                int gust = 0;
                 MetarWind mwItem = GetFirstMetarWindElement();
-                if (mwItem != null)
+                if (mwItem != null)
                     gust = mwItem.Gust;
                 return gust;
             }
             set
-            {
+            {
                 MetarWind mwItem = GetFirstMetarWindElement();
-                if (mwItem != null)
-                    mwItem.Gust = value;
+                if (mwItem != null)
+                    mwItem.Gust = value;
             }
-        }
-
+        }
+
         public string SurfaceWindTurbulance
         {
             get
-            {
-                string turbulance ="";
-                MetarWind mwItem = GetFirstMetarWindElement();
-                if (mwItem != null)
-                    turbulance = mwItem.Turbulance;
-                return turbulance;
-            }
+            {
+                string turbulance ="";
+                MetarWind mwItem = GetFirstMetarWindElement();
+                if (mwItem != null)
+                    turbulance = mwItem.Turbulance;
+                return turbulance;
+            }
             set
             {
                 MetarWind mwItem = GetFirstMetarWindElement();
-                if (mwItem != null)
-                    mwItem.Turbulance = value;
+                if (mwItem != null)
+                    mwItem.Turbulance = value;
             }
         }
 
@@ -703,7 +703,7 @@ namespace CGC_Sim_IOS
                 }
             }
             return bRc;
-        }
+        }
 
 
         private void ParseCurrentMetarElements()
@@ -821,279 +821,279 @@ namespace CGC_Sim_IOS
                                 }
                             }
                         }
-                    }
-                    //                    System.Console.WriteLine("Index {0} ", index);
+                    }
+                    //                    System.Console.WriteLine("Index {0} ", index);
                 }
             }
         }
-    }
-
-
-    class SimRestConnection
-    {
-        HttpClient client = new HttpClient();
+    }
+
+
+    class SimRestConnection
+    {
+        HttpClient client = new HttpClient();
         private bool failedAltimeter = false;
-        private bool failedASI = false;
+        private bool failedASI = false;
         private bool failedPitot = false;
-        private bool failedElectrics = false;
-        private bool failedTurnCord = false;
-
+        private bool failedElectrics = false;
+        private bool failedTurnCord = false;
+
         #region Public Properties
-
-        public bool AltimeterFailed
-        {
-            get
-            {
-                return failedAltimeter;
-            }
-
-            set
-            {
-
-            }
+
+        public bool AltimeterFailed
+        {
+            get
+            {
+                return failedAltimeter;
+            }
+
+            set
+            {
+
+            }
         }
-        public bool ASIFailed
-        {
-            get
-            {
-                return failedASI;
-            }
-
-            set
-            {
-
-            }
-        }
-
-        public bool ElectricsFailed
-        {
-            get
-            {
-                return failedElectrics;
-            }
-
-            set
-            {
-
-            }
+        public bool ASIFailed
+        {
+            get
+            {
+                return failedASI;
+            }
+
+            set
+            {
+
+            }
         }
 
-        public bool PitotFailed
-        {
-            get
-            {
-                return failedPitot;
-            }
-
-            set
-            {
-
-            }
+        public bool ElectricsFailed
+        {
+            get
+            {
+                return failedElectrics;
+            }
+
+            set
+            {
+
+            }
         }
 
+        public bool PitotFailed
+        {
+            get
+            {
+                return failedPitot;
+            }
+
+            set
+            {
+
+            }
+        }
+
         #endregion
-
-        public SimRestConnection()
-        {
-            // Update port # in the following line. 
-            //client.BaseAddress = new Uri("http://localhost/p3dapi/"); 
-            //client.DefaultRequestHeaders.Accept.Clear(); 
-            //client.DefaultRequestHeaders.Accept.Add( 
-            //    new MediaTypeWithQualityHeaderValue("application/json")); 
-        }
-
-        ~SimRestConnection()
-        {
-
-        }
-
-        public async Task<dynamic> RunCmdAsync(string[] args)
-        {
-            string responseBody = "";
-            dynamic response = null; ;
-            if (args.Length < 2)
-            {
-                Console.WriteLine("Need to supply at least the command and its sub-command");
-                return response;
-            }
-
-            // Call asynchronous network methods in a try/catch block to handle exceptions. 
-            try
-            {
-                // This just builds up the full URL from bits on the command line as a convenience. 
-                string url = "http://localhost/p3dapi/";
-                int index = 0;
-                url += args[index++];
-                url += "/";
-                url += args[index++];
-
-                if (args.Length > 2)
-                {
-                    url += "?";
-                    url += WebUtility.HtmlEncode(args[index++]);
-                }
-
-                while (index < args.Length)
-                {
-                    url += "&";
-                    //url += WebUtility.UrlEncode(args[index++]);
-                    url += WebUtility.HtmlEncode(args[index++]);
-                }
-                // replace spaces by %20
-                url = url.Replace(" ", "%20");
-                // Should have a complete URL with all the parameters 
-                //Console.WriteLine(url);
-
-
-                responseBody = await Run(url);//.Result; 
-
-                //Console.WriteLine(responseBody);
-
-                response = parseResult(responseBody);
-
-            }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine("\nException Caught!");
-                Console.WriteLine("Message :{0} ", e.Message);
-            }
-            return response;
-        }
-
-        dynamic parseResult(string json)
-        {
-            dynamic data = JsonConvert.DeserializeObject(json);
-            bool isOK = data.status == "OK";
-            if (isOK)
-            {
-                // do something creative here.... 
-            }
-            return data;
-            
-        }
-
-        // This is the key bit that actually calls the web API - assuming it's 
-        // given a properly formed url that matches the web api. 
-        // Note async nature. 
-        async Task<string> Run(string url)
-        {
-            HttpResponseMessage response = await client.GetAsync(url);
-            response.EnsureSuccessStatusCode();
-            string responseBody = await response.Content.ReadAsStringAsync();
-            // Above three lines can be replaced with new helper method below 
-            // string responseBody = await client.GetStringAsync(uri); 
-            return responseBody;
-        }
-
-        public void CMD_Pause()
-        {
-
-            string[] cmd = { "cmd", "pause_toggle"};
-            dynamic response = RunCmdAsync(cmd);
-            ////RunAsync().GetAwaiter().GetResult(); 
-            //string[] cmd2 = { "scenario", "list" }; 
-            //RunCmdAsync(cmd2); 
-            //string[] cmd3 = { "position", "up?feet=2000" }; 
-            //RunCmdAsync(cmd3); 
-            //string[] cmd3 = { "traffic", "launch" };
-            //RunCmdAsync(cmd3);
-        }
-
-        public void CMD_Freeze_Lat_Long()
-        {
-            string[] cmd = { "cmd", "FREEZE_LATITUDE_LONGITUDE_SET" };
-            RunCmdAsync(cmd);
-        }
-
-        public void CMD_Position_Back(int count=10)
-        {
-            string[] cmd = { "position", "back?count="+count.ToString() };
-            RunCmdAsync(cmd);
-        }
-
-        public void CMD_Position_Set(int count = 1)
-        {
-            string[] cmd = { "position", "set?count=" + count.ToString() };
-            RunCmdAsync(cmd);
-        }
-
-        public void CMD_Engine_Auto_Start()
-        {
-
-            string[] cmd = { "cmd", "ENGINE_AUTO_START" };
-            dynamic response = RunCmdAsync(cmd);
-        }
-
-        public void CMD_Engine_Auto_Stop()
-        {
-
-            string[] cmd = { "cmd", "ENGINE_AUTO_SHUTDOWN" };
-            dynamic response = RunCmdAsync(cmd);
-        }
-
-        public void CMD_Throttle_Set(int count = 0)
-        {
-            string[] cmd = { "cmd", "THROTTLE_SET", "value=" + count.ToString() };
-            RunCmdAsync(cmd);
-        }
-
-        public async Task<int> CMD_Position_Available()
-        {
-            int length = 0;
-            try
-            {
-                string[] cmd = { "position", "available" };
-                dynamic response = await RunCmdAsync(cmd);
-                Newtonsoft.Json.Linq.JObject jRep = response;
-                if (jRep.Count > 0)
-                {
-                    string val1 = (string)jRep["status"];
-                    length = (int)jRep["length"];
-                }
-            }
+
+        public SimRestConnection()
+        {
+            // Update port # in the following line. 
+            //client.BaseAddress = new Uri("http://localhost/p3dapi/"); 
+            //client.DefaultRequestHeaders.Accept.Clear(); 
+            //client.DefaultRequestHeaders.Accept.Add( 
+            //    new MediaTypeWithQualityHeaderValue("application/json")); 
+        }
+
+        ~SimRestConnection()
+        {
+
+        }
+
+        public async Task<dynamic> RunCmdAsync(string[] args)
+        {
+            string responseBody = "";
+            dynamic response = null; ;
+            if (args.Length < 2)
+            {
+                Console.WriteLine("Need to supply at least the command and its sub-command");
+                return response;
+            }
+
+            // Call asynchronous network methods in a try/catch block to handle exceptions. 
+            try
+            {
+                // This just builds up the full URL from bits on the command line as a convenience. 
+                string url = "http://localhost/p3dapi/";
+                int index = 0;
+                url += args[index++];
+                url += "/";
+                url += args[index++];
+
+                if (args.Length > 2)
+                {
+                    url += "?";
+                    url += WebUtility.HtmlEncode(args[index++]);
+                }
+
+                while (index < args.Length)
+                {
+                    url += "&";
+                    //url += WebUtility.UrlEncode(args[index++]);
+                    url += WebUtility.HtmlEncode(args[index++]);
+                }
+                // replace spaces by %20
+                url = url.Replace(" ", "%20");
+                // Should have a complete URL with all the parameters 
+                //Console.WriteLine(url);
+
+
+                responseBody = await Run(url);//.Result; 
+
+                //Console.WriteLine(responseBody);
+
+                response = parseResult(responseBody);
+
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine("\nException Caught!");
+                Console.WriteLine("Message :{0} ", e.Message);
+            }
+            return response;
+        }
+
+        dynamic parseResult(string json)
+        {
+            dynamic data = JsonConvert.DeserializeObject(json);
+            bool isOK = data.status == "OK";
+            if (isOK)
+            {
+                // do something creative here.... 
+            }
+            return data;
+            
+        }
+
+        // This is the key bit that actually calls the web API - assuming it's 
+        // given a properly formed url that matches the web api. 
+        // Note async nature. 
+        async Task<string> Run(string url)
+        {
+            HttpResponseMessage response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            string responseBody = await response.Content.ReadAsStringAsync();
+            // Above three lines can be replaced with new helper method below 
+            // string responseBody = await client.GetStringAsync(uri); 
+            return responseBody;
+        }
+
+        public void CMD_Pause()
+        {
+
+            string[] cmd = { "cmd", "pause_toggle"};
+            dynamic response = RunCmdAsync(cmd);
+            ////RunAsync().GetAwaiter().GetResult(); 
+            //string[] cmd2 = { "scenario", "list" }; 
+            //RunCmdAsync(cmd2); 
+            //string[] cmd3 = { "position", "up?feet=2000" }; 
+            //RunCmdAsync(cmd3); 
+            //string[] cmd3 = { "traffic", "launch" };
+            //RunCmdAsync(cmd3);
+        }
+
+        public void CMD_Freeze_Lat_Long()
+        {
+            string[] cmd = { "cmd", "FREEZE_LATITUDE_LONGITUDE_SET" };
+            RunCmdAsync(cmd);
+        }
+
+        public void CMD_Position_Back(int count=10)
+        {
+            string[] cmd = { "position", "back?count="+count.ToString() };
+            RunCmdAsync(cmd);
+        }
+
+        public void CMD_Position_Set(int count = 1)
+        {
+            string[] cmd = { "position", "set?count=" + count.ToString() };
+            RunCmdAsync(cmd);
+        }
+
+        public void CMD_Engine_Auto_Start()
+        {
+
+            string[] cmd = { "cmd", "ENGINE_AUTO_START" };
+            dynamic response = RunCmdAsync(cmd);
+        }
+
+        public void CMD_Engine_Auto_Stop()
+        {
+
+            string[] cmd = { "cmd", "ENGINE_AUTO_SHUTDOWN" };
+            dynamic response = RunCmdAsync(cmd);
+        }
+
+        public void CMD_Throttle_Set(int count = 0)
+        {
+            string[] cmd = { "cmd", "THROTTLE_SET", "value=" + count.ToString() };
+            RunCmdAsync(cmd);
+        }
+
+        public async Task<int> CMD_Position_Available()
+        {
+            int length = 0;
+            try
+            {
+                string[] cmd = { "position", "available" };
+                dynamic response = await RunCmdAsync(cmd);
+                Newtonsoft.Json.Linq.JObject jRep = response;
+                if (jRep.Count > 0)
+                {
+                    string val1 = (string)jRep["status"];
+                    length = (int)jRep["length"];
+                }
+            }
             catch (Exception ex)
-            {
-            }
-            return length;
-        }
-
-        public void CMD_Position_Clear_History()
-        {
-            int length = 0;
-            try
-            {
-                string[] cmd = { "position", "clear" };
-                RunCmdAsync(cmd);
-            }
+            {
+            }
+            return length;
+        }
+
+        public void CMD_Position_Clear_History()
+        {
+            int length = 0;
+            try
+            {
+                string[] cmd = { "position", "clear" };
+                RunCmdAsync(cmd);
+            }
             catch (Exception ex)
-            {
-            }
-        }
-
-        public async Task<bool> Get_Failure_States()
-        {
-            bool changed = false;
-            try
-            {
-                string[] cmd = { "failures", "current" };
-                dynamic response = await RunCmdAsync(cmd);
-                Newtonsoft.Json.Linq.JObject jRep = response;
-                if (jRep.Count > 0)
-                {
-                    string val1 = (string)jRep["status"];
-                    failedAltimeter = (bool)jRep["altimeter"];
-                    failedASI = (bool)jRep["airspeed"];
-                    failedPitot = (bool)jRep["pitot"];
-                    failedElectrics = (bool)jRep["electrical"];
-                    failedTurnCord = (bool)jRep["turn_coordinator"];
-                    changed = true;
-                }
-            }
+            {
+            }
+        }
+
+        public async Task<bool> Get_Failure_States()
+        {
+            bool changed = false;
+            try
+            {
+                string[] cmd = { "failures", "current" };
+                dynamic response = await RunCmdAsync(cmd);
+                Newtonsoft.Json.Linq.JObject jRep = response;
+                if (jRep.Count > 0)
+                {
+                    string val1 = (string)jRep["status"];
+                    failedAltimeter = (bool)jRep["altimeter"];
+                    failedASI = (bool)jRep["airspeed"];
+                    failedPitot = (bool)jRep["pitot"];
+                    failedElectrics = (bool)jRep["electrical"];
+                    failedTurnCord = (bool)jRep["turn_coordinator"];
+                    changed = true;
+                }
+            }
             catch (Exception ex)
-            {
-            }
-            return changed;
-        }
-
-    }
+            {
+            }
+            return changed;
+        }
+
+    }
 }

@@ -1324,6 +1324,14 @@ namespace CGC_Sim_IOS
                 Button_Fail_Altimeter.Content = simRest.AltimeterFailed ? "Clear Altimeter" : "Fail Altimeter";
                 Button_Fail_Pitot.Content = simRest.PitotFailed ? "Clear Pitot" : "Fail Pitot";
                 Button_Fail_Electrical.Content = simRest.ElectricsFailed ? "Clear Electrics" : "Fail Electrics";
+                Button_Engine_Start.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                Button_Engine_Stop.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                Slider_Throttle.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                Button_Engine_Stop.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                Button_Throttle_Min.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                Button_Throttle_Decrease.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                Button_Throttle_Increase.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                Button_Throttle_Max.Visibility = (sim.Engines > 0) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
             }
             response = changed;
             return response;
