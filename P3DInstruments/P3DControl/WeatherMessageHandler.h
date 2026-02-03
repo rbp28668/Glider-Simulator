@@ -29,7 +29,7 @@ public:
 	static bool setCustom(Simulator* pSim);
 	static bool setTheme(Simulator* pSim, const std::string& themeName);
 	static void processTheme(File& file, std::string& name, std::string& title, std::string& description);
-	static File::ListT& listThemes(File::ListT& fileList);
+	static File::ListT& listThemes(Simulator* pSim, File::ListT& fileList);
 	static bool refresh(Simulator* pSim);
 	static std::string requestMetar(Simulator* pSim, const std::string& icao, std::string& name);
 	static std::string requestGlobalMetar(Simulator* pSim);

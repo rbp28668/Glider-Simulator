@@ -143,10 +143,10 @@ bool TrafficMessageHandler::launch(Simulator* pSim, const std::string& targetNam
 	return hr == S_OK;
 }
 
-std::list<std::string>& TrafficMessageHandler::listAircraft(std::list<std::string>& aircraft)
+std::list<std::string>& TrafficMessageHandler::listAircraft(Simulator* pSim, std::list<std::string>& aircraft)
 {
 
-	P3DInstallationDirectory p3dInstall;
+	P3DInstallationDirectory p3dInstall(pSim);
 	Directory airplanesFolder = p3dInstall.sub("SimObjects").sub("Airplanes");
 
 	Directory::ListT folders;
@@ -210,7 +210,7 @@ void TrafficMessageHandler::availableAircraft(std::string& output)
 		json.array("aircraft");
 
 		std::list<std::string> aircraft;
-		listAircraft(aircraft);
+		listAircraft(pSim, aircraft);
 		for (auto it = aircraft.begin(); it != aircraft.end(); ++it) {
 			json.object();
 			json.add("title", *it);

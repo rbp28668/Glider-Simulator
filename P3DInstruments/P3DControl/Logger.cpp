@@ -8,10 +8,10 @@
 
 #include "../P3DCommon/Prepar3D.h"
 
-std::string Logger::getOutputPath()
+std::string Logger::getOutputPath(Prepar3D* p3d)
 {
 	DocumentDirectory documents;
-	Directory logFolder = documents.sub(Prepar3D::DOCUMENTS).sub("log");
+	Directory logFolder = documents.sub(p3d->documentsFolder()).sub("log");
 
 	time_t now;
 	time(&now);
@@ -34,18 +34,18 @@ std::string Logger::getOutputPath()
 	return file;
 }
 
-void Logger::openOutput()
+void Logger::openOutput(Prepar3D* p3d)
 {
 	assert(this);
 	assert(output == 0);
 
-	std::string path = getOutputPath();
+	std::string path = getOutputPath(p3d);
 	output = new std::ofstream(path);
 }
 
 
 // Writes the text string with initial timestamp.
-void Logger::write(const std::string& text)
+void Logger::write(Prepar3D* p3d, const std::string& text)
 {
 	time_t now;
 	time(&now);
@@ -60,7 +60,7 @@ void Logger::write(const std::string& text)
 	int sec = t.tm_sec;
 
 	if (output == 0) {
-		openOutput();
+		openOutput(p3d);
 	}
 
 	(*output) << std::setw(4) << std::setfill('0') << y
@@ -89,32 +89,32 @@ Logger::~Logger()
 	}
 }
 
-void Logger::logCommand(const std::string& cmd, const std::string& params)
+void Logger::logCommand(Prepar3D* p3d, const std::string& cmd, const std::string& params)
 {
 	std::string msg = "COMMAND: " + cmd + " " + params;
-	write(msg);
+	write(p3d,msg);
 }
 
-void Logger::logSession(const std::string& event)
+void Logger::logSession(Prepar3D* p3d, const std::string& event)
 {
 	std::string message = "SESSION: " + event;
-	write(message);
+	write(p3d,message);
 }
 
-void Logger::info(const std::string& msg)
+void Logger::info(Prepar3D* p3d, const std::string& msg)
 {
 	std::string message = "INFO: " + msg;
-	write(message);
+	write(p3d,message);
 }
 
-void Logger::warn(const std::string& msg)
+void Logger::warn(Prepar3D* p3d, const std::string& msg)
 {
 	std::string message = "WARN: " + msg;
-	write(message);
+	write(p3d,message);
 }
 
-void Logger::error(const std::string& msg)
+void Logger::error(Prepar3D* p3d, const std::string& msg)
 {
 	std::string message = "ERROR: " + msg;
-	write(message);
+	write(p3d,message);
 }

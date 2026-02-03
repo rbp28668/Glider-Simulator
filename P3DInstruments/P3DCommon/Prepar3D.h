@@ -64,6 +64,9 @@ private:
 	WeatherStations wxStations;
 	ExternalSim* extSim;
 	SimObject userAc;
+	int majorVersion;
+	int minorVersion;
+	std::string documents = "Prepar3D v4 Files"; // fallback to v4
 
     static void CALLBACK DispatchCallback(SIMCONNECT_RECV *pData, DWORD cbData, void *pContext);
     void Process(SIMCONNECT_RECV *pData, DWORD cbData);
@@ -141,7 +144,8 @@ private:
 
 public:
 
-	const static char* DOCUMENTS;
+	//static char* DOCUMENTS;
+	std::string documentsFolder() { return documents; }
 
 	void showLastRequest(const char* name);
 	HANDLE getHandle() const { return hSimConnect; } 
@@ -158,6 +162,8 @@ public:
     void Dispatch();
 	void DispatchLoop();
 
+	int getMajorVersion() const { return majorVersion; }
+	int getMinorVersion() const { return minorVersion; }
 
 	LONG nextRequestId();	// Threadsafe counter for allocating request IDs.
 	//LONG nextEventId();		// Threadsafe counter for allocating event IDs.

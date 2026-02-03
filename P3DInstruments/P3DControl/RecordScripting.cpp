@@ -64,7 +64,7 @@ int RecordScripting::list(lua_State* L)
 	Simulator* pSim = *(Simulator**)lua_getextraspace(L);
 
 	File::ListT files;
-	RecordMessageHandler::list(files);
+	RecordMessageHandler::list(pSim,files);
 	lua_newtable(L);
 
 	int idx = 1;

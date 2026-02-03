@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <sstream>
 #include "..//P3DCommon/Prepar3D.h"
 #include "RecordMessageHandler.h"
 #include "APIParameters.h"
@@ -9,6 +10,13 @@
 RecordMessageHandler::RecordMessageHandler(Prepar3D* p3d)
 	: MessageHandler(p3d, "record")
 {
+}
+
+std::string RecordMessageHandler::getSubFolder(Prepar3D* pSim) {
+	std::stringstream ss;
+	ss << "Prepar3D v" << pSim->getMajorVersion() << " files";
+	std::string subFolder = ss.str();
+	return subFolder;
 }
 
 bool RecordMessageHandler::start(Simulator* pSim)
@@ -35,7 +43,7 @@ bool RecordMessageHandler::playback(Simulator* pSim, const std::string& name)
 {
 	//Expand name to full path.
 	DocumentDirectory docs;
-	Directory recordingFolder = docs.sub("Prepar3D v4 files");
+	Directory recordingFolder = docs.sub(getSubFolder(pSim));  //was  "Prepar3D v4 files"
 	File file = recordingFolder.file(name.c_str());
 
 	HRESULT hr = SimConnect_PlaybackRecording(
@@ -57,10 +65,10 @@ bool RecordMessageHandler::analyse(Simulator* pSim)
 
 }
 
-File::ListT& RecordMessageHandler::list(File::ListT& files)
+File::ListT& RecordMessageHandler::list(Simulator* pSim, File::ListT& files)
 {
 	DocumentDirectory docs;
-	Directory recordingFolder = docs.sub("Prepar3D v4 files");
+	Directory recordingFolder = docs.sub(getSubFolder(pSim)); // was "Prepar3D v4 files"
 
 	recordingFolder.files(files, "*.fsr");
 
@@ -119,7 +127,7 @@ void RecordMessageHandler::saveAnalysis(std::string& output) {
 void RecordMessageHandler::listRecordings(std::string& output) {
 	try {
 		DocumentDirectory docs;
-		Directory recordingFolder = docs.sub("Prepar3D v4 files");
+		Directory recordingFolder = docs.sub(getSubFolder(p3d)); // "Prepar3D v4 files"
 
 		File::ListT files;
 		recordingFolder.files(files, "*.fsr");

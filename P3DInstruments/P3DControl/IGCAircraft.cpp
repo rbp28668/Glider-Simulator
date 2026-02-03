@@ -99,7 +99,7 @@ SIMCONNECT_DATA_INITPOSITION IGCAircraft::initialPosition()
 	init.Latitude = p.lat;
 	init.Longitude = p.lon;
 	init.Altitude = p.alt;
-	init.Airspeed = p.speed;
+	init.Airspeed = (DWORD)p.speed;
 	init.Bank = p.bank;
 	init.Pitch = p.pitch;
 	init.Heading = p.heading;

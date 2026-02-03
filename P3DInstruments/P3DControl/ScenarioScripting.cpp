@@ -42,7 +42,7 @@ int ScenarioScripting::list(lua_State* L)
     try {
         std::string filter(luaL_checkstring(L, 1));
         File::ListT files;
-        ScenarioMessageHandler::list(filter, files);
+        ScenarioMessageHandler::list(pSim, filter, files);
 
         lua_newtable(L);
         int idx = 1;

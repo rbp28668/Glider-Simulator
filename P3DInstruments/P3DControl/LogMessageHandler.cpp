@@ -20,27 +20,27 @@ void LogMessageHandler::run(const std::string& cmd, const APIParameters& params,
 		Simulator* sim = static_cast<Simulator*>(p3d);
 		std::string number = params.getString("number");
 		std::string name = params.getString("name"); 
-		sim->getLogger()->logSession("logon " + number + "," + name);
+		sim->getLogger()->logSession(sim,"logon " + number + "," + name);
 		reportSuccess(output);
 	} else if (cmd == "logoff") {
 		Simulator* sim = static_cast<Simulator*>(p3d);
-		sim->getLogger()->logSession("logoff");
+		sim->getLogger()->logSession(sim,"logoff");
 		reportSuccess(output);
 	} else if (cmd == "info") {
 		Simulator* sim = static_cast<Simulator*>(p3d);
 		std::string message = params.getString("message");
-		sim->getLogger()->info(message);
+		sim->getLogger()->info(sim,message);
 		reportSuccess(output);
 	} else if (cmd == "warn") {
 		Simulator* sim = static_cast<Simulator*>(p3d);
 		std::string message = params.getString("message");
-		sim->getLogger()->warn(message);
+		sim->getLogger()->warn(sim,message);
 		reportSuccess(output);
 	}
 	else if (cmd == "error") {
 		Simulator* sim = static_cast<Simulator*>(p3d);
 		std::string message = params.getString("message");
-		sim->getLogger()->error(message);
+		sim->getLogger()->error(sim,message);
 		reportSuccess(output);
 	}
     else {

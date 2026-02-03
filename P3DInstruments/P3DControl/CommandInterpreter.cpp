@@ -65,7 +65,7 @@ void CommandInterpreter::process(const std::string& cmd, const std::string& para
 {
 	std::cout << "Processing " << cmd << ":" << params << std::endl;
 	Simulator* sim = static_cast<Simulator*>(pSim);
-	sim->getLogger()->logCommand(cmd, params);
+	sim->getLogger()->logCommand(pSim, cmd, params);
 
 
 	std::string handlerName;
@@ -91,7 +91,7 @@ void CommandInterpreter::process(const std::string& cmd, const std::string& para
 		JSONWriter json(output);
 		json.add("status", "FAILED")
 			.add("reason", "No command handler for " + handlerName);
-		sim->getLogger()->error("No command handler for " + handlerName);
+		sim->getLogger()->error(pSim, "No command handler for " + handlerName);
 	}
 
 }

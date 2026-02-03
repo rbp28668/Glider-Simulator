@@ -130,9 +130,9 @@ void WeatherMessageHandler::processTheme(File& file, std::string& name, std::str
 
 }
 
-File::ListT& WeatherMessageHandler::listThemes(File::ListT& fileList)
+File::ListT& WeatherMessageHandler::listThemes(Simulator* pSim, File::ListT& fileList)
 {
-	P3DInstallationDirectory p3dInstall;
+	P3DInstallationDirectory p3dInstall(pSim);
 	Directory themesFolder = p3dInstall.sub("Weather").sub("themes");
 
 	themesFolder.files(fileList, "*.wt");
@@ -508,7 +508,7 @@ void WeatherMessageHandler::listWeatherThemes(std::string& output)
 {
 	try {
 		File::ListT files;
-		listThemes(files);
+		listThemes(pSim, files);
 
 		JSONWriter json(output);
 		json.add("status", "OK");

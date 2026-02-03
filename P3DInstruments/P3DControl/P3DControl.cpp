@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 		Lua lua(&sim);
 		std::string error;
 		if (lua.runFile(script, error)) {
-			sim.getLogger()->error(error);
+			sim.getLogger()->error(&sim,error);
 		}
 		
 	}

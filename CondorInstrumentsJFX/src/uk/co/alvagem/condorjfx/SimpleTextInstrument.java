@@ -10,9 +10,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
-
-import com.sun.javafx.tk.FontMetrics;
-import com.sun.javafx.tk.Toolkit;
+import javafx.geometry.Bounds;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextBoundsType;
 
 /**
  * @author bruce.porteous
@@ -22,6 +22,7 @@ public class SimpleTextInstrument extends RectangularInstrument {
 
 	private Paint background = Color.LIGHTGREY;
 	private Canvas canvas;
+	protected int fontHeight = 20;
 	/**
 	 * @param width
 	 * @param height
@@ -103,8 +104,9 @@ public class SimpleTextInstrument extends RectangularInstrument {
 		return result;
 	}
 
-
-	private void draw(GraphicsContext gc) {
+/*
+// Old implementation - breaks JAVA11 modularity rules due to use of internal Toolkit class
+private void draw(GraphicsContext gc) {
 
 		gc.setFill(background);
 		gc.setStroke(background);
@@ -117,6 +119,7 @@ public class SimpleTextInstrument extends RectangularInstrument {
 		gc.setFont(titleFont);
 		Toolkit tk = Toolkit.getToolkit();
 		FontMetrics fm = tk.getFontLoader().getFontMetrics(titleFont);
+		FontMetrics fm = gc.getFontMetrics(titleFont);
 		float tHeight = fm.getLineHeight();
 		gc.fillText(this.key, tHeight, tHeight);
 		
@@ -126,6 +129,40 @@ public class SimpleTextInstrument extends RectangularInstrument {
 		FontMetrics metrics = tk.getFontLoader().getFontMetrics(font);
 		float h = metrics.getLineHeight();
 		gc.fillText(getValue(), h/2, h+(height-h)/2);
+	}
+*/
+
+	private void draw(GraphicsContext gc) {
+
+		gc.setFill(background);
+		gc.setStroke(background);
+		gc.fillRect(0,0, width, height);
+
+		gc.setStroke(Color.BLACK);
+		gc.setFill(Color.BLACK);
+
+		// Title (small inset)
+		Font titleFont = new Font("SansSerif", 10);
+		gc.setFont(titleFont);
+		Text titleText = new Text(this.key);
+		titleText.setFont(titleFont);
+		titleText.setBoundsType(TextBoundsType.LOGICAL);
+		Bounds tb = titleText.getLayoutBounds();
+		double titleBaseline = titleText.getBaselineOffset();
+		double titleX = 6;
+		double titleY = 6 + titleBaseline;
+		gc.fillText(this.key, titleX, titleY);
+
+		// Main value, centered
+		Font font = new Font("SansSerif", fontHeight);
+		gc.setFont(font);
+		Text valueText = new Text(getValue());
+		valueText.setFont(font);
+		valueText.setBoundsType(TextBoundsType.LOGICAL);
+		Bounds vb = valueText.getLayoutBounds();
+		double x = (width - vb.getWidth()) / 2.0;
+		double y = (height - vb.getHeight()) / 2.0 + valueText.getBaselineOffset();
+		gc.fillText(getValue(), x, y);
 	}
 
 	
@@ -239,6 +276,49 @@ public class SimpleTextInstrument extends RectangularInstrument {
 		
 		protected String getValue() {
 			return getValueAsFrequency();
+		}
+	}
+
+    // Generic text instrument for any purpose. By default it just displays the raw value sent.
+	// If however you provide a fontHeight in the constructor it will use that for the text size.
+	// Similarly a format string will format the value if provided.
+	public static class Generic extends SimpleTextInstrument{
+		
+		private String format = null;
+
+		public Generic(String key, int width, int height){
+			super(key,width, height);
+		}
+
+		public Generic(String key, int width, int height, int fontHeight){
+			super(key,width, height);
+			this.fontHeight = fontHeight;
+		}
+
+		public Generic(String key, int width, int height, int fontHeight, String format){
+			super(key,width, height);
+			this.fontHeight = fontHeight;
+			format = format.trim();
+			this.format = format;
+		}
+
+		protected String getValue() {
+			String result = "------";
+			if(this.value != null){
+				result = this.value;
+
+				if(format != null) {
+					try {
+						double val = Double.parseDouble(this.value);
+						result = String.format(format, val);
+					} catch (NumberFormatException nfe) {
+						// ignore - just use raw value
+					}
+				}
+
+
+			}
+			return result;
 		}
 	}
 

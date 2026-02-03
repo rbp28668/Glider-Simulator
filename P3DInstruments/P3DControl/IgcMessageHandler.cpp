@@ -28,7 +28,7 @@ void IgcMessageHandler::run(const std::string& cmd, const APIParameters& params,
 
 	if (cmd == "list") {
 		std::string filter = params.getString("filter");
-		listAvailableIGCFiles( filter, output);
+		listAvailableIGCFiles( pSim, filter, output);
 	}
 	else if (cmd == "traffic") {
 		std::string file = params.getString("igc");
@@ -85,14 +85,14 @@ void IgcMessageHandler::run(const std::string& cmd, const APIParameters& params,
 	}
 }
 
-bool IgcMessageHandler::listFiles(const std::string& filter, std::list<std::string>& fileList, std::string& err)
+bool IgcMessageHandler::listFiles(Simulator* pSim, const std::string& filter, std::list<std::string>& fileList, std::string& err)
 {
 	File::ListT files;
 
 	try {
 		// E:\Users\rbp28668\Documents\Prepar3D v4 Files
 		DocumentDirectory documents;
-		Directory igcFolder = documents.sub(Prepar3D::DOCUMENTS).sub("igc");
+		Directory igcFolder = documents.sub(pSim->documentsFolder()).sub("igc");
 		files = igcFolder.files(files, filter + "*.igc");
 	}
 	catch (FileException& fx) {
@@ -114,7 +114,7 @@ bool IgcMessageHandler::launch(Simulator* pSim, const std::string& file, const s
 	IGCFile igc;
 
 	DocumentDirectory documents;
-	Directory igcFolder = documents.sub(Prepar3D::DOCUMENTS).sub("igc");
+	Directory igcFolder = documents.sub(pSim->documentsFolder()).sub("igc");
 	File f = igcFolder.file(file);
 
 	if (f.exists()) {
@@ -136,7 +136,7 @@ bool IgcMessageHandler::replay(Simulator* pSim, const std::string& file, const s
 {
 	IGCFile igc;
 	DocumentDirectory documents;
-	Directory igcFolder = documents.sub(Prepar3D::DOCUMENTS).sub("igc");
+	Directory igcFolder = documents.sub(pSim->documentsFolder()).sub("igc");
 	File f = igcFolder.file(file);
 
 	if (f.exists()) {
@@ -175,7 +175,7 @@ bool IgcMessageHandler::start(Simulator* pSim, int interval, const std::string& 
 
 		// E:\Users\rbp28668\Documents\Prepar3D v4 Files
 		DocumentDirectory documents;
-		Directory igcFolder = documents.sub(Prepar3D::DOCUMENTS).sub("igc");
+		Directory igcFolder = documents.sub(pSim->documentsFolder()).sub("igc");
 		fr->start(igcFolder);
 		return true;
 	}
@@ -206,12 +206,12 @@ bool IgcMessageHandler::stop(Simulator* pSim, std::string& err)
 
 
 
-void IgcMessageHandler::listAvailableIGCFiles( const std::string& filter, std::string& output)
+void IgcMessageHandler::listAvailableIGCFiles( Simulator* pSim, const std::string& filter, std::string& output)
 {
 	std::list<std::string> fileList;
 	std::string err;
 
-	if (listFiles(filter, fileList, err)) {
+	if (listFiles(pSim, filter, fileList, err)) {
 		JSONWriter json(output);
 		json.add("status", "OK");
 		json.array("entries");
