@@ -66,7 +66,7 @@ private:
 	SimObject userAc;
 	int majorVersion;
 	int minorVersion;
-	std::string documents = "Prepar3D v4 Files"; // fallback to v4
+	std::string documents = "Prepar3D v5 Files"; // fallback to v5
 
     static void CALLBACK DispatchCallback(SIMCONNECT_RECV *pData, DWORD cbData, void *pContext);
     void Process(SIMCONNECT_RECV *pData, DWORD cbData);

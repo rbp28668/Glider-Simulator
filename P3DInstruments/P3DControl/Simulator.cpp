@@ -10,7 +10,7 @@
 
 #include "../P3DCommon/SimObjectDataRequest.h"
 
-Simulator::Simulator(const char* appName, bool verbose)
+Simulator::Simulator(const char* appName, const char* logPath, bool verbose)
 	:Prepar3D(appName, verbose)
 	, state(0)
 	, stateRequest(0)
@@ -21,7 +21,7 @@ Simulator::Simulator(const char* appName, bool verbose)
 	, fr(0)
 	, pTug(0)
 {
-	logger = new Logger();
+	logger = new Logger(logPath);
 	logger->info(this,"Startup");
 	state = new SimState(this);
 	stateRequest = new SimObjectDataRequest(this, state, &userAircraft(), SIMCONNECT_PERIOD_SECOND);
