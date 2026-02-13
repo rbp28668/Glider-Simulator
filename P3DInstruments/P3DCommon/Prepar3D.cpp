@@ -67,7 +67,7 @@ Prepar3D::Prepar3D(const char* appName, bool verbose)
 	wxStations(this),
 	extSim(0),
 	userAc(this),
-	majorVersion(4), // until proven otherwise
+	majorVersion(5), // until proven otherwise
 	minorVersion(0)
 {
 

@@ -6,6 +6,7 @@ class Prepar3D;
 
 class Logger
 {
+	std::string logPath;
 	std::ofstream* output;
 
 	std::string getOutputPath(Prepar3D* p3d);
@@ -13,7 +14,7 @@ class Logger
 	void write(Prepar3D* p3d, const std::string& text);
 
 public:
-	Logger();
+	Logger(const char* logPath = nullptr);
 	~Logger();
 
 	void logCommand(Prepar3D* p3d,const std::string& cmd, const std::string& params);

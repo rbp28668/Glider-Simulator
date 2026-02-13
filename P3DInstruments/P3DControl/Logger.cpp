@@ -11,7 +11,10 @@
 std::string Logger::getOutputPath(Prepar3D* p3d)
 {
 	DocumentDirectory documents;
-	Directory logFolder = documents.sub(p3d->documentsFolder()).sub("log");
+	
+	Directory logFolder = (logPath.empty())
+		? documents.sub(p3d->documentsFolder()).sub("log")
+		: Directory(logPath);
 
 	time_t now;
 	time(&now);
@@ -77,9 +80,31 @@ void Logger::write(Prepar3D* p3d, const std::string& text)
 	output->flush();
 }
 
-Logger::Logger()
+Logger::Logger(const char* logPath)
 	: output(0)
 {
+	if (logPath != nullptr) {
+		this->logPath = std::string(logPath);
+	}
+
+	if (this->logPath.empty()) {
+		// Check for the P3D_LOG environment variable.  If it exists and its a folder then use
+		// that instead.
+		char buffer[512];
+		auto size = ::GetEnvironmentVariableA("P3D_LOG", buffer, 512);
+		if (size > 0) {
+			auto dir = std::string(buffer, size);
+			DWORD dwAttrib = GetFileAttributesA(dir.c_str());
+
+			bool isDir = (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+			if (isDir) {
+				this->logPath = dir;
+			}
+
+		}
+
+	}
+
 }
 
 Logger::~Logger()

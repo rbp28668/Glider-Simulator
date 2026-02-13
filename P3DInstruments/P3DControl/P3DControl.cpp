@@ -24,6 +24,7 @@ int main(int argc, char* argv[])
 	bool verbose = false;
 	unsigned short port = 3000;
 	std::string script;
+	std::string logpath;
 
 	for (int i = 1; i<argc; ) {
 		std::string arg = argv[i++];
@@ -44,6 +45,16 @@ int main(int argc, char* argv[])
 			}
 		}
 
+		else if (arg == "-log") {
+			if (i < argc) {
+				logpath = argv[i++];
+			}
+			else {
+				std::cerr << "Missing path parameter for -log option, ignoring this" << std::endl;
+			}
+		}
+
+
 		else if (arg == "-verbose") {
 			verbose = true;
 		}
@@ -62,7 +73,7 @@ int main(int argc, char* argv[])
 	HTTPService httpService;
 
 
-	Simulator sim("P3DControl",verbose);
+	Simulator sim("P3DControl",logpath.c_str(), verbose);
 
 	CommandInterpreter interpreter(&sim);
 

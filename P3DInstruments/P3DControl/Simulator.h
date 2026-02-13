@@ -23,7 +23,7 @@ class Simulator : public Prepar3D
 
 
 public:
-	Simulator(const char* appName, bool verbose = false);
+	Simulator(const char* appName, const char* logPath, bool verbose = false);
 	~Simulator();
 
 	SimState* getState() { return state; }
