@@ -19,11 +19,12 @@ class ASK21:
         # Initialize ASK21-specific parameters here
 
         #Moments of inertia about principal axes through center of gravity (roll, pitch, yaw)
-        # Note estimages from Gemini, commented out figures from USAF spin report
-        self.Ixx = 4500 #1285.0  # kg·m²
-        self.Iyy = 1200 #1824.0  # kg·m²
-        self.Izz = 5500 #2663.0  # kg·m²
-        self.Ixz = 150 #100.0     # kg·m² Wild guess (retain product-of-inertia for dynamics)
+        # Note estimates from USAF spin report
+        self.Ixx = 1285.0  # kg·m²
+        self.Iyy = 1824.0  # kg·m²
+        self.Izz = 2663.0  # kg·m²
+        self.Ixz = 100.0     # kg·m² Wild guess (retain product-of-inertia for dynamics)
+
         self.mass = 687.0  # kg
 
         self.cg = -0.30  # m from datum (negative is aft of datum), was 30 originally
