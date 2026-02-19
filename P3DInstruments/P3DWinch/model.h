@@ -75,10 +75,13 @@ class Model{
         //Fin
         fin_forces(state, aircraft, control_inputs, world, relative_velocity, forces_body, moments_body) ;
 
+
+        auto roll_rate = state.angular_velocity()[0];
+        auto yaw_rate = state.angular_velocity()[2];
+
         // Explicit roll damping (Clp effect)
         // Wing panels provide some damping via local velocity, but add explicit term
         // for robustness at high rates. Clp is typically -0.4 to -0.5 for gliders.
-        auto roll_rate = state.angular_velocity()[0];
         auto tas = relative_velocity.TotalAirspeed();
         if (tas > MIN_AIRSPEED) {
             auto q = 0.5f * world.air_density * tas * tas;
@@ -130,8 +133,6 @@ class Model{
         const float HIGH_RATE_THRESHOLD = 0.5f;  // rad/s (~30 deg/s)
         const float HIGH_RATE_DAMP = 8000.0f;    // N.m.s/rad
 
-        float roll_rate = state.angular_velocity()[0];
-        float yaw_rate = state.angular_velocity()[2];
 
         if (std::abs(roll_rate) > HIGH_RATE_THRESHOLD) {
             float excess_rate = roll_rate - std::copysign(HIGH_RATE_THRESHOLD, roll_rate);

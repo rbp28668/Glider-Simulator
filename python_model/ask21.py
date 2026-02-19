@@ -19,10 +19,11 @@ class ASK21:
         # Initialize ASK21-specific parameters here
 
         #Moments of inertia about principal axes through center of gravity (roll, pitch, yaw)
-        self.Ixx = 1285.0  # kg·m²
-        self.Iyy = 1824.0  # kg·m²
-        self.Izz = 2663.0  # kg·m²
-        self.Ixz = 100.0     # kg·m² Wild guess
+        # Note estimages from Gemini, commented out figures from USAF spin report
+        self.Ixx = 4500 #1285.0  # kg·m²
+        self.Iyy = 1200 #1824.0  # kg·m²
+        self.Izz = 5500 #2663.0  # kg·m²
+        self.Ixz = 150 #100.0     # kg·m² Wild guess (retain product-of-inertia for dynamics)
         self.mass = 687.0  # kg
 
         self.cg = -0.30  # m from datum (negative is aft of datum), was 30 originally
@@ -36,13 +37,13 @@ class ASK21:
         # quarter-chord is distance from root leading edge (datum) to quarter-chord of panel
         # root and tip are the root and tip sections and interp determines interpolation between them.
         rootPanel =     Panel(         3.215313306, 1.545740741, -0.3368518519, 1.347407407, incidenceDegrees, root, tip, 0.0)
-        airbrakePanel = AirbrakePanel( 1.648746982, 3.440925926, -0.2935648148, 1.174259259, incidenceDegrees, root, tip, 0.2)  
-        outerPanel =    Panel(         1.112233745, 4.668703704, -0.2644444444, 1.057777778, incidenceDegrees, root, tip, 0.5)
-        aileronPanel =  AileronPanel(  2.216578464, 6.585925926, -0.211712963, 0.7964814815, incidenceDegrees, root, tip, 0.7,
+        airbrakePanel = AirbrakePanel( 1.648746982, 3.440925926, -0.2935648148, 1.174259259, incidenceDegrees - 0.2, root, tip, 0.2)  
+        outerPanel =    Panel(         1.112233745, 4.668703704, -0.2644444444, 1.057777778, incidenceDegrees- 0.4, root, tip, 0.5)
+        aileronPanel =  AileronPanel(  2.216578464, 6.585925926, -0.211712963, 0.7964814815, incidenceDegrees - 0.8, root, tip, 0.7,
                                         max_up_deg=18.0, max_down_deg=12.0,  # differential aileron
                                         lift_effectiveness=0.6, moment_coeff=-0.4, profile_drag_coeff=0.01)  
-        tipPanel =      Panel(         0.287909808, 8.238703704, -0.1629166667, 0.5509259259, incidenceDegrees, root, tip, 1.0)  
-        self.wing = [
+        tipPanel =      Panel(         0.287909808, 8.238703704, -0.1629166667, 0.5509259259, incidenceDegrees - 1, root, tip, 1.0)  
+        self.wing : list[Panel] = [
             rootPanel,
             airbrakePanel,
             outerPanel,
@@ -74,8 +75,32 @@ class ASK21:
         self.fin_quarter_chord = -5.082685185  # m from datum
         self.fin = tail
 
-        self.wing_span = 17.0  # m
-        self.mean_chord = 1.121 # m
+        self.wing_span = 17.0  # m    aka 'b'
+        self.mean_chord = 1.121 # m   aka 'c'
+        self.S = 17.95 # m2 (should be the same as 2x sum of panel areas + fuselage plug)
+
+        # Fuselage coefficients
+        # Aerodynamic Coefficients for ASK21 Fuselage
+        # These are typical values for a high-performance (?? a K21?) tandem glider
+        self.C_d0 = 0.015       # Baseline parasite drag (positive)
+        self.C_y_beta = -0.12   # Side force coefficient per radian (low angle)
+        self.C_z_alpha = -0.10  # Vertical force coefficient (negligible lift, low angle
+        self.C_m_alpha = 0.05   # Pitching instability (destabilizing)
+        self.C_n_beta = -0.04   # Yawing instability (Munk moment)
+        self.C_mq_fus = -0.15   # Pitch damping (fuselage contribution) - with pitch rate
+        self.C_nr_fus = -0.10   # Yaw damping (fuselage contribution)   - with yaw rate
+        self.S_side = 4.5    # Projected side area of ASK21 fuselage (m^2)
+        self.S_plan = 3.8    # Projected top/bottom area (m^2)
+        self.Cd_cylinder = 1.2 # Drag coefficient of a cylinder-like body - used for cross-flow drag
+
+
+#        Coefficient	Scaled Value (per rad)	Role in Simulation
+# Cyβ​	-0.18	Sideforce: Makes the glider slide sideways in a slip.
+# Czα​	0.08	Fuselage Lift: Minor contribution to total lift.
+# Cmα​	0.065	Static Instability: Pushes nose up; tail must counter this.
+# Cnβ​	-0.09	Weathercock Instability: Tail must be >+0.090 to be stable.
+# Cmq​	-0.12	Pitch Damping: Resistance to pitching.
+# Cnr​	-0.025	Yaw Damping: Resistance to yawing.
 
 
         # Contact points for ground detection. Relative to datum. Fwd and down are +ve.

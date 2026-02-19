@@ -3,17 +3,33 @@
 
 #include <iostream>
 
-#include "simulation.h"
-
+#include "../P3DCommon/Prepar3D.h"
+//#include "simulation.h"
+#include "Joystick.h"
 
 int main(int argc, char* argv[])
 {
     
 
-    Simulation simulation;
+    //Simulation simulation;
 
 
-    std::cout << "Hello World!\n";
+    std::cout << "Hello Winch!\n";
+
+
+    Prepar3D* p3D = new Prepar3D("Winch");
+
+    Joystick joystick;
+
+    joystick.Register(p3D);
+
+    p3D->DispatchLoop();
+
+    joystick.Unregister(p3D);
+    delete p3D;
+
+    return 0;
+
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

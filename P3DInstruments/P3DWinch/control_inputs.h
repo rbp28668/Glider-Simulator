@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+
 class ControlInputs{
 
 public:

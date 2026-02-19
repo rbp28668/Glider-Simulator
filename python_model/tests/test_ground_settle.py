@@ -1,5 +1,6 @@
 """Test script to verify ground settling behavior."""
 
+
 from simulation import Simulation
 from math import sqrt
 

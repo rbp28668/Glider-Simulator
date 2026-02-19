@@ -63,8 +63,7 @@ class Simulation:
         self.winch = Winch()
         self.winch_info = {}  # Diagnostic info from last winch calculation
         self.pitch_only = False
-        self.use_rk4 = True
-
+  
 
     def reset(self):
         self.total_time = 0.0
@@ -72,140 +71,7 @@ class Simulation:
 
     def update(self, dt : float) -> StateVector:
         self.total_time += dt
-       
-        if self.use_rk4:
-            return self.update_rk4(dt)
-        else:
-            return self.update_simple(dt)
-
-
-    def update_simple(self, dt : float) -> StateVector:
-        state = self.state
-        # Get wind
-        wind_earth = self.world.get_wind_vector(state.position(), self.total_time)
-
-        # Calculate airspeed with wind
-        V_air_body = self.apply_wind_to_state(state, wind_earth)
-
-        # Calculate aerodynamics
-        forces_body, moments_body = self.model.calculate_aerodynamics(
-            state, self.aircraft, self.controls, self.world, V_air_body
-        )
-
-        # Get current velocity and angular velocity for Coriolis terms
-        u, v, w = state.velocity()
-        p, q, r = state.angular_velocity()
-
-        # Linear acceleration: F/m + gravity + Coriolis terms
-        # In rotating body frame: a_body = F/m + g_body + ω × v_body
-        # Coriolis: (r*v - q*w, p*w - r*u, q*u - p*v)
-        acc_x = forces_body[0] / self.aircraft.mass + (r*v - q*w)
-        acc_y = forces_body[1] / self.aircraft.mass + (p*w - r*u)
-        acc_z = forces_body[2] / self.aircraft.mass + (q*u - p*v)
-
-        orientation = state.orientation()
-
-        # Gravity in body frame
-        g = 9.81
-        g_earth = (0, 0, g) # +ve down
-        g_body = quaternion_rotate_vector_inverse(orientation, g_earth)
-
-        acc_x += g_body[0]
-        acc_y += g_body[1]
-        acc_z += g_body[2]
-
-        # Update velocity: v_new = v_old + a * dt
-        vx = u + acc_x * dt
-        vy = v + acc_y * dt
-        vz = w + acc_z * dt
-
-        # Update position using OLD velocity (standard forward Euler)
-        v_world = quaternion_rotate_vector(orientation, (u, v, w))  # body to world frame
-        position = state.position()
-        px = position[0] + v_world[0] * dt
-        py = position[1] + v_world[1] * dt
-        pz = position[2] + v_world[2] * dt
-
-        # Moments of inertia
-        Ixx = self.aircraft.Ixx
-        Iyy = self.aircraft.Iyy
-        Izz = self.aircraft.Izz
-
-        # Angular acceleration with gyroscopic coupling
-        # Using Euler's equations: I * ω̇ = M - ω × (I * ω)
-        dp = (moments_body[0] + (Iyy - Izz) * q * r) / Ixx
-        dq = (moments_body[1] + (Izz - Ixx) * r * p) / Iyy
-        dr = (moments_body[2] + (Ixx - Iyy) * p * q) / Izz
-
-        # Update angular velocity
-        av_roll = p + dp * dt
-        av_pitch = q + dq * dt
-        av_yaw = r + dr * dt
-
-        # Note: Artificial damping removed - natural aerodynamic damping comes from:
-        # - Tail seeing different AoA due to pitch rate (modeled in tailplane_forces)
-        # - For proper damping, add Cmq derivative term to pitching moment
-
-        # Constrain to pitch-only motion if set
-        if(self.pitch_only):
-            av_yaw = 0
-            av_roll = 0
-            vy = 0
-
-        # Orientation update via quaternion derivative (using NEW angular velocity)
-        quat = state.orientation()
-        quat_dot = quaternion_derivative(quat, (av_roll, av_pitch, av_yaw))
-        qw = quat[0] + quat_dot[0] * dt
-        qx = quat[1] + quat_dot[1] * dt
-        qy = quat[2] + quat_dot[2] * dt
-        qz = quat[3] + quat_dot[3] * dt
-
-        # Update position using euler angles for DEBUG
-        # Note - provides same behaviour
-        # roll, pitch, yaw = quaternion_to_euler(quat[0],quat[1], quat[2], quat[3])
-        # pitch += angular_velocity[1] * dt
-        # quat = euler_to_quaternion(roll, pitch, yaw)
-        # qw = quat[0] 
-        # qx = quat[1] 
-        # qy = quat[2] 
-        # qz = quat[3] 
-
-        new_state = StateVector()
-
-        # Sanitize position (allow large range but catch NaN/Inf)
-        new_state.set_position((
-            clamp(safe_value(px), -MAX_POSITION, MAX_POSITION),
-            clamp(safe_value(py), -MAX_POSITION, MAX_POSITION),
-            clamp(safe_value(pz), -MAX_POSITION, MAX_POSITION)
-        ))
-
-        # Sanitize velocity
-        new_state.set_velocity(sanitize_velocity(vx, vy, vz))
-
-        # Sanitize angular velocity
-        new_state.set_angular_velocity(sanitize_angular_velocity(av_roll, av_pitch, av_yaw))
-
-        # Sanitize quaternion (normalize handles most issues, but check for NaN)
-        quat_safe = (
-            safe_value(qw, 1.0),
-            safe_value(qx, 0.0),
-            safe_value(qy, 0.0),
-            safe_value(qz, 0.0)
-        )
-        new_state.set_orientation(quaternion_normalize(quat_safe))
-        new_state.set_forces_moments(forces_body, moments_body)
-
-        self.state = new_state
-
-        # Apply ground settling - zero velocities if nearly stationary on ground
-        self._apply_ground_settling()
-
-        return new_state
-
-
-
-    def update_rk4(self, dt : float) -> StateVector:
-
+  
         # Update aircraft state based on physics, control inputs, and world conditions
 
         """
@@ -325,21 +191,21 @@ class Simulation:
         # k2
         state2 = state.offset(k1, 0.5*dt) #[state[i] + 0.5*dt*k1[i] for i in range(13)]
         state2.normalize_orientation()
-        state2.sanitize()
+        #state2.sanitize()
         forces2, moments2 = forces_moments_func(state2)
         k2 = self.state_derivative(state2, forces2, moments2, mass, inertia)
 
         # k3
         state3 = state.offset(k2, 0.5*dt) #[state[i] + 0.5*dt*k2[i] for i in range(13)]
         state3.normalize_orientation()
-        state3.sanitize()
+        #state3.sanitize()
         forces3, moments3 = forces_moments_func(state3)
         k3 = self.state_derivative(state3, forces3, moments3, mass, inertia)
 
         # k4
         state4 = state.offset(k3, dt) #[state[i] + dt*k3[i] for i in range(13)]
         state4.normalize_orientation()
-        state4.sanitize()
+        #state4.sanitize()
         forces4, moments4 = forces_moments_func(state4)
         k4 = self.state_derivative(state4, forces4, moments4, mass, inertia)
 
@@ -430,6 +296,7 @@ class Simulation:
         return u_dot, v_dot, w_dot
 
     # Angular Acceleration (Body Frame)
+    # Angular acceleration is 1st derivative of angular velocity.
     @staticmethod
     def calculate_angular_acceleration(state: StateVector, moments_body: V3d , inertia) -> V3d:
         """
@@ -460,9 +327,42 @@ class Simulation:
         q_dot = (M + gyro_M) / Iyy
         r_dot = (Ixz * (L + gyro_L) + Ixx * (N + gyro_N)) / I_det
 
-        return (p_dot, q_dot, r_dot)
+        #return (p_dot, q_dot, r_dot)
 
+        # We calculate the "Inertial Terms" (Gyroscopic effects) first.
+        # These are the terms typically on the RHS of the equations.
+        
+        # -----------------------------------------------------------------
+        # Derived from M = I * w_dot + w x (I * w)
+        #
 
+        # Precompute the Determinant (Gamma)
+        # This represents the inertial coupling magnitude
+        Gamma = Ixx * Izz - Ixz**2
+   
+        # Pitch (Decoupled in this simplified symmetry):
+        # Iyy * dq = M - (Ixx - Izz)*p*r - Ixz*(p^2 - r^2)
+        # Note: (Izz - Ixx)*p*r is equivalent to -(Ixx - Izz)*p*r
+        
+        term_pitch = (Izz - Ixx) * p * r + Ixz * (r**2 - p**2)
+        dq = (M + term_pitch) / Iyy
+
+        # Roll and Yaw (Coupled System):
+        # We define "Prime" moments (External + Gyroscopic terms)
+        # L_prime = L - [ (Izz - Iyy)qr - Ixz*pq ]  <-- from w x (Iw) expansion
+        # N_prime = N - [ (Iyy - Ixx)pq + Ixz*qr ]
+        
+        # CAUTION: Signs often flip depending on moving terms to LHS or RHS.
+        # Below is derived for LHS = I*w_dot
+        
+        L_prime = L + (Iyy - Izz) * q * r + Ixz * p * q
+        N_prime = N + (Ixx - Iyy) * p * q - Ixz * q * r
+
+        # Solve using Cramer's Rule (Pre-calculated Gamma)
+        dp = (Izz * L_prime + Ixz * N_prime) / Gamma
+        dr = (Ixz * L_prime + Ixx * N_prime) / Gamma
+        return (dp, dq, dr)
+    
     # Position Update (Earth Frame)
     @staticmethod
     def calculate_position_derivative(state: StateVector) -> V3d:

@@ -98,6 +98,7 @@ def reset_to_ground():
     # Main wheel penetration ~0.095m, CG height ~0.643m
     sim.state.set_position((0.0, 0.0, -0.643))
     sim.state.set_velocity((0.0, 0.0, 0.0))
+    
     # Equilibrium pitch from test: ~0.63 degrees
     sim.state.set_orientation(euler_to_quaternion(0, radians(0.63), 0))
     sim.state.set_angular_velocity((0.0, 0.0, 0.0))
@@ -114,6 +115,15 @@ def start_winch_launch():
     sim.engage_winch()
     print("Winch launch initiated")
 
+def restart_in_air():
+    """Reset to 1000m altitude and flying at 30 m/s."""
+    sim.reset()
+    sim.state.set_position((0.0, 0.0, -1000.0))  # 1000m altitude
+    sim.state.set_velocity((30.0, 0.0, 0.0))      # Initial forward speed 30 m/s
+    sim.state.set_orientation(euler_to_quaternion(0, radians(1.5),0))  # Pointing north, slight pitch up
+    sim.state.set_angular_velocity((0.0, 0.0, 0.0))  # No initial rotation
+    print("Restarted in air at 1000m")
+
 
 @window.event
 def on_key_press(symbol, modifiers):
@@ -121,7 +131,9 @@ def on_key_press(symbol, modifiers):
         reset_to_ground()
     elif symbol == key.W:
         start_winch_launch()
-
+    elif symbol == key.F:
+        restart_in_air()
+        
 log = StateLog('state.txt')
 
 count:int = 0

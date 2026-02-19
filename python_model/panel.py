@@ -118,8 +118,8 @@ class Panel:
         # Transform from wind axes to body axes (rotation by angle of attack about Y)
         # Wind axes: -X is drag direction, -Z is lift direction
         # Body axes: X forward, Z down
-        Fx = -D * cos(local_alpha) - L * sin(local_alpha)  # drag backwards in S&L flight
-        Fz =  D * sin(local_alpha) - L * cos(local_alpha)  # lift is -ve Z in body axes
+        Fx = -(D * cos(local_alpha) - L * sin(local_alpha))  # drag backwards in S&L flight
+        Fz = -(D * sin(local_alpha) + L * cos(local_alpha))  # lift is -ve Z in body axes
 
         # Apply low-airspeed scaling
         Fx *= airspeed_factor
