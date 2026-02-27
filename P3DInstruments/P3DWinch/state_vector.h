@@ -125,6 +125,12 @@ public:
         this->_position = position;
     }
 
+    void set_position(T x, T y, T z) {
+        this->_position.data[0] = x;
+        this->_position.data[1] = y;
+        this->_position.data[2] = z;
+    }
+
     // Velocity: u, v, w in body frame
     V3d<T> velocity() const
     {
@@ -134,6 +140,12 @@ public:
     void set_velocity(const V3d<T> &velocity)
     {
         this->_velocity = velocity;
+    }
+
+    void set_velocity(T x, T y, T z) {
+        this->_velocity.data[0] = x;
+        this->_velocity.data[1] = y;
+        this->_velocity.data[2] = z;
     }
 
     // Orientation: qw, qx, qy, qz in quaternion form
@@ -157,6 +169,13 @@ public:
     {
         this->_angular_velocity = av;
     }
+
+    void set_angular_velocity(T p, T q, T r) {
+        this->_angular_velocity.data[0] = p;
+        this->_angular_velocity.data[1] = q;
+        this->_angular_velocity.data[2] = r;
+    }
+
 
     StateVector<T> copy()
     {

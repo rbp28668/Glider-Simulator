@@ -44,6 +44,11 @@ private:
 template<class T>
 void Spline<T>::spline(T* x, T* y, int n, T* y2)
 {
+	assert(x);
+	assert(y);
+	assert(n > 2);
+	assert(y2);
+		
 	int i, k;
 	T p, qn, sig, un, * u;
 
@@ -91,6 +96,12 @@ T Spline<T>::splint(T x, T& dydx, T& d2ydx2)
 		++klo;
 		++khi;
 	}
+	// or previous
+	else if( x < xx[klo]) {
+		--klo;
+		--khi;
+	}
+
 	// If not in correct range now revert to doing a binary
 	// search to find the correct values for klo and khi to 
 	// bracket x.

@@ -5,6 +5,8 @@
 #define V3D_H
 
 #include <cmath>
+#include <ostream>
+#include <assert.h>
 
 template <typename T>
 struct V3d
@@ -21,6 +23,9 @@ struct V3d
 
     V3d(T x, T y, T z)
     {
+        assert(!isnan(x));
+        assert(!isnan(y));
+        assert(!isnan(z));
         data[0] = x;
         data[1] = y;
         data[2] = z;
@@ -76,6 +81,18 @@ struct V3d
             return 0.0;
         return asin(v / V);
     }
+
 };
 
+inline std::ostream& operator<<(std::ostream& os, const V3d<float>& v)
+{
+    os << '(' << v[0] << ',' << v[1] << ',' << v[2] << ')';
+    return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const V3d<double>& v)
+{
+    os << '(' << v[0] << ',' << v[1] << ',' << v[2] << ')';
+    return os;
+}
 #endif // V3D_H

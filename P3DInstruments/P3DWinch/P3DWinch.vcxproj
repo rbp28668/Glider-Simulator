@@ -148,11 +148,21 @@
     <ClCompile Include="Aerofoil_FX_02_196.cpp" />
     <ClCompile Include="Aerofoil_FX_60_126.cpp" />
     <ClCompile Include="Aerofoil_NACA0010.cpp" />
+    <ClCompile Include="control_inputs.cpp" />
+    <ClCompile Include="ground_contact.cpp" />
     <ClCompile Include="Joystick.cpp" />
+    <ClCompile Include="model.cpp" />
+    <ClCompile Include="P3DEvent.cpp" />
     <ClCompile Include="P3DWinch.cpp" />
+    <ClCompile Include="panel.cpp" />
     <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="Spline.cpp" />
+    <ClCompile Include="state_input.cpp" />
+    <ClCompile Include="state_output.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="TestBase.cpp" />
+    <ClCompile Include="TestFinEffect.cpp" />
+    <ClCompile Include="TestTailplaneEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aerofoil.h" />
@@ -167,12 +177,18 @@
     <ClInclude Include="Joystick.h" />
     <ClInclude Include="local_math.h" />
     <ClInclude Include="model.h" />
+    <ClInclude Include="P3DEvent.h" />
     <ClInclude Include="panel.h" />
     <ClInclude Include="quaternion.h" />
     <ClInclude Include="simulation.h" />
     <ClInclude Include="Spline.h" />
+    <ClInclude Include="state_input.h" />
+    <ClInclude Include="state_output.h" />
     <ClInclude Include="state_vector.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TestBase.h" />
+    <ClInclude Include="TestFinEffect.h" />
+    <ClInclude Include="TestTailplaneEffect.h" />
     <ClInclude Include="v3d.h" />
     <ClInclude Include="winch.h" />
     <ClInclude Include="world.h" />

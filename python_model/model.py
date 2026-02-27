@@ -215,14 +215,11 @@ class Model:
 
         forces = (D, 0.0, L)
 
-        # Moments (about c.g.)
-        dist = aircraft.cg - aircraft.tailplane_quarter_chord;  # should be +ve as tail behind CG
-        assert(dist > 0.0), "Tailplane should be located behind CG"
-
+    
         # Moments (about c.g.). Note: dist is negative when tail is behind CG.
         # pitchMoment = M + L * dist where positive L (downwards) and positive dist
         # produce a positive pitchMoment (nose-up) as expected for tail downforce.
-        pitchMoment = M + L * dist
+        pitchMoment = M + L * -dist
 
         moments = (0.0, pitchMoment, 0.0)
 
@@ -256,11 +253,11 @@ class Model:
 
         # 2. Beta at the fin
         # If local_airflow[1] is positive (air from right), beta is positive.
-        beta_fin = atan2(local_airflow[1], abs(local_airflow[0]))
+        beta_fin_raf = atan2(local_airflow[1], local_airflow[0])
 
         # Rudder: Right rudder (+1) should pull the tail LEFT (+Fy) to yaw nose RIGHT.
         # This means right rudder must create 'negative lift' in aero terms.
-        beta_fin += controls.rudder * radians(15) 
+        beta_fin = beta_fin_raf +controls.rudder * radians(15) 
 
         # 3. Aero Coefficients
         cl, cd, _ = aircraft.fin.coefficients_at(beta_fin)
@@ -274,8 +271,8 @@ class Model:
         # 4. Final Body Forces
         # Drag acts in direction of local airflow (mostly -X)
         # Lift acts perpendicular to local airflow (mostly -Y)
-        fx = -drag * cos(beta_fin) + lift * sin(beta_fin)
-        fy = -lift * cos(beta_fin) - drag * sin(beta_fin)
+        fx = -(drag * cos(beta_fin_raf) - lift * sin(beta_fin_raf))  # drag backwards, lift can have small forward component at high beta
+        fy = -(lift * cos(beta_fin_raf) + drag * sin(beta_fin_raf))
 
         forces = (fx, fy, 0.0)
 

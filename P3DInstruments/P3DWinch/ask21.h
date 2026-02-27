@@ -27,8 +27,14 @@ public:
     float moments_of_inertia[4] = {Ixx, Iyy, Izz, Ixz};
 
     float mass = 687.0f; // kg
-
     float cg = -0.30f; // m from datum (negative is aft of datum), was 30 originally
+
+
+    // Wing information
+
+    float wing_span = 17.0f;   // m
+    float mean_chord = 1.121f; // m
+    float S = 17.95f;            // m2(should be the same as 2x sum of panel areas + fuselage plug)
 
     Aerofoil_FX_60_126 root;
     Aerofoil_FX_02_196 tip;
@@ -76,8 +82,20 @@ public:
     float fin_quarter_chord = -5.082685185f; // m from datum
     Aerofoil& fin = tail;
 
-    float wing_span = 17.0f;   // m
-    float mean_chord = 1.121f; // m
+    // Fuselage coefficients
+    // Aerodynamic Coefficients for ASK21 Fuselage
+    // These are typical values for a high - performance(? ? a K21 ? ) tandem glider
+    float C_d0 = 0.015f;       // Baseline parasite drag(positive)
+    float C_y_beta = -0.12f;   // Side force coefficient per radian(low angle)
+    float C_z_alpha = -0.10f;  // Vertical force coefficient(negligible lift, low angle
+    float C_m_alpha = 0.05f;   // Pitching instability(destabilizing)
+    float C_n_beta = -0.04f;   // Yawing instability(Munk moment)
+    float C_mq_fus = -0.15f;   // Pitch damping(fuselage contribution) - with pitch rate
+    float C_nr_fus = -0.10f;   // Yaw damping(fuselage contribution) - with yaw rate
+    float S_side = 4.5f;    // Projected side area of ASK21 fuselage(m ^ 2)
+    float S_plan = 3.8f;    // Projected top / bottom area(m ^ 2)
+    float Cd_cylinder = 1.2f; // Drag coefficient of a cylinder - like body - used for cross - flow drag
+
 
     // Contact points for ground detection. Relative to datum. Fwd and down are +ve.
     // contact_type determines stiffness, damping, friction and max penetration:

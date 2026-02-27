@@ -1,0 +1,60 @@
+#pragma once
+
+#include "..\P3DCommon\simobjectdata.h"
+
+class Prepar3D;
+class Simulation;
+class StateOutput;
+
+// Get state data from the simulator
+class StateInput :public SimObjectData
+{
+
+	static DataItem dataItems[];
+
+#pragma pack(push, 1)
+	struct Data {
+		
+		SIMCONNECT_DATA_XYZ bodyVelocity; //{"STRUCT BODY VELOCITY", "metres per second", SIMCONNECT_DATATYPE_XYZ},
+		SIMCONNECT_DATA_XYZ bodyAcceleration; //{ "STRUCT BODY ACCELERATION","meters per second squared", SIMCONNECT_DATATYPE_XYZ },
+		SIMCONNECT_DATA_XYZ bodyRotationVelocity; //{ "STRUCT BODY ROTATION VELOCITY","Radians per second",SIMCONNECT_DATATYPE_XYZ },
+		SIMCONNECT_DATA_XYZ bodyRotationAcceleration; //{ "STRUCT BODY ROTATION ACCELERATION","Radians per second squared",SIMCONNECT_DATATYPE_XYZ },
+		
+		float pitch;//{ "PLANE PITCH DEGREES","Radians",SIMCONNECT_DATATYPE_FLOAT32 },
+		float bank; //{ "PLANE BANK DEGREES", "Radians",SIMCONNECT_DATATYPE_FLOAT32 },
+		float heading;//{ "PLANE HEADING DEGREES TRUE","Radians",SIMCONNECT_DATATYPE_FLOAT32 },
+	
+		float rudder;   //{ "RUDDER POSITION", "Position", SIMCONNECT_DATATYPE_FLOAT32 }, //	Rudder input deflection[-1.0:Full Left, 1.0 : Full Right]	Position	Y -
+		float elevator; //{ "ELEVATOR POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32 }, //	Elevator input deflection[-1.0:Full Down, 1.0 : Full Up]	Position	Y -
+		float aileron;  //{ "AILERON POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32 }, // Aileron input left/right [-1.0: Full Left, 1.0: Full Right]
+		float spoiler;  //{ "SPOILERS HANDLE POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32 }, //Spoiler handle position [0: Retracted, 1.0: Fully Extended]
+
+		float time; // {"SIM TIME", "Seconds", SIMCONNECT_DATATYPE_FLOAT32}, //	The elapsed simulation time	Seconds
+
+	    // World information
+		float windX; // { "AMBIENT WIND X", "meters per second", SIMCONNECT_DATATYPE_FLOAT32 }, //	Wind component in East / West direction.Feet per second	N -
+		float windY; // { "AMBIENT WIND Y", "meters per second", SIMCONNECT_DATATYPE_FLOAT32 }, //		Wind component in vertical direction.Feet per second	N -
+		float windZ; // { "AMBIENT WIND Z", "meters per second", SIMCONNECT_DATATYPE_FLOAT32 }, //		Wind component in North / South direction.Feet per second	N -
+		float ground; // { "GROUND ALTITUDE", "meters per second", SIMCONNECT_DATATYPE_FLOAT32 }, //		Altitude of surface	Meters	N	-
+
+		int32_t onGround; //{ "SIM ON GROUND","",SIMCONNECT_DATATYPE_INT32 },
+	};
+#pragma pack(pop)
+
+	Simulation* pFlightModel;
+	StateOutput* pOutput;
+
+	float lastSimTime = 0.0f;
+
+public:
+
+	virtual DataItem* items();
+
+	virtual int itemCount();
+
+	virtual void onData(void* pData, SimObject* pObject);
+
+	StateInput(Prepar3D*, Simulation* pFlightModel);
+
+};
+

@@ -73,19 +73,35 @@ void SimObjectData::show(void* pData) {
 	SimObjectData::DataItem* pItem = items();
 	
 	printf("-------------------------------------\n");
-	printf("double %Iu, long %Iu\n",sizeof(double), sizeof(__int64));
+	//printf("double %Iu, long %Iu\n",sizeof(double), sizeof(__int64));
 	for(int i=0; i<nItems; ++i, ++pItem) {
 		switch(pItem->DatumType) {
 		case SIMCONNECT_DATATYPE_FLOAT64:
 			printf("%s: %f %s  \t\t(%8.8I64x,%8.8I64x)\n",pItem->DatumName, *(double*)pData, pItem->UnitsName, *(__int64*)pData >> 32, *(__int64*)pData);
 			pData = (char*)pData + sizeof(double);
 			break;
+		case SIMCONNECT_DATATYPE_FLOAT32:
+			printf("%s: %f %s  \t\t(%8.8I32x)\n", pItem->DatumName, *(float*)pData, pItem->UnitsName, *(__int32*)pData);
+			pData = (char*)pData + sizeof(float);
+			break;
 		case SIMCONNECT_DATATYPE_INT64:
 			printf("%s: %16.16I64x %s\n",pItem->DatumName, *(__int64*)pData, pItem->UnitsName);
 			pData = (char*)pData + sizeof(__int64);
 			break;
+		case SIMCONNECT_DATATYPE_INT32:
+			printf("%s: %8.8I32x %s\n", pItem->DatumName, *(__int32*)pData, pItem->UnitsName);
+			pData = (char*)pData + sizeof(__int32);
+			break;
+		case SIMCONNECT_DATATYPE_XYZ:
+		{
+			SIMCONNECT_DATA_XYZ* pxyz = reinterpret_cast<SIMCONNECT_DATA_XYZ*>(pData);
+			printf("%s: (%f, %f,%f) %s\n", pItem->DatumName, pxyz->x, pxyz->y, pxyz->z, pItem->UnitsName);
+			pData = (char*)pData + sizeof(SIMCONNECT_DATA_XYZ);
+		}
+			break;
+
 		default:
-			printf("%s unhandled type \n", pItem->DatumName);
+			printf("%s unhandled type %s\n", pItem->DatumName, pItem->UnitsName);
 			break;
 		}
 	}

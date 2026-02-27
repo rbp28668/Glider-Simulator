@@ -157,7 +157,7 @@ class GroundContact:
         # Apply settling forces when 2+ contact points and low velocity
         # This prevents "fidgeting" when the aircraft should be stationary
         # (gliders typically sit on 2 points: main wheel + tail skid)
-        if contacts_in_ground >= 2:
+        if contacts_in_ground >= 2 :
             u, v, w = state.velocity()
             p, q, r = state.angular_velocity()
             vel_mag = sqrt(u*u + v*v + w*w)

@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include <iostream>
 #include "Spline.h"
 
 // Provides Coefficients of lift, drag and moment for a given alpha (AoA)
@@ -27,7 +28,7 @@ class Aerofoil {
     Spline<float>* _cd_spline = nullptr;
     Spline<float>* _cm_spline = nullptr;
 
-    const double pi = 3.14159265358979323846;
+    const float two_pi = float(3.14159265358979323846 * 2); //double pi = 3.14159265358979323846;
 
 public:
 
@@ -47,19 +48,24 @@ protected:
 
 
     Aerofoil(float data[][4], int nlines) {
+        assert(nlines > 0);
 
         alphas = new float[nlines];
         cls = new float[nlines];
         cds = new float[nlines];
         cms = new float[nlines];
 
+        //std::cout << "START AEROFOIL" << std::endl;
         for (int i = 0; i < nlines; ++i) {
-            auto line = data[i];
-            alphas[i] = line[0] / float(2 * pi); // store as radians
+            float* line = data[i];
+            //std::cout << line[0] << ',' << line[1] << ',' << line[2] << ',' << line[3] << std::endl;
+
+            alphas[i] = line[0] * two_pi / 360; // store as radians
             cls[i] = line[1];
             cds[i] = line[2];
             cms[i] = line[3];
         }
+        //std::cout << "END AEROFOIL" << std::endl;
 
         _cl_spline = new Spline<float>(alphas, cls, nlines);
         _cd_spline = new Spline<float>(alphas, cds, nlines);
@@ -92,9 +98,11 @@ public:
     Coefficients coefficients_at(float alpha_rad) const {
         //Return (CL, CD, CM) for a given alpha in radians.
         //Alpha is wrapped into [0, 2pi) radians before interpolation.
+        assert(!isnan(alpha_rad));
+        assert(!isinf(alpha_rad));
 
-        while (alpha_rad < 0.0f) alpha_rad += float(2 * pi);
-        while (alpha_rad >= float(2 * pi)) alpha_rad -= float(2 * pi);
+        while (alpha_rad < 0.0f) alpha_rad += two_pi;
+        while (alpha_rad >= two_pi) alpha_rad -= two_pi;
         auto cl = _cl_spline->point(alpha_rad);
         auto cd = _cd_spline->point(alpha_rad);
         auto cm = _cm_spline->point(alpha_rad);

@@ -129,7 +129,7 @@ struct Quaternion
     //     phi: Roll angle (rad)
     //     theta: Pitch angle (rad)
     //     psi: Yaw angle (rad)
-    V3d<T> quaternion_to_euler() const
+    V3d<T> to_euler() const
     {
         T qw = data[0], qx = data[1], qy = data[2], qz = data[3];
         // Roll (phi)
@@ -141,7 +141,7 @@ struct Quaternion
         T sinp = 2 * (qw * qy - qz * qx);
         T theta = 0;
         if (abs(sinp) >= 1)
-            theta = copysign(pi / 2, sinp); // Use 90° if out of range
+            theta = copysign((T)pi / 2, sinp); // Use 90° if out of range
         else
             theta = asin(sinp);
 

@@ -30,6 +30,7 @@ class TestTailplane(unittest.TestCase):
         self.state.set_velocity((25.0, 0.0, 0.0))
         self.state.set_angular_velocity((0.0, 0.0, 0.0))
 
+
         tp_force, tp_moments = self.model.tailplane_forces_moments(self.state, self.aircraft, self.state.velocity(), self.controls, self.world)
         print(f"S&L, Tail Force: {tp_force}, Tail moments: {tp_moments}")
 
@@ -55,12 +56,14 @@ class TestTailplane(unittest.TestCase):
         self.state.set_velocity((25.0, 0.0, 0.0))
         self.state.set_angular_velocity((0.0, 0.0, 0.0))
         base_force, _ = self.model.tailplane_forces_moments(self.state, self.aircraft, self.state.velocity(), self.controls, self.world)
+        print(f"Pitch rate base, Tail Force: {base_force}")
 
         # apply positive pitch rate (nose up) which moves tail down and increases local AoA
         self.state.set_velocity((25.0, 0.0, 0.0))
         self.state.set_angular_velocity((0.0, 0.1, 0.0))
         pr_force, _ = self.model.tailplane_forces_moments(self.state, self.aircraft, self.state.velocity(), self.controls, self.world)
-
+        print(f"Pitch rate test, Tail Force: {pr_force}")
+        
         # Observed: positive pitch rate (nose up) moves tail down and here reduces downforce magnitude
         self.assertLess(pr_force[2], base_force[2], "Positive pitch rate should reduce tailplane downforce (Z less positive) in this trim condition")
 

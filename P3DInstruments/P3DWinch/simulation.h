@@ -50,7 +50,7 @@ class Simulation {
 
 public:
     void reset();
-    StateVector<float> update(float dt);
+    StateVector<float> update(float dt, const ControlInputs& controls, const World& world);
     void setup_winch_launch(float winch_distance = 1500.0f,
         float max_tension = 9000.0f,
         float weak_link = 10000.0f);

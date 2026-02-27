@@ -23,6 +23,9 @@ public:
 	void setName(const char* pszName) { this->pszName = pszName; }
 	void setObjectId(DWORD objectId);
 	void setRequestId(DWORD requestId);
+
+
+	const char* name() const { return pszName; }
 	DWORD id() const {return objectId; }
 	DWORD request() const { return requestId; }
 

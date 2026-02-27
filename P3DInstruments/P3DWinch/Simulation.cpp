@@ -174,7 +174,12 @@ void Simulation::reset() {
 
 // Update aircraft state based on physics, control inputs, and world conditions
 // Uses Runge-Kutta 4th order integration
-StateVector<float> Simulation::update(float dt) {
+StateVector<float> Simulation::update(float dt, const ControlInputs& controls, const World& world) {
+
+    // Update control positions & world view
+    this->controls = controls;
+    this->world = world;
+
 
     //Advance simulation by one time step
     total_time += dt;
@@ -353,6 +358,7 @@ V3d<float> Simulation::calculate_linear_acceleration(const StateVector<float>& s
     auto u_dot = Fx_total / mass + r * v - q * w;
     auto v_dot = Fy_total / mass + p * w - r * u;
     auto w_dot = Fz_total / mass + q * u - p * v;
+
 
     return V3d<float>(u_dot, v_dot, w_dot);
 
