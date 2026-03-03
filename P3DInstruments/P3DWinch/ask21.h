@@ -44,16 +44,17 @@ public:
     // mid-span is distance from centerline to panel center
     // quarter-chord is distance from root leading edge (datum) to quarter-chord of panel
     // root and tip are the root and tip sections and interp determines interpolation between them.
+    // NOTE - washout hardwired into incidence of each panel.
     Panel *rootPanel = new Panel(3.215313306f, 1.545740741f, -0.3368518519f, 1.347407407f, incidenceDegrees, root, tip, 0.0f);
-    Panel *airbrakePanel = new AirbrakePanel(1.648746982f, 3.440925926f, -0.2935648148f, 1.174259259f, incidenceDegrees, root, tip, 0.2f);
-    Panel *outerPanel = new Panel(1.112233745f, 4.668703704f, -0.2644444444f, 1.057777778f, incidenceDegrees, root, tip, 0.5f);
-    Panel *aileronPanel = new AileronPanel(2.216578464f, 6.585925926f, -0.211712963f, 0.7964814815f, incidenceDegrees, root, tip, 0.7f,
+    Panel *airbrakePanel = new AirbrakePanel(1.648746982f, 3.440925926f, -0.2935648148f, 1.174259259f, incidenceDegrees - 0.2f, root, tip, 0.2f);
+    Panel *outerPanel = new Panel(1.112233745f, 4.668703704f, -0.2644444444f, 1.057777778f, incidenceDegrees-0.4f, root, tip, 0.5f);
+    Panel *aileronPanel = new AileronPanel(2.216578464f, 6.585925926f, -0.211712963f, 0.7964814815f, incidenceDegrees-0.8f, root, tip, 0.7f,
                                            18.0f, 12.0f, // differential aileron
                                             0.6f, // lift effectiveness
                                             -0.4f, // moment coeff
                                             0.01f  // profile drag coeff
                                         );
-    Panel *tipPanel = new Panel(0.287909808f, 8.238703704f, -0.1629166667f, 0.5509259259f, incidenceDegrees, root, tip, 1.0f);
+    Panel *tipPanel = new Panel(0.287909808f, 8.238703704f, -0.1629166667f, 0.5509259259f, incidenceDegrees-1.0f, root, tip, 1.0f);
 
     std::vector<Panel*> wing = {
         rootPanel,
@@ -153,7 +154,7 @@ public:
     }
     virtual float Oswald() const 
     {
-        return 0.8f; // typical for gliders
+        return 0.95f; // typical for gliders
     }
     virtual float DihedralAngle() const 
     {

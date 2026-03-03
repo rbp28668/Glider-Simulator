@@ -25,14 +25,8 @@ void Model::calculate_aerodynamics(const StateVector<float>& state, const ASK21&
 	V3d<float> forces_body;
 	V3d<float> moments_body;
 
-	//Wings
-	for (auto iter = aircraft.wing.begin(); iter != aircraft.wing.end(); ++iter) {
-		Panel* panel = *iter;
-		// Right hand side            
-		panel->process(state, relative_velocity, (AircraftParameters&)aircraft, (World&)world, (ControlInputs&)control_inputs, 1.0, forces_body, moments_body);
-		// Left hand side
-		panel->process(state, relative_velocity, (AircraftParameters&)aircraft, (World&)world, (ControlInputs&)control_inputs, -1.0, forces_body, moments_body);
-	}
+	//Wing
+	wing_forces(state, aircraft, control_inputs, world, relative_velocity, forces_body, moments_body);
 
 	//Tailplane
 	tailplane_forces(state, aircraft, control_inputs, world, relative_velocity, forces_body, moments_body);
@@ -75,6 +69,18 @@ void Model::calculate_aerodynamics(const StateVector<float>& state, const ASK21&
 	moments[2] = clamp(safe_value(moments_body[2]), -MAX_MOMENT, MAX_MOMENT);
 
 	return;
+}
+
+void Model::wing_forces(const StateVector<float>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<float>& relative_velocity,
+	V3d<float>& forces, V3d<float>& moments) {
+	//Wings
+	for (auto iter = aircraft.wing.begin(); iter != aircraft.wing.end(); ++iter) {
+		Panel* panel = *iter;
+		// Right hand side            
+		panel->process(state, relative_velocity, (AircraftParameters&)aircraft, (World&)world, (ControlInputs&)control_inputs, 1.0, forces, moments);
+		// Left hand side
+		panel->process(state, relative_velocity, (AircraftParameters&)aircraft, (World&)world, (ControlInputs&)control_inputs, -1.0, forces, moments);
+	}
 }
 
 // Calculate tailplane aerodynamic forces

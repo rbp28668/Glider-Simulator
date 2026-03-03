@@ -60,7 +60,7 @@ class TestTailplaneEffect :
 
         // apply positive pitch rate(nose up) which moves tail down and increases local AoA
         state.set_velocity(25.0, 0.0, 0.0);
-        state.set_angular_velocity(0.0, 0.1, 0.0);
+        state.set_angular_velocity(0.0, 0.1f, 0.0);
         V3d<float> pr_forces;
         V3d<float> pr_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), pr_forces, pr_moments);

@@ -20,6 +20,10 @@ SimObjectData::DataItem StateInput::dataItems[] = {
 	{"PLANE BANK DEGREES", "Radians",SIMCONNECT_DATATYPE_FLOAT32},
 	{"PLANE HEADING DEGREES TRUE","Radians",SIMCONNECT_DATATYPE_FLOAT32},
 	
+	{"PLANE LATITUDE","Radians", SIMCONNECT_DATATYPE_FLOAT32}, //	Latitude of aircraft, North is positive, South negative	Radians	Y -
+	{"PLANE LONGITUDE","Radians", SIMCONNECT_DATATYPE_FLOAT32}, //	Longitude of aircraft, East is positive, West negative	Radians	Y -
+	{"PLANE ALTITUDE","Meters", SIMCONNECT_DATATYPE_FLOAT32}, //	Altitude of aircraft	Feet	Y
+
 	// Controls
 	{"RUDDER POSITION", "Position", SIMCONNECT_DATATYPE_FLOAT32}, //	Rudder input deflection[-1.0:Full Left, 1.0 : Full Right]	Position	Y -
 	{"ELEVATOR POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32}, //	Elevator input deflection[-1.0:Full Down, 1.0 : Full Up]	Position	Y -
@@ -69,11 +73,66 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 	world.set_wind_vector(data.windX, data.windY, data.windZ);
 	world.set_ground_height(data.ground);
 
-	float dt = (lastSimTime > 0) ? data.time - lastSimTime : 0.1f; 
-	lastSimTime = data.time;
-	std::cout << dt << std::endl;
+	if (initialised) {
+		float dt = data.time - lastSimTime;
+		lastSimTime = data.time;
 
-	StateVector<float> sv = pFlightModel->update(dt, controls, world);
+		StateVector<float> sv = pFlightModel->update(dt, controls, world);
 
-	pOutput->updateFrom(sv);
+		auto pos = sv.position(); // Position in meters NED
+		pOutput->data.latitude = start_lat + pos[0] / metresPerRadianLat;  // North
+		pOutput->data.longitude = start_lon + pos[1] / metresPerRadianLon;  // East
+		pOutput->data.altitude = -pos[2]; // Down
+
+		auto orientation = sv.orientation();
+		auto rpy = orientation.to_euler();  // as roll, pitch and yaw
+
+		pOutput->data.bank = rpy[0];
+		pOutput->data.pitch = rpy[1];
+		pOutput->data.heading = rpy[2];
+
+		auto v = sv.velocity();
+		pOutput->data.velocity_body_z = v[0];
+		pOutput->data.velocity_body_x = v[1];
+		pOutput->data.velocity_body_y = -v[2];
+
+		auto linear_acceleration = pFlightModel->get_linear_acceleration();
+		pOutput->data.acceleration_body_z = linear_acceleration[0];
+		pOutput->data.acceleration_body_x = linear_acceleration[1];
+		pOutput->data.acceleration_body_y = -linear_acceleration[2];
+
+		auto av = sv.angular_velocity();
+		pOutput->data.rotation_body_z = av[0];
+		pOutput->data.rotation_body_x = av[1];
+		pOutput->data.rotation_body_y = -av[2];
+
+		auto angular_acceleration = pFlightModel->get_angular_acceleration();
+		pOutput->data.rotation_acceleration_body_z = angular_acceleration[0];
+		pOutput->data.rotation_acceleration_body_x = angular_acceleration[1];
+		pOutput->data.rotation_acceleration_body_y = -angular_acceleration[2];
+
+		pOutput->sendData();
+	}
+	else { // not initialised
+
+		StateVector<float>& state = pFlightModel->get_state();
+		state.orientation().from_euler_angles(data.bank, data.pitch, data.heading);
+		state.set_position( 0.0f, 0.0f, -data.altitude );
+		state.set_velocity(data.bodyVelocity.z, data.bodyVelocity.x, -data.bodyVelocity.y); // convert from P3D to NED
+		state.set_angular_velocity(data.bodyRotationVelocity.z, data.bodyRotationVelocity.x, -data.bodyRotationVelocity.y);
+		start_lat = data.latitude;
+		start_lon = data.longitude;
+		
+		constexpr float earthEquatorialRadius = 6378.1f * 1000.0f; //  metres
+		constexpr float earthPolarRadius = 6356.8f * 1000.0f; // metres
+		const float pi = 3.14159265358979f;
+
+		metresPerRadianLat = earthPolarRadius;   // polar circumference / 360
+		metresPerRadianLon = earthEquatorialRadius * std::cos(start_lat);
+
+
+		lastSimTime = data.time;
+		initialised = true;
+	}
+
 }

@@ -162,7 +162,9 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TestBase.cpp" />
     <ClCompile Include="TestFinEffect.cpp" />
+    <ClCompile Include="TestFuselageEffect.cpp" />
     <ClCompile Include="TestTailplaneEffect.cpp" />
+    <ClCompile Include="TestWingEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aerofoil.h" />
@@ -188,7 +190,9 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TestBase.h" />
     <ClInclude Include="TestFinEffect.h" />
+    <ClInclude Include="TestFuselageEffect.h" />
     <ClInclude Include="TestTailplaneEffect.h" />
+    <ClInclude Include="TestWingEffect.h" />
     <ClInclude Include="v3d.h" />
     <ClInclude Include="winch.h" />
     <ClInclude Include="world.h" />

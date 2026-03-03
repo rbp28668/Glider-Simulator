@@ -34,6 +34,9 @@ class Model {
 public:
 
 	// Note - these are public for testing
+	void wing_forces(const StateVector<float>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<float>& relative_velocity,
+		V3d<float>& forces, V3d<float>& moments);
+
 	void tailplane_forces(const StateVector<float>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<float>& relative_velocity,
 		V3d<float>& forces, V3d<float>& moments);
 

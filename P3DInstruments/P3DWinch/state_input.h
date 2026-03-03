@@ -24,6 +24,10 @@ class StateInput :public SimObjectData
 		float bank; //{ "PLANE BANK DEGREES", "Radians",SIMCONNECT_DATATYPE_FLOAT32 },
 		float heading;//{ "PLANE HEADING DEGREES TRUE","Radians",SIMCONNECT_DATATYPE_FLOAT32 },
 	
+		float latitude; // {"PLANE LATITUDE", "Radians", SIMCONNECT_DATATYPE_FLOAT32}, //	Latitude of aircraft, North is positive, South negative	Radians	Y -
+		float longitude; // { "PLANE LONGITUDE", "Radians", SIMCONNECT_DATATYPE_FLOAT32 }, //	Longitude of aircraft, East is positive, West negative	Radians	Y -
+		float altitude; // { "PLANE ALTITUDE", "Meters", SIMCONNECT_DATATYPE_FLOAT32 }, //	Altitude of aircraft	Feet	Y
+
 		float rudder;   //{ "RUDDER POSITION", "Position", SIMCONNECT_DATATYPE_FLOAT32 }, //	Rudder input deflection[-1.0:Full Left, 1.0 : Full Right]	Position	Y -
 		float elevator; //{ "ELEVATOR POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32 }, //	Elevator input deflection[-1.0:Full Down, 1.0 : Full Up]	Position	Y -
 		float aileron;  //{ "AILERON POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32 }, // Aileron input left/right [-1.0: Full Left, 1.0: Full Right]
@@ -45,6 +49,12 @@ class StateInput :public SimObjectData
 	StateOutput* pOutput;
 
 	float lastSimTime = 0.0f;
+	bool initialised = false;
+
+	float start_lat;
+	float start_lon;
+	float metresPerRadianLat;
+	float metresPerRadianLon;
 
 public:
 

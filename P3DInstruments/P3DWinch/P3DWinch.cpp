@@ -13,16 +13,15 @@
 #ifndef NDEBUG
 #include "TestFinEffect.h"
 #include "TestTailplaneEffect.h"
+#include "TestWingEffect.h"
+#include "TestFuselageEffect.h"
 
 #endif
 
 int main(int argc, char* argv[])
 {
     
-
-
-
-
+                                                                                                                                                                                                        
     std::cout << "Hello Winch!\n";
 
 #ifndef NDEBUG
@@ -43,6 +42,13 @@ int main(int argc, char* argv[])
 
         TestTailplaneEffect testTailplaneEffect;
         testTailplaneEffect.test_all();
+
+        TestWingEffect testWingEffect;
+        testWingEffect.test_all();
+
+        TestFuselageEffect testFuselageEffect;
+        testFuselageEffect.test_all();
+
     }
 #endif
 
@@ -54,10 +60,10 @@ int main(int argc, char* argv[])
     std::cout << p3D->userAircraft().name() << "," << p3D->userAircraft().id() << std::endl;
 
     //
-    // P3DEvent events(p3D);
-    //events.dispatchEvent(P3DEvent::FREEZE_LATITUDE_LONGITUDE_SET, 1);
-    //events.dispatchEvent(P3DEvent::FREEZE_ALTITUDE_SET, 1);
-    //events.dispatchEvent(P3DEvent::FREEZE_ATTITUDE_SET, 1);
+    P3DEvent events(p3D);
+    events.dispatchEvent(P3DEvent::FREEZE_LATITUDE_LONGITUDE_SET, 1);
+    events.dispatchEvent(P3DEvent::FREEZE_ALTITUDE_SET, 1);
+    events.dispatchEvent(P3DEvent::FREEZE_ATTITUDE_SET, 1);
 
 
     StateInput input(p3D, &simulation);

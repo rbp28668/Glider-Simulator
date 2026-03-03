@@ -33,8 +33,10 @@ class Simulation {
     GroundContact ground_contact;
     Winch winch;
     std::map<std::string, float> winch_info;  // Diagnostic info from last winch calculation
-    bool pitch_only = false;
-    bool use_rk4 = true;
+
+    // Derived values for driving P3d    
+    V3d<float> vel_dot; // Linear velocity derivative - linear acceleration
+    V3d<float> omega_dot; // Angular velocity derivative - angular acceleration
 
     float clamp(float value, float min_val, float max_val);
     float safe_value(float value, float dflt = 0.0f);
@@ -49,6 +51,13 @@ class Simulation {
     V3d<float> apply_wind_to_state(const StateVector<float>&state, const V3d<float>&wind_earth);
 
 public:
+
+    // Acceleration values from last update.
+    const V3d<float>& get_linear_acceleration() const { return vel_dot;}
+    const V3d<float>& get_angular_acceleration() const { return omega_dot; }
+
+    StateVector<float>& get_state() { return state; }
+
     void reset();
     StateVector<float> update(float dt, const ControlInputs& controls, const World& world);
     void setup_winch_launch(float winch_distance = 1500.0f,

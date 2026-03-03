@@ -10,6 +10,7 @@ class StateOutput :public SimObjectData
 
 	static DataItem dataItems[];
 
+public:
 #pragma pack(push, 1)
 	struct Data {
 
@@ -17,6 +18,23 @@ class StateOutput :public SimObjectData
 		//SIMCONNECT_DATA_XYZ bodyAcceleration; //{ "STRUCT BODY ACCELERATION","meters per second squared", SIMCONNECT_DATATYPE_XYZ },
 		//SIMCONNECT_DATA_XYZ bodyRotationVelocity; //{ "STRUCT BODY ROTATION VELOCITY","Radians per second",SIMCONNECT_DATATYPE_XYZ },
 		//SIMCONNECT_DATA_XYZ bodyRotationAcceleration; //{ "STRUCT BODY ROTATION ACCELERATION","Radians per second squared",SIMCONNECT_DATATYPE_XYZ },
+
+		float velocity_body_x; //{"VELOCITY BODY X", "meters per second", SIMCONNECT_DATATYPE_FLOAT32};//	True lateral speed, relative to aircraft axis	Feet per second	Y -
+		float velocity_body_y; //{"VELOCITY BODY Y", "meters per second", SIMCONNECT_DATATYPE_FLOAT32};//	True vertical speed, relative to aircraft axis	Feet per second	Y -
+		float velocity_body_z; // {"VELOCITY BODY Z", "meters per second", SIMCONNECT_DATATYPE_FLOAT32};//	True longitudinal speed, relative to aircraft axis	Feet per second	Y -
+		float acceleration_body_x;  //{"ACCELERATION BODY X", "meters per second squared", SIMCONNECT_DATATYPE_FLOAT32};//	Acceleration relative to aircraft axis, in east / west direction	Feet per second squared	Y -
+		float acceleration_body_y; //{"ACCELERATION BODY Y", "meters per second squared", SIMCONNECT_DATATYPE_FLOAT32};//	Acceleration relative to aircraft axis, in vertical direction	Feet per second squared	Y -
+		float acceleration_body_z; //{"ACCELERATION BODY Z", "meters per second squared", SIMCONNECT_DATATYPE_FLOAT32};//	Acceleration relative to aircraft axis, in north / south direction	Feet per second squared	Y -
+		float rotation_body_x;  //{"ROTATION VELOCITY BODY X", "radians per second", SIMCONNECT_DATATYPE_FLOAT32};//	Rotation relative to aircraft axis	Radians per second	Y -
+		float rotation_body_y; //{"ROTATION VELOCITY BODY Y", "radians per second", SIMCONNECT_DATATYPE_FLOAT32};//	Rotation relative to aircraft axis	Radians per second	Y -
+		float rotation_body_z; //{"ROTATION VELOCITY BODY Z", "radians per second", SIMCONNECT_DATATYPE_FLOAT32};//	Rotation relative to aircraft axis	Radians per second	Y -
+		float rotation_acceleration_body_x; // {"ROTATION ACCELERATION BODY X", "radians per second", SIMCONNECT_DATATYPE_FLOAT32};//	Rotation acceleration relative to aircraft axis	Radians per second	Y -
+		float rotation_acceleration_body_y; //{"ROTATION ACCELERATION BODY Y", "radians per second", SIMCONNECT_DATATYPE_FLOAT32};//	Rotation acceleration relative to aircraft axis	Radians per second	Y -
+		float rotation_acceleration_body_z; //{"ROTATION ACCELERATION BODY Z", "radians per second", SIMCONNECT_DATATYPE_FLOAT32};//	Rotation acceleration relative to aircraft axis	Radians per second	Y -
+
+		float latitude; // {"PLANE LATITUDE", "Radians", SIMCONNECT_DATATYPE_FLOAT32}, //	Latitude of aircraft, North is positive, South negative	Radians	Y -
+		float longitude; // { "PLANE LONGITUDE", "Radians", SIMCONNECT_DATATYPE_FLOAT32 }, //	Longitude of aircraft, East is positive, West negative	Radians	Y -
+		float altitude; // { "PLANE ALTITUDE", "Meters", SIMCONNECT_DATATYPE_FLOAT32 }, //	Altitude of aircraft	Feet	Y
 
 		float pitch;//{ "PLANE PITCH DEGREES","Radians",SIMCONNECT_DATATYPE_FLOAT32 },
 		float bank; //{ "PLANE BANK DEGREES", "Radians",SIMCONNECT_DATATYPE_FLOAT32 },
@@ -36,7 +54,7 @@ public:
 		
 	StateOutput(Prepar3D*);
 
-	void updateFrom(const StateVector<float>& sv);
+	void sendData();
 };
 
 

@@ -40,136 +40,7 @@ void Simulation::reset() {
     state = StateVector<float>();
 }
 
-// def update(self, dt : float) -> StateVector:
-//     self.total_time += dt
-//     print(f"DT: {dt}")
 
-//     if self.use_rk4:
-//         return self.update_rk4(dt)
-//     else:
-//         return self.update_simple(dt)
-
-
-// def update_simple(self, dt : float) -> StateVector:
-//     state = self.state
-//     // Get wind
-//     wind_earth = self.world.get_wind_vector(state.position(), self.total_time)
-
-
-//     // Calculate airspeed with wind
-//     V_air_body = self.apply_wind_to_state(state, wind_earth)
-
-//     // Calculate aerodynamics
-//     forces_body, moments_body = self.model.calculate_aerodynamics(
-//         state, self.aircraft, self.controls, self.world, V_air_body
-//     )
-
-//     // Get current velocity and angular velocity for Coriolis terms
-//     u, v, w = state.velocity()
-//     p, q, r = state.angular_velocity()
-
-//     // Linear acceleration: F/m + gravity + Coriolis terms
-//     // In rotating body frame: a_body = F/m + g_body + ω × v_body
-//     // Coriolis: (r*v - q*w, p*w - r*u, q*u - p*v)
-//     acc_x = forces_body[0] / self.aircraft.mass + (r*v - q*w)
-//     acc_y = forces_body[1] / self.aircraft.mass + (p*w - r*u)
-//     acc_z = forces_body[2] / self.aircraft.mass + (q*u - p*v)
-
-//     orientation = state.orientation()
-
-//     // Gravity in body frame
-//     g = 9.81
-//     g_earth = (0, 0, g) // +ve down
-//     g_body = quaternion_rotate_vector_inverse(orientation, g_earth)
-
-//     acc_x += g_body[0]
-//     acc_y += g_body[1]
-//     acc_z += g_body[2]
-
-//     // Update velocity: v_new = v_old + a * dt
-//     vx = u + acc_x * dt
-//     vy = v + acc_y * dt
-//     vz = w + acc_z * dt
-
-//     // Update position using OLD velocity (standard forward Euler)
-//     v_world = quaternion_rotate_vector(orientation, (u, v, w))  // body to world frame
-//     position = state.position()
-//     px = position[0] + v_world[0] * dt
-//     py = position[1] + v_world[1] * dt
-//     pz = position[2] + v_world[2] * dt
-
-//     // Moments of inertia
-//     Ixx = self.aircraft.Ixx
-//     Iyy = self.aircraft.Iyy
-//     Izz = self.aircraft.Izz
-
-//     // Angular acceleration with gyroscopic coupling
-//     // Using Euler's equations: I * ω̇ = M - ω × (I * ω)
-//     dp = (moments_body[0] + (Iyy - Izz) * q * r) / Ixx
-//     dq = (moments_body[1] + (Izz - Ixx) * r * p) / Iyy
-//     dr = (moments_body[2] + (Ixx - Iyy) * p * q) / Izz
-
-//     // Update angular velocity
-//     av_roll = p + dp * dt
-//     av_pitch = q + dq * dt
-//     av_yaw = r + dr * dt
-
-//     // Note: Artificial damping removed - natural aerodynamic damping comes from:
-//     // - Tail seeing different AoA due to pitch rate (modeled in tailplane_forces)
-//     // - For proper damping, add Cmq derivative term to pitching moment
-
-//     // Constrain to pitch-only motion if set
-//     if(self.pitch_only):
-//         av_yaw = 0
-//         av_roll = 0
-//         vy = 0
-
-//     // Orientation update via quaternion derivative (using NEW angular velocity)
-//     quat = state.orientation()
-//     quat_dot = quaternion_derivative(quat, (av_roll, av_pitch, av_yaw))
-//     qw = quat[0] + quat_dot[0] * dt
-//     qx = quat[1] + quat_dot[1] * dt
-//     qy = quat[2] + quat_dot[2] * dt
-//     qz = quat[3] + quat_dot[3] * dt
-
-//     // Update position using euler angles for DEBUG
-//     // Note - provides same behaviour
-//     // roll, pitch, yaw = quaternion_to_euler(quat[0],quat[1], quat[2], quat[3])
-//     // pitch += angular_velocity[1] * dt
-//     // quat = euler_to_quaternion(roll, pitch, yaw)
-//     // qw = quat[0] 
-//     // qx = quat[1] 
-//     // qy = quat[2] 
-//     // qz = quat[3] 
-
-//     new_state = StateVector()
-
-//     // Sanitize position (allow large range but catch NaN/Inf)
-//     new_state.set_position((
-//         clamp(safe_value(px), -MAX_POSITION, MAX_POSITION),
-//         clamp(safe_value(py), -MAX_POSITION, MAX_POSITION),
-//         clamp(safe_value(pz), -MAX_POSITION, MAX_POSITION)
-//     ))
-
-//     // Sanitize velocity
-//     new_state.set_velocity(sanitize_velocity(vx, vy, vz))
-
-//     // Sanitize angular velocity
-//     new_state.set_angular_velocity(sanitize_angular_velocity(av_roll, av_pitch, av_yaw))
-
-//     // Sanitize quaternion (normalize handles most issues, but check for NaN)
-//     quat_safe = (
-//         safe_value(qw, 1.0),
-//         safe_value(qx, 0.0),
-//         safe_value(qy, 0.0),
-//         safe_value(qz, 0.0)
-//     )
-//     new_state.set_orientation(quaternion_normalize(quat_safe))
-//     new_state.set_forces_moments(forces_body, moments_body)
-
-//     self.state = new_state
-
-//     return new_state
 
 
 // Update aircraft state based on physics, control inputs, and world conditions
@@ -299,18 +170,18 @@ StateVector<float> Simulation::state_derivative(const StateVector<float>& state,
     // Position derivative
     auto pos_dot = calculate_position_derivative(state);
 
-    // Velocity derivative
-    auto vel_dot = calculate_linear_acceleration(state, forces_body);
+    // Velocity derivative - note uses instance variable to allow access
+    vel_dot = calculate_linear_acceleration(state, forces_body);
 
     // Quaternion derivative
     auto omega = state.angular_velocity();
     auto quat = state.orientation();
     auto quat_dot = quat.derivative(omega);
 
-    // Angular velocity derivative
-    auto omega_dot = calculate_angular_acceleration(state, moments_body);
+    // Angular velocity derivative - note uses instance variable to allow access
+    omega_dot = calculate_angular_acceleration(state, moments_body);
 
-    // Assemble complete derivative
+    // Assemble complete derivative.  Returned state vector contains derivatives of each value rather than the values.
     StateVector<float> state_dot;
     state_dot.set_position(pos_dot);           // [Ẋ, Ẏ, Ż]
     state_dot.set_velocity(vel_dot);           // [u̇, v̇, ẇ]
