@@ -11,11 +11,13 @@
 
 
 SimObjectData::DataItem StateInput::dataItems[] = {
-	// Aircraft state
-	{"STRUCT BODY VELOCITY","meters per second", SIMCONNECT_DATATYPE_XYZ},
-	{"STRUCT BODY ACCELERATION","meters per second squared", SIMCONNECT_DATATYPE_XYZ},
-	{"STRUCT BODY ROTATION VELOCITY","Radians per second",SIMCONNECT_DATATYPE_XYZ},
-	{"STRUCT BODY ROTATION ACCELERATION","Radians per second squared",SIMCONNECT_DATATYPE_XYZ},
+	// Aircraft state - use individual FLOAT32 variables (not STRUCT XYZ) so SimConnect honours unit conversion
+	{"VELOCITY BODY X","meters per second", SIMCONNECT_DATATYPE_FLOAT32},	//	True lateral speed, relative to aircraft axis
+	{"VELOCITY BODY Y","meters per second", SIMCONNECT_DATATYPE_FLOAT32},	//	True vertical speed, relative to aircraft axis
+	{"VELOCITY BODY Z","meters per second", SIMCONNECT_DATATYPE_FLOAT32},	//	True longitudinal speed, relative to aircraft axis
+	{"ROTATION VELOCITY BODY X","radians per second", SIMCONNECT_DATATYPE_FLOAT32},	//	Rotation relative to aircraft axis (pitch rate)
+	{"ROTATION VELOCITY BODY Y","radians per second", SIMCONNECT_DATATYPE_FLOAT32},	//	Rotation relative to aircraft axis (yaw rate)
+	{"ROTATION VELOCITY BODY Z","radians per second", SIMCONNECT_DATATYPE_FLOAT32},	//	Rotation relative to aircraft axis (roll rate)
 	{"PLANE PITCH DEGREES","Radians",SIMCONNECT_DATATYPE_FLOAT32},
 	{"PLANE BANK DEGREES", "Radians",SIMCONNECT_DATATYPE_FLOAT32},
 	{"PLANE HEADING DEGREES TRUE","Radians",SIMCONNECT_DATATYPE_FLOAT32},
@@ -118,8 +120,8 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 		StateVector<float>& state = pFlightModel->get_state();
 		state.set_orientation(Quaternion<float>::from_euler_angles(data.bank, data.pitch, data.heading));
 		state.set_position( 0.0f, 0.0f, -data.altitude );
-		state.set_velocity(data.bodyVelocity.z, data.bodyVelocity.x, -data.bodyVelocity.y); // convert from P3D to NED
-		state.set_angular_velocity(data.bodyRotationVelocity.z, data.bodyRotationVelocity.x, -data.bodyRotationVelocity.y);
+		state.set_velocity(data.velocity_body_z, data.velocity_body_x, -data.velocity_body_y); // convert from P3D to NED
+		state.set_angular_velocity(data.rotation_velocity_body_z, data.rotation_velocity_body_x, -data.rotation_velocity_body_y);
 		start_lat = data.latitude;
 		start_lon = data.longitude;
 		

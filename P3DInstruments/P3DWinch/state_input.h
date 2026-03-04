@@ -14,11 +14,15 @@ class StateInput :public SimObjectData
 
 #pragma pack(push, 1)
 	struct Data {
-		
-		SIMCONNECT_DATA_XYZ bodyVelocity; //{"STRUCT BODY VELOCITY", "metres per second", SIMCONNECT_DATATYPE_XYZ},
-		SIMCONNECT_DATA_XYZ bodyAcceleration; //{ "STRUCT BODY ACCELERATION","meters per second squared", SIMCONNECT_DATATYPE_XYZ },
-		SIMCONNECT_DATA_XYZ bodyRotationVelocity; //{ "STRUCT BODY ROTATION VELOCITY","Radians per second",SIMCONNECT_DATATYPE_XYZ },
-		SIMCONNECT_DATA_XYZ bodyRotationAcceleration; //{ "STRUCT BODY ROTATION ACCELERATION","Radians per second squared",SIMCONNECT_DATATYPE_XYZ },
+
+		// Body velocity components (m/s) - individual FLOAT32 so SimConnect converts units
+		float velocity_body_x;		// lateral speed (right positive)
+		float velocity_body_y;		// vertical speed (up positive)
+		float velocity_body_z;		// longitudinal speed (forward positive)
+		// Body rotation velocity components (rad/s)
+		float rotation_velocity_body_x;	// pitch rate
+		float rotation_velocity_body_y;	// yaw rate
+		float rotation_velocity_body_z;	// roll rate
 		
 		float pitch;//{ "PLANE PITCH DEGREES","Radians",SIMCONNECT_DATATYPE_FLOAT32 },
 		float bank; //{ "PLANE BANK DEGREES", "Radians",SIMCONNECT_DATATYPE_FLOAT32 },
