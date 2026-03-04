@@ -145,7 +145,7 @@ class Winch:
         # Cable length (distance from hook to winch)
         cable_distance = sqrt(cable_vec[0]**2 + cable_vec[1]**2 + cable_vec[2]**2)
 
-        if cable_distance < 1.0:
+        if cable_distance < 100.0:
             # Too close to winch, release
             self.release("cable_run_out")
             info['cable_run_out'] = True

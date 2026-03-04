@@ -7,7 +7,7 @@ from v3d import V3d, TotalAirspeed, AngleOfAttack, SideslipAngle
 from math import radians, sin, cos, isnan, isinf, copysign, atan2, sqrt, asin
 
 # Minimum airspeed for aerodynamic calculations (m/s)
-MIN_AIRSPEED = 1.0
+MIN_AIRSPEED = 0.1
 
 # Maximum total force/moment to prevent numerical overflow
 MAX_FORCE = 100000.0

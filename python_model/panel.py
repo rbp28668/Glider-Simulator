@@ -10,7 +10,7 @@ from world import World
 
 # Minimum airspeed for aerodynamic calculations (m/s)
 # Below this, forces are scaled to zero to prevent numerical instability
-MIN_AIRSPEED = 1.0
+MIN_AIRSPEED = 0.1
 
 # Maximum force magnitude per panel (N) - prevents runaway
 MAX_PANEL_FORCE = 50000.0

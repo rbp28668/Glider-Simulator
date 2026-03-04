@@ -212,7 +212,7 @@ class Simulation:
         # Combine & normalize
         new_state = state.rk4_sum(k1, k2, k3, k4, dt)
         new_state.normalize_orientation()
-        new_state.sanitize()
+        #new_state.sanitize()
         
         # Set final forces and moments for logging / display
         new_state.set_forces_moments(forces4, moments4)
@@ -314,21 +314,6 @@ class Simulation:
         Ixx, Iyy, Izz, Ixz = inertia
         L, M, N = moments_body             # roll moment, pitch moment, yaw moment
         
-        # Inertia determinant
-        I_det = Ixx * Izz - Ixz**2         # note - in practice this is fixed
-        
-        # Gyroscopic terms
-        gyro_L = (Izz - Iyy) * q * r - Ixz * p * q
-        gyro_M = (Ixx - Izz) * p * r + Ixz * (p**2 - r**2)
-        gyro_N = (Iyy - Ixx) * p * q + Ixz * q * r
-    
-        # Angular accelerations (Euler's equations)
-        p_dot = (Izz * (L + gyro_L) + Ixz * (N + gyro_N)) / I_det
-        q_dot = (M + gyro_M) / Iyy
-        r_dot = (Ixz * (L + gyro_L) + Ixx * (N + gyro_N)) / I_det
-
-        #return (p_dot, q_dot, r_dot)
-
         # We calculate the "Inertial Terms" (Gyroscopic effects) first.
         # These are the terms typically on the RHS of the equations.
         
@@ -412,9 +397,9 @@ class Simulation:
         
         return (u_air, v_air, w_air) 
 
-    def setup_winch_launch(self, winch_distance: float = 1000.0,
-                           max_tension: float = 6000.0,
-                           weak_link: float = 8000.0):
+    def setup_winch_launch(self, winch_distance: float = 1500.0,
+                           max_tension: float = 9000.0,
+                           weak_link: float = 10000.0):
         """
         Set up for a winch launch.
 

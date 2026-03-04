@@ -6,38 +6,38 @@
 
 //Clamp value to range [min_val, max_val].
 float Simulation::clamp(float value, float min_val, float max_val) {
-    return std::max(min_val, std::min(max_val, value));
+	return std::max(min_val, std::min(max_val, value));
 }
 
 // Return default if value is NaN or Inf.
 float Simulation::safe_value(float value, float dflt) {
-    return  (isnan(value) || isinf(value)) ? dflt : value;
+	return  (isnan(value) || isinf(value)) ? dflt : value;
 }
 
 
 //Clamp velocity components to safe range.
 V3d<float> Simulation::sanitize_velocity(float vx, float vy, float vz) {
-    return V3d<float>(
-        clamp(safe_value(vx), -MAX_VELOCITY, MAX_VELOCITY),
-        clamp(safe_value(vy), -MAX_VELOCITY, MAX_VELOCITY),
-        clamp(safe_value(vz), -MAX_VELOCITY, MAX_VELOCITY)
-        );
+	return V3d<float>(
+		clamp(safe_value(vx), -MAX_VELOCITY, MAX_VELOCITY),
+		clamp(safe_value(vy), -MAX_VELOCITY, MAX_VELOCITY),
+		clamp(safe_value(vz), -MAX_VELOCITY, MAX_VELOCITY)
+		);
 }
 
 //Clamp angular velocity components to safe range.
 V3d<float> Simulation::sanitize_angular_velocity(float p, float q, float r) {
-    return V3d<float>(
-        clamp(safe_value(p), -MAX_ANGULAR_RATE, MAX_ANGULAR_RATE),
-        clamp(safe_value(q), -MAX_ANGULAR_RATE, MAX_ANGULAR_RATE),
-        clamp(safe_value(r), -MAX_ANGULAR_RATE, MAX_ANGULAR_RATE)
-        );
+	return V3d<float>(
+		clamp(safe_value(p), -MAX_ANGULAR_RATE, MAX_ANGULAR_RATE),
+		clamp(safe_value(q), -MAX_ANGULAR_RATE, MAX_ANGULAR_RATE),
+		clamp(safe_value(r), -MAX_ANGULAR_RATE, MAX_ANGULAR_RATE)
+		);
 }
 
 
 // Reset simulation to initial state
 void Simulation::reset() {
-    total_time = 0.0;
-    state = StateVector<float>();
+	total_time = 0.0;
+	state = StateVector<float>();
 }
 
 
@@ -47,18 +47,18 @@ void Simulation::reset() {
 // Uses Runge-Kutta 4th order integration
 StateVector<float> Simulation::update(float dt, const ControlInputs& controls, const World& world) {
 
-    // Update control positions & world view
-    this->controls = controls;
-    this->world = world;
+	// Update control positions & world view
+	this->controls = controls;
+	this->world = world;
 
 
-    //Advance simulation by one time step
-    total_time += dt;
+	//Advance simulation by one time step
+	total_time += dt;
 
-    // Integration
-    state = rk4_step(state, dt);
+	// Integration
+	state = rk4_step(state, dt);
 
-    return state;
+	return state;
 }
 
 //     4th order Runge-Kutta integration step
@@ -73,37 +73,37 @@ StateVector<float> Simulation::update(float dt, const ControlInputs& controls, c
 
 StateVector<float> Simulation::rk4_step(const StateVector<float>& state, float dt) {
 
-    // k1
-    V3d<float>forces1, moments1;
-    calculate_forces_moments(state, forces1, moments1);
-    auto k1 = state_derivative(state, forces1, moments1);
+	// k1
+	V3d<float>forces1, moments1;
+	calculate_forces_moments(state, forces1, moments1);
+	auto k1 = state_derivative(state, forces1, moments1);
 
-    // k2
-    auto state2 = state.offset(k1, 0.5f * dt); //[state[i] + 0.5*dt*k1[i] for i in range(13)]
-    state2.normalize_orientation();
-    V3d<float>forces2, moments2;
-    calculate_forces_moments(state2, forces2, moments2);
-    auto k2 = state_derivative(state2, forces2, moments2);
+	// k2
+	auto state2 = state.offset(k1, 0.5f * dt); //[state[i] + 0.5*dt*k1[i] for i in range(13)]
+	state2.normalize_orientation();
+	V3d<float>forces2, moments2;
+	calculate_forces_moments(state2, forces2, moments2);
+	auto k2 = state_derivative(state2, forces2, moments2);
 
-    // k3
-    auto state3 = state.offset(k2, 0.5f * dt); //[state[i] + 0.5*dt*k2[i] for i in range(13)]
-    state3.normalize_orientation();
-    V3d<float>forces3, moments3;
-    calculate_forces_moments(state3, forces3, moments3);
-    auto k3 = state_derivative(state3, forces3, moments3);
+	// k3
+	auto state3 = state.offset(k2, 0.5f * dt); //[state[i] + 0.5*dt*k2[i] for i in range(13)]
+	state3.normalize_orientation();
+	V3d<float>forces3, moments3;
+	calculate_forces_moments(state3, forces3, moments3);
+	auto k3 = state_derivative(state3, forces3, moments3);
 
-    // k4
-    auto state4 = state.offset(k3, dt); //[state[i] + dt*k3[i] for i in range(13)]
-    state4.normalize_orientation();
-    V3d<float>forces4, moments4;
-    calculate_forces_moments(state4, forces4, moments4);
-    auto k4 = state_derivative(state4, forces4, moments4);
+	// k4
+	auto state4 = state.offset(k3, dt); //[state[i] + dt*k3[i] for i in range(13)]
+	state4.normalize_orientation();
+	V3d<float>forces4, moments4;
+	calculate_forces_moments(state4, forces4, moments4);
+	auto k4 = state_derivative(state4, forces4, moments4);
 
-    // Combine & normalize
-    auto new_state = state.rk4_sum(k1, k2, k3, k4, dt);
-    new_state.normalize_orientation();
+	// Combine & normalize
+	auto new_state = state.rk4_sum(k1, k2, k3, k4, dt);
+	new_state.normalize_orientation();
 
-    return new_state;
+	return new_state;
 }
 
 
@@ -116,41 +116,41 @@ StateVector<float> Simulation::rk4_step(const StateVector<float>& state, float d
 //     moments_body: [L, M, N] (N·m)
 void Simulation::calculate_forces_moments(const StateVector<float>& state, V3d<float>& forces, V3d<float>& moments) {
 
-    // Get wind
-    auto wind_earth = world.get_wind_vector(state.position(), total_time);
+	// Get wind
+	auto wind_earth = world.get_wind_vector(state.position(), total_time);
 
-    // Calculate airspeed with wind
-    auto V_air_body = apply_wind_to_state(state, wind_earth);
+	// Calculate airspeed with wind
+	auto V_air_body = apply_wind_to_state(state, wind_earth);
 
-    // Calculate aerodynamics
-    V3d<float>aero_forces, aero_moments;
-    model.calculate_aerodynamics(state, aircraft, controls, world, V_air_body, aero_forces, aero_moments);
+	// Calculate aerodynamics
+	V3d<float>aero_forces, aero_moments;
+	model.calculate_aerodynamics(state, aircraft, controls, world, V_air_body, aero_forces, aero_moments);
 
-    // Calculate ground contact forces
-    V3d<float>ground_forces, ground_moments;
-    std::vector<ContactResult> results;
-    ground_contact.calculate_ground_forces(state, aircraft.contact_points, world, aircraft.cg, ground_forces, ground_moments, results);
+	// Calculate ground contact forces
+	V3d<float>ground_forces, ground_moments;
+	std::vector<ContactResult> results;
+	ground_contact.calculate_ground_forces(state, aircraft.contact_points, world, aircraft.cg, ground_forces, ground_moments, results);
 
 
-    // Calculate winch forces
-    V3d<float>winch_forces, winch_moments;
-    auto hook_body = aircraft.winch_hook;
-    winch.calculate_forces(state, hook_body, winch_forces, winch_moments);
+	// Calculate winch forces
+	V3d<float>winch_forces, winch_moments;
+	auto hook_body = aircraft.winch_hook;
+	winch.calculate_forces(state, hook_body, winch_forces, winch_moments);
 
-    // Accumulate total forces and moments
-    forces = V3d<float>(
-        aero_forces[0] + ground_forces[0] + winch_forces[0],
-        aero_forces[1] + ground_forces[1] + winch_forces[1],
-        aero_forces[2] + ground_forces[2] + winch_forces[2]
-        );
+	// Accumulate total forces and moments
+	forces = V3d<float>(
+		aero_forces[0] + ground_forces[0] + winch_forces[0],
+		aero_forces[1] + ground_forces[1] + winch_forces[1],
+		aero_forces[2] + ground_forces[2] + winch_forces[2]
+		);
 
-    moments = V3d<float>(
-        aero_moments[0] + ground_moments[0] + winch_moments[0],
-        aero_moments[1] + ground_moments[1] + winch_moments[1],
-        aero_moments[2] + ground_moments[2] + winch_moments[2]
-        );
+	moments = V3d<float>(
+		aero_moments[0] + ground_moments[0] + winch_moments[0],
+		aero_moments[1] + ground_moments[1] + winch_moments[1],
+		aero_moments[2] + ground_moments[2] + winch_moments[2]
+		);
 
-    return;
+	return;
 }
 
 
@@ -167,28 +167,28 @@ void Simulation::calculate_forces_moments(const StateVector<float>& state, V3d<f
 // Returns:
 //     state_dot: Time derivative of state vector
 StateVector<float> Simulation::state_derivative(const StateVector<float>& state, const V3d<float>& forces_body, const V3d<float>& moments_body) {
-    // Position derivative
-    auto pos_dot = calculate_position_derivative(state);
+	// Position derivative
+	auto pos_dot = calculate_position_derivative(state);
 
-    // Velocity derivative - note uses instance variable to allow access
-    vel_dot = calculate_linear_acceleration(state, forces_body);
+	// Velocity derivative - note uses instance variable to allow access
+	vel_dot = calculate_linear_acceleration(state, forces_body);
 
-    // Quaternion derivative
-    auto omega = state.angular_velocity();
-    auto quat = state.orientation();
-    auto quat_dot = quat.derivative(omega);
+	// Quaternion derivative
+	auto omega = state.angular_velocity();
+	auto quat = state.orientation();
+	auto quat_dot = quat.derivative(omega);
 
-    // Angular velocity derivative - note uses instance variable to allow access
-    omega_dot = calculate_angular_acceleration(state, moments_body);
+	// Angular velocity derivative - note uses instance variable to allow access
+	omega_dot = calculate_angular_acceleration(state, moments_body);
 
-    // Assemble complete derivative.  Returned state vector contains derivatives of each value rather than the values.
-    StateVector<float> state_dot;
-    state_dot.set_position(pos_dot);           // [Ẋ, Ẏ, Ż]
-    state_dot.set_velocity(vel_dot);           // [u̇, v̇, ẇ]
-    state_dot.set_orientation(quat_dot);          // [q̇w, q̇x, q̇y, q̇z]
-    state_dot.set_angular_velocity(omega_dot);           // [ṗ, q̇, ṙ]
+	// Assemble complete derivative.  Returned state vector contains derivatives of each value rather than the values.
+	StateVector<float> state_dot;
+	state_dot.set_position(pos_dot);           // [Ẋ, Ẏ, Ż]
+	state_dot.set_velocity(vel_dot);           // [u̇, v̇, ẇ]
+	state_dot.set_orientation(quat_dot);          // [q̇w, q̇x, q̇y, q̇z]
+	state_dot.set_angular_velocity(omega_dot);           // [ṗ, q̇, ṙ]
 
-    return state_dot;
+	return state_dot;
 }
 
 //Linear Acceleration (Body Frame)
@@ -200,38 +200,38 @@ StateVector<float> Simulation::state_derivative(const StateVector<float>& state,
 // Returns:
 //     [u̇, v̇, ẇ] - acceleration in body frame (m/s²)
 V3d<float> Simulation::calculate_linear_acceleration(const StateVector<float>& state, const V3d<float>& forces_body) {
-    auto velocity = state.velocity();
-    auto u = velocity[0];
-    auto v = velocity[1];
-    auto w = velocity[2];
+	auto velocity = state.velocity();
+	auto u = velocity[0];
+	auto v = velocity[1];
+	auto w = velocity[2];
 
-    auto orientation = state.orientation();
+	auto orientation = state.orientation();
 
-    // roll, pitch & yaw rates
-    auto av = state.angular_velocity();
-    auto p = av[0];
-    auto q = av[1];
-    auto r = av[2];
+	// roll, pitch & yaw rates
+	auto av = state.angular_velocity();
+	auto p = av[0];
+	auto q = av[1];
+	auto r = av[2];
 
-    // Gravity in body frame
-    auto g = 9.81f;
-    auto g_earth = V3d<float>(0, 0, g);
-    auto g_body = orientation.rotate_vector_inverse(g_earth);
+	// Gravity in body frame
+	auto g = 9.81f;
+	auto g_earth = V3d<float>(0, 0, g);
+	auto g_body = orientation.rotate_vector_inverse(g_earth);
 
-    auto mass = aircraft.mass;
+	auto mass = aircraft.mass;
 
-    // Total force in body frame
-    auto Fx_total = forces_body[0] + mass * g_body[0];
-    auto Fy_total = forces_body[1] + mass * g_body[1];
-    auto Fz_total = forces_body[2] + mass * g_body[2];
+	// Total force in body frame
+	auto Fx_total = forces_body[0] + mass * g_body[0];
+	auto Fy_total = forces_body[1] + mass * g_body[1];
+	auto Fz_total = forces_body[2] + mass * g_body[2];
 
-    // Acceleration (including Coriolis terms)
-    auto u_dot = Fx_total / mass + r * v - q * w;
-    auto v_dot = Fy_total / mass + p * w - r * u;
-    auto w_dot = Fz_total / mass + q * u - p * v;
+	// Acceleration (including Coriolis terms)
+	auto u_dot = Fx_total / mass + r * v - q * w;
+	auto v_dot = Fy_total / mass + p * w - r * u;
+	auto w_dot = Fz_total / mass + q * u - p * v;
 
 
-    return V3d<float>(u_dot, v_dot, w_dot);
+	return V3d<float>(u_dot, v_dot, w_dot);
 
 }
 
@@ -244,35 +244,55 @@ V3d<float> Simulation::calculate_linear_acceleration(const StateVector<float>& s
 // Returns:
 //     [ṗ, q̇, ṙ] - angular acceleration (rad/s²)
 V3d<float> Simulation::calculate_angular_acceleration(const StateVector<float>& state, const V3d<float>& moments_body) {
-    auto av = state.angular_velocity();
-    auto p = av[0];
-    auto q = av[1];
-    auto r = av[2];
+	auto av = state.angular_velocity();
+	auto p = av[0];
+	auto q = av[1];
+	auto r = av[2];
 
-    // Inertia components
-    auto Ixx = aircraft.Ixx;
-    auto Iyy = aircraft.Iyy;
-    auto Izz = aircraft.Izz;
-    auto Ixz = aircraft.Ixz;
+	// Inertia components
+	auto Ixx = aircraft.Ixx;
+	auto Iyy = aircraft.Iyy;
+	auto Izz = aircraft.Izz;
+	auto Ixz = aircraft.Ixz;
 
-    auto L = moments_body[0]; // roll moment, 
-    auto M = moments_body[1]; // pitch moment,
-    auto N = moments_body[2]; // yaw moment
+	auto L = moments_body[0]; // roll moment, 
+	auto M = moments_body[1]; // pitch moment,
+	auto N = moments_body[2]; // yaw moment
 
-    // Inertia determinant
-    auto I_det = Ixx * Izz - Ixz * Ixz;         // note - in practice this is fixed
+	// We calculate the "Inertial Terms" (Gyroscopic effects) first.
+	// These are the terms typically on the RHS of the equations.
 
-    // Gyroscopic terms
-    auto gyro_L = (Izz - Iyy) * q * r - Ixz * p * q;
-    auto gyro_M = (Ixx - Izz) * p * r + Ixz * (p * p - r * r);
-    auto gyro_N = (Iyy - Ixx) * p * q + Ixz * q * r;
+	// -----------------------------------------------------------------
+	// 
+	// Derived from M = I * w_dot + w x(I * w)
+	//
 
-    // Angular accelerations (Euler's equations)
-    auto p_dot = (Izz * (L + gyro_L) + Ixz * (N + gyro_N)) / I_det;
-    auto q_dot = (M + gyro_M) / Iyy;
-    auto r_dot = (Ixz * (L + gyro_L) + Ixx * (N + gyro_N)) / I_det;
+	// Precompute the Determinant(Gamma)
+	// This represents the inertial coupling magnitude
+	auto Gamma = Ixx * Izz - Ixz * Ixz;
 
-    return V3d<float>(p_dot, q_dot, r_dot);
+	// Pitch(Decoupled in this simplified symmetry) :
+	// Iyy * dq = M - (Ixx - Izz) * p * r - Ixz * (p ^ 2 - r ^ 2)
+	// Note: (Izz - Ixx) * p * r is equivalent to - (Ixx - Izz) * p * r
+
+	auto term_pitch = (Izz - Ixx) * p * r + Ixz * (r * r - p * p);
+	auto dq = (M + term_pitch) / Iyy;
+
+	// Roll and Yaw(Coupled System) :
+	// We define "Prime" moments(External + Gyroscopic terms)
+	// L_prime = L - [(Izz - Iyy)qr - Ixz * pq] < --from w x(Iw) expansion
+	// N_prime = N - [(Iyy - Ixx)pq + Ixz * qr]
+
+	// CAUTION: Signs often flip depending on moving terms to LHS or RHS.
+	// Below is derived for LHS = I * w_dot
+
+	auto L_prime = L + (Iyy - Izz) * q * r + Ixz * p * q;
+	auto N_prime = N + (Ixx - Iyy) * p * q - Ixz * q * r;
+
+	// Solve using Cramer's Rule (Pre-calculated Gamma)
+	auto dp = (Izz * L_prime + Ixz * N_prime) / Gamma;
+	auto dr = (Ixz * L_prime + Ixx * N_prime) / Gamma;
+	return V3d<float>(dp, dq, dr);
 }
 
 
@@ -285,13 +305,13 @@ V3d<float> Simulation::calculate_angular_acceleration(const StateVector<float>& 
 // Returns:
 //     [Ẋ, Ẏ, Ż] - velocity in Earth frame (m/s)
 V3d<float> Simulation::calculate_position_derivative(const StateVector<float>& state) {
-    auto v_body = state.velocity();
-    auto q = state.orientation();
+	auto v_body = state.velocity();
+	auto q = state.orientation();
 
-    // Rotate body velocity to Earth frame
-    auto v_earth = q.rotate_vector(v_body);
+	// Rotate body velocity to Earth frame
+	auto v_earth = q.rotate_vector(v_body);
 
-    return v_earth;
+	return v_earth;
 }
 
 
@@ -303,22 +323,22 @@ V3d<float> Simulation::calculate_position_derivative(const StateVector<float>& s
 //    new state object with corrected
 //    airspeed vector in body frame (m/s)
 V3d<float> Simulation::apply_wind_to_state(const StateVector<float>& state, const V3d<float>& wind_earth) {
-    auto velocity = state.velocity();
-    auto u = velocity[0];
-    auto v = velocity[1];
-    auto w = velocity[2];
+	auto velocity = state.velocity();
+	auto u = velocity[0];
+	auto v = velocity[1];
+	auto w = velocity[2];
 
-    auto orientation = state.orientation();
+	auto orientation = state.orientation();
 
-    // Rotate wind to body frame
-    auto wind_body = orientation.rotate_vector_inverse(wind_earth);
+	// Rotate wind to body frame
+	auto wind_body = orientation.rotate_vector_inverse(wind_earth);
 
-    // Airspeed = ground speed - wind
-    auto u_air = u - wind_body[0];
-    auto v_air = v - wind_body[1];
-    auto w_air = w - wind_body[2];
+	// Airspeed = ground speed - wind
+	auto u_air = u - wind_body[0];
+	auto v_air = v - wind_body[1];
+	auto w_air = w - wind_body[2];
 
-    return V3d<float>(u_air, v_air, w_air);
+	return V3d<float>(u_air, v_air, w_air);
 }
 
 //     Set up for a winch launch.
@@ -327,20 +347,20 @@ V3d<float> Simulation::apply_wind_to_state(const StateVector<float>& state, cons
 //     max_tension: Maximum cable tension (N)
 //     weak_link: Weak link breaking tension (N)
 void Simulation::setup_winch_launch(float winch_distance, float max_tension, float weak_link) {
-    // Position winch ahead of glider (in X direction)
-    auto pos = state.position();
+	// Position winch ahead of glider (in X direction)
+	auto pos = state.position();
 
-    auto winch_pos = V3d<float>(pos[0] + winch_distance, pos[1], 0.0f);  // On ground
+	auto winch_pos = V3d<float>(pos[0] + winch_distance, pos[1], 0.0f);  // On ground
 
-    winch = Winch(winch_pos, max_tension, weak_link, winch_distance + 200.0f);
+	winch = Winch(winch_pos, max_tension, weak_link, winch_distance + 200.0f);
 }
 
 //Engage the winch cable.
 void Simulation::engage_winch() {
-    winch.engage();
+	winch.engage();
 }
 
 //Release the winch cable."""
 void Simulation::release_winch() {
-    winch.release("manual");
+	winch.release("manual");
 }

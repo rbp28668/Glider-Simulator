@@ -195,7 +195,7 @@ def update(dt):
     
     pitch = degrees(pitch)
     roll = degrees(roll)
-    yaw = degrees(state.SideslipAngle())
+    yaw = degrees(-state.SideslipAngle()) # yawing right is positive sideslip, but negative yaw angle convention, so invert sign
     hdg = hdg * 180/pi
     if hdg < 0:
         hdg += 360

@@ -31,7 +31,7 @@ class Panel
 
     // Minimum airspeed for aerodynamic calculations (m/s)
     // Below this, forces are scaled to zero to prevent numerical instability
-    const float MIN_AIRSPEED = 1.0f;
+    const float MIN_AIRSPEED = 0.1f;
 
     // Maximum force magnitude per panel (N) - prevents runaway
     const float MAX_PANEL_FORCE = 50000.0f;
