@@ -37,11 +37,11 @@ public:
     // Set the wind conditions in the world.
     // Args:
     //     speed: Wind speed in m/s
-    //     direction: Wind direction in degrees from north
+    //     direction: Wind direction in degrees from north (meteorological: direction wind blows FROM)
     void set_wind(float speed, float direction, float vertical = 0.0f) {
         auto dir_rad = radians(direction);
-        wx = speed * cos(dir_rad);
-        wy = speed * sin(dir_rad);
+        wx = -speed * cos(dir_rad);  // wind FROM north → blows south (negative North)
+        wy = -speed * sin(dir_rad);  // wind FROM east → blows west (negative East)
         wz = vertical;
     }
 

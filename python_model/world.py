@@ -33,8 +33,8 @@ class World :
         """
         from math import radians, cos, sin
         dir_rad = radians(self.wind_direction)
-        wx = self.wind_speed * cos(dir_rad)
-        wy = self.wind_speed * sin(dir_rad)
+        wx = -self.wind_speed * cos(dir_rad)  # wind FROM north → blows south (negative North)
+        wy = -self.wind_speed * sin(dir_rad)  # wind FROM east → blows west (negative East)
         return (wx, wy, 0.0)  # Assuming no vertical wind component
     
 
