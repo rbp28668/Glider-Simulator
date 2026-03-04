@@ -70,8 +70,8 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 	controls.spoiler = data.spoiler;
 
 	World world;  // update world from sim
-	world.set_wind_vector(data.windX, data.windY, data.windZ);
-	world.set_ground_height(data.ground);
+	world.set_wind_vector(data.windZ, data.windX, -data.windY); // convert from P3D world (East,Up,North) to NED (North,East,Down)
+	world.set_ground_height(-data.ground); // convert altitude (positive up) to NED Z (positive down)
 
 	if (initialised) {
 		float dt = data.time - lastSimTime;
@@ -116,7 +116,7 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 	else { // not initialised
 
 		StateVector<float>& state = pFlightModel->get_state();
-		state.orientation().from_euler_angles(data.bank, data.pitch, data.heading);
+		state.set_orientation(Quaternion<float>::from_euler_angles(data.bank, data.pitch, data.heading));
 		state.set_position( 0.0f, 0.0f, -data.altitude );
 		state.set_velocity(data.bodyVelocity.z, data.bodyVelocity.x, -data.bodyVelocity.y); // convert from P3D to NED
 		state.set_angular_velocity(data.bodyRotationVelocity.z, data.bodyRotationVelocity.x, -data.bodyRotationVelocity.y);
