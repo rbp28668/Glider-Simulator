@@ -89,8 +89,8 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 		auto orientation = sv.orientation();
 		auto rpy = orientation.to_euler();  // as roll, pitch and yaw
 
-		pOutput->data.bank = rpy[0];
-		pOutput->data.pitch = rpy[1];
+		pOutput->data.bank = -rpy[0];	// NED right-bank positive → P3D left-bank positive
+		pOutput->data.pitch = -rpy[1];	// NED nose-up positive → P3D nose-down positive
 		pOutput->data.heading = rpy[2];
 
 		auto v = sv.velocity();
@@ -103,25 +103,27 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 		pOutput->data.acceleration_body_x = linear_acceleration[1];
 		pOutput->data.acceleration_body_y = -linear_acceleration[2];
 
+		// Angular velocity/acceleration are pseudovectors: signs flip vs polar vectors
+		// because P3D↔NED transform has det=-1 (LH↔RH reflection)
 		auto av = sv.angular_velocity();
-		pOutput->data.rotation_body_z = av[0];
-		pOutput->data.rotation_body_x = av[1];
-		pOutput->data.rotation_body_y = -av[2];
+		pOutput->data.rotation_body_z = -av[0];
+		pOutput->data.rotation_body_x = -av[1];
+		pOutput->data.rotation_body_y = av[2];
 
 		auto angular_acceleration = pFlightModel->get_angular_acceleration();
-		pOutput->data.rotation_acceleration_body_z = angular_acceleration[0];
-		pOutput->data.rotation_acceleration_body_x = angular_acceleration[1];
-		pOutput->data.rotation_acceleration_body_y = -angular_acceleration[2];
+		pOutput->data.rotation_acceleration_body_z = -angular_acceleration[0];
+		pOutput->data.rotation_acceleration_body_x = -angular_acceleration[1];
+		pOutput->data.rotation_acceleration_body_y = angular_acceleration[2];
 
 		pOutput->sendData();
 	}
 	else { // not initialised
 
 		StateVector<float>& state = pFlightModel->get_state();
-		state.set_orientation(Quaternion<float>::from_euler_angles(data.bank, data.pitch, data.heading));
+		state.set_orientation(Quaternion<float>::from_euler_angles(-data.bank, -data.pitch, data.heading)); // negate bank & pitch: P3D LH→NED RH
 		state.set_position( 0.0f, 0.0f, -data.altitude );
-		state.set_velocity(data.velocity_body_z, data.velocity_body_x, -data.velocity_body_y); // convert from P3D to NED
-		state.set_angular_velocity(data.rotation_velocity_body_z, data.rotation_velocity_body_x, -data.rotation_velocity_body_y);
+		state.set_velocity(data.velocity_body_z, data.velocity_body_x, -data.velocity_body_y); // polar vector: convert from P3D to NED
+		state.set_angular_velocity(-data.rotation_velocity_body_z, -data.rotation_velocity_body_x, data.rotation_velocity_body_y); // pseudovector: signs flip vs polar
 		start_lat = data.latitude;
 		start_lon = data.longitude;
 		
