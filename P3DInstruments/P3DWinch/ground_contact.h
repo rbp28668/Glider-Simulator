@@ -61,5 +61,5 @@ public:
      V3d<float> _get_contact_velocity(const StateVector<float>& state, const ContactPoint& cp, float cg_offset);
 
     // Calculate friction forces using Coulomb model with velocity blending.
-     void _calculate_friction(V3d<float> vel_earth, float normal_force, const ContactPoint& cp, float& F_x, float& F_y);
+     void _calculate_friction(V3d<float> vel_earth, float normal_force, const ContactPoint& cp, const V3d<float>& heading_earth, float& F_x, float& F_y);
 };

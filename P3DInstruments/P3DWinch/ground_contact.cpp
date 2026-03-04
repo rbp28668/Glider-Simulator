@@ -131,9 +131,20 @@ GroundContact::GroundContact()
         result.normal_force = F_normal;
 
         // 6. Calculate friction forces
+        // Get aircraft's forward direction projected onto ground plane (for wheel alignment)
+        auto fwd_earth = orientation.rotate_vector(V3d<float>(1.0f, 0.0f, 0.0f));
+        auto hx = fwd_earth[0];
+        auto hy = fwd_earth[1];
+        auto h_len = std::sqrt(hx * hx + hy * hy);
+        V3d<float> heading_earth;
+        if (h_len > 1e-6f)
+            heading_earth = V3d<float>(hx / h_len, hy / h_len, 0.0f);
+        else
+            heading_earth = V3d<float>(1.0f, 0.0f, 0.0f); // fallback if pointing straight up/down
+
         float F_friction_x = 0;
         float F_friction_y = 0;
-        _calculate_friction(cp_vel_earth, F_normal, cp, F_friction_x, F_friction_y);
+        _calculate_friction(cp_vel_earth, F_normal, cp, heading_earth, F_friction_x, F_friction_y);
         result.friction_force_long = F_friction_x;
         result.friction_force_lat = F_friction_y;
 
@@ -203,7 +214,7 @@ GroundContact::GroundContact()
     //     contact_type: 'wheel', 'skid', or 'wingtip'
     // Returns:
     //     (F_x, F_y) friction forces in earth frame
-    void GroundContact::_calculate_friction(V3d<float> vel_earth, float normal_force, const ContactPoint& cp, float& F_x, float& F_y)
+    void GroundContact::_calculate_friction(V3d<float> vel_earth, float normal_force, const ContactPoint& cp, const V3d<float>& heading_earth, float& F_x, float& F_y)
     {
 
         // Horizontal velocity components
@@ -237,28 +248,45 @@ GroundContact::GroundContact()
         // Special handling for wheels (rolling vs sliding)
         if (cp.contact_type == ContactPoint::ContactType::WHEEL)
         {
+            // Decompose velocity into wheel-aligned axes:
+            // heading_earth = unit vector along aircraft's ground-projected forward direction
+            // lateral_earth = perpendicular to heading (90 deg right in ground plane)
+            auto hx = heading_earth[0];
+            auto hy = heading_earth[1];
+            auto lx = -hy; // lateral unit vector (perpendicular to heading)
+            auto ly = hx;
+
+            // Project ground velocity onto wheel's longitudinal and lateral axes
+            auto v_long = v_x * hx + v_y * hy;  // velocity along heading
+            auto v_lat  = v_x * lx + v_y * ly;   // velocity perpendicular to heading
+
             // Longitudinal: rolling resistance (small, opposes motion)
+            float F_long;
             auto F_roll = ROLLING_RESISTANCE * normal_force;
-            // Smooth application of rolling resistance
-            if (abs(v_x) < FRICTION_VELOCITY_THRESHOLD)
+            if (std::abs(v_long) < FRICTION_VELOCITY_THRESHOLD)
             {
-                F_x = -v_x * (F_roll / FRICTION_VELOCITY_THRESHOLD);
+                F_long = -v_long * (F_roll / FRICTION_VELOCITY_THRESHOLD);
             }
             else
             {
-                F_x = -copysign(F_roll, v_x);
+                F_long = -copysign(F_roll, v_long);
             }
 
             // Lateral: full friction (wheels don't roll sideways)
-            if (abs(v_y) < FRICTION_VELOCITY_THRESHOLD)
+            float F_lat;
+            if (std::abs(v_lat) < FRICTION_VELOCITY_THRESHOLD)
             {
                 // Proportional friction at low speed (prevents jitter)
-                F_y = -v_y * (F_friction_max / FRICTION_VELOCITY_THRESHOLD);
+                F_lat = -v_lat * (F_friction_max / FRICTION_VELOCITY_THRESHOLD);
             }
             else
             {
-                F_y = -copysign(F_friction_max, v_y);
+                F_lat = -copysign(F_friction_max, v_lat);
             }
+
+            // Project friction forces back to earth frame
+            F_x = F_long * hx + F_lat * lx;
+            F_y = F_long * hy + F_lat * ly;
         }
         else
         {
