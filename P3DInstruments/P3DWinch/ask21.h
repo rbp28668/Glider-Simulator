@@ -124,7 +124,7 @@ public:
 
     ASK21()
     {
-        // Constructor
+        mainWheel->has_brake = true;
     }
 
     ~ASK21()

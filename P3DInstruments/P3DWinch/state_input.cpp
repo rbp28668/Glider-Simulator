@@ -31,6 +31,7 @@ SimObjectData::DataItem StateInput::dataItems[] = {
 	{"ELEVATOR POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32}, //	Elevator input deflection[-1.0:Full Down, 1.0 : Full Up]	Position	Y -
 	{"AILERON POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32}, // Aileron input left/right [-1.0: Full Left, 1.0: Full Right]
 	{"SPOILERS HANDLE POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32}, //Spoiler handle position [0: Retracted, 1.0: Fully Extended]
+	{"BRAKE LEFT POSITION", "Position", SIMCONNECT_DATATYPE_FLOAT32}, //Brake input [0: Released, 1.0: Full]
 
 	{"SIM TIME","Seconds", SIMCONNECT_DATATYPE_FLOAT32}, //	The elapsed simulation time	Seconds
 
@@ -70,6 +71,7 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 	controls.elevator = data.elevator;
 	controls.rudder = data.rudder;
 	controls.spoiler = data.spoiler;
+	controls.brake = data.brake;
 
 	World world;  // update world from sim
 	world.set_wind_vector(data.windZ, data.windX, -data.windY); // convert from P3D world (East,Up,North) to NED (North,East,Down)
