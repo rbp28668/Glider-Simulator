@@ -349,7 +349,7 @@ void Simulation::setup_winch_launch(float winch_distance, float weak_link) {
 	// Position winch ahead of glider (in X direction)
 	auto pos = state.position();
 
-	auto winch_pos = V3d<float>(pos[0] + winch_distance, pos[1], 0.0f);  // On ground
+	auto winch_pos = V3d<float>(pos[0] + winch_distance, pos[1], pos[2]);  // On ground, same elevation as aircraft
 
 	winch = Winch(winch_pos, weak_link, winch_distance + 200.0f);
 }

@@ -117,9 +117,7 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 			}
 			else {
 				engage();
-				// Set up and engage winch for launch
-				pFlightModel->setup_winch_launch();
-				pFlightModel->engage_winch();
+				winch_launch_pending = true;  // defer until state is initialised
 			}
 			break;
 		default: 
@@ -206,9 +204,13 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 
 		lastSimTime = data.time;
 
-
-
 		initialised = true;
+
+		if (winch_launch_pending) {
+			winch_launch_pending = false;
+			pFlightModel->setup_winch_launch();
+			pFlightModel->engage_winch();
+		}
 	}
 
 }
