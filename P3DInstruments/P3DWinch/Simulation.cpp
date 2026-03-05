@@ -129,7 +129,7 @@ void Simulation::calculate_forces_moments(const StateVector<float>& state, V3d<f
 	// Calculate ground contact forces
 	V3d<float>ground_forces, ground_moments;
 	std::vector<ContactResult> results;
-	ground_contact.calculate_ground_forces(state, aircraft.contact_points, world, aircraft.cg, ground_forces, ground_moments, results);
+	ground_contact.calculate_ground_forces(state, aircraft.contact_points, world, aircraft.cg, controls.brake, ground_forces, ground_moments, results);
 
 
 	// Calculate winch forces

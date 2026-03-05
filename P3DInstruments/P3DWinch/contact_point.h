@@ -29,6 +29,7 @@ class ContactPoint
     float friction_static;
     float friction_dynamic;
     float max_penetration;
+    bool has_brake = false;
 
     public:
 

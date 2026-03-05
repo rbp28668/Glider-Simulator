@@ -32,7 +32,7 @@ GroundContact::GroundContact()
     //     forces_body: Total force in body frame (Fx, Fy, Fz)
     //     moments_body: Total moment about CG in body frame (L, M, N)
     //     results: List of ContactResult for each contact point
-    void GroundContact::calculate_ground_forces(const StateVector<float>& state, std::vector<const ContactPoint*>& contact_points, const World& world, float cg_offset,
+    void GroundContact::calculate_ground_forces(const StateVector<float>& state, std::vector<const ContactPoint*>& contact_points, const World& world, float cg_offset, float brake,
         V3d<float>& forces_body, V3d<float>& moments_body,
         std::vector<ContactResult>& results)
     {
@@ -44,7 +44,7 @@ GroundContact::GroundContact()
         for (auto iter = contact_points.begin(); iter != contact_points.end(); ++iter)
         {
             const ContactPoint* cp = *iter;
-            ContactResult result = _calculate_single_contact(state, *cp, world, cg_offset);
+            ContactResult result = _calculate_single_contact(state, *cp, world, cg_offset, brake);
             results.push_back(result);
 
             if (result.in_contact)
@@ -59,7 +59,7 @@ GroundContact::GroundContact()
     }
 
     // Calculate forces for a single contact point.
-    ContactResult GroundContact::_calculate_single_contact(const StateVector<float>& state, const ContactPoint& cp, const World& world, float cg_offset)
+    ContactResult GroundContact::_calculate_single_contact(const StateVector<float>& state, const ContactPoint& cp, const World& world, float cg_offset, float brake)
     {
 
         ContactResult result;
@@ -144,7 +144,7 @@ GroundContact::GroundContact()
 
         float F_friction_x = 0;
         float F_friction_y = 0;
-        _calculate_friction(cp_vel_earth, F_normal, cp, heading_earth, F_friction_x, F_friction_y);
+        _calculate_friction(cp_vel_earth, F_normal, cp, heading_earth, brake, F_friction_x, F_friction_y);
         result.friction_force_long = F_friction_x;
         result.friction_force_lat = F_friction_y;
 
@@ -214,7 +214,7 @@ GroundContact::GroundContact()
     //     contact_type: 'wheel', 'skid', or 'wingtip'
     // Returns:
     //     (F_x, F_y) friction forces in earth frame
-    void GroundContact::_calculate_friction(V3d<float> vel_earth, float normal_force, const ContactPoint& cp, const V3d<float>& heading_earth, float& F_x, float& F_y)
+    void GroundContact::_calculate_friction(V3d<float> vel_earth, float normal_force, const ContactPoint& cp, const V3d<float>& heading_earth, float brake, float& F_x, float& F_y)
     {
 
         // Horizontal velocity components
@@ -260,16 +260,21 @@ GroundContact::GroundContact()
             auto v_long = v_x * hx + v_y * hy;  // velocity along heading
             auto v_lat  = v_x * lx + v_y * ly;   // velocity perpendicular to heading
 
-            // Longitudinal: rolling resistance (small, opposes motion)
+            // Longitudinal: rolling resistance, blended up to full friction when braked
             float F_long;
             auto F_roll = ROLLING_RESISTANCE * normal_force;
+            float F_long_max = F_roll;
+            if (cp.has_brake && brake > 0)
+            {
+                F_long_max = F_roll + brake * (F_friction_max - F_roll);
+            }
             if (std::abs(v_long) < FRICTION_VELOCITY_THRESHOLD)
             {
-                F_long = -v_long * (F_roll / FRICTION_VELOCITY_THRESHOLD);
+                F_long = -v_long * (F_long_max / FRICTION_VELOCITY_THRESHOLD);
             }
             else
             {
-                F_long = -copysign(F_roll, v_long);
+                F_long = -copysign(F_long_max, v_long);
             }
 
             // Lateral: full friction (wheels don't roll sideways)

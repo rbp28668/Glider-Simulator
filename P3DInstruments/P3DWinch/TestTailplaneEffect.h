@@ -10,7 +10,7 @@ class TestTailplaneEffect :
     void test_straight_and_level() {
         state.set_velocity(25.0, 0.0, 0.0);
         state.set_angular_velocity(0.0, 0.0, 0.0);
-        controls.set_controls(0.0, 0.0, 0.0, 0.0);
+        controls.set_controls(0.0, 0.0, 0.0, 0.0, 0.0);
 
         V3d<float> tp_forces;
         V3d<float> tp_moments;
@@ -28,7 +28,7 @@ class TestTailplaneEffect :
         // baseline
         state.set_velocity(25.0, 0.0, 0.0);
         state.set_angular_velocity(0.0, 0.0, 0.0);
-        controls.set_controls(0.0, 0.0, 0.0, 0.0);
+        controls.set_controls(0.0, 0.0, 0.0, 0.0, 0.0);
 
         V3d<float> base_forces;
         V3d<float> base_moments;
@@ -51,7 +51,7 @@ class TestTailplaneEffect :
         // baseline
         state.set_velocity(25.0, 0.0, 0.0);
         state.set_angular_velocity(0.0, 0.0, 0.0);
-        controls.set_controls(0.0, 0.0, 0.0, 0.0);
+        controls.set_controls(0.0, 0.0, 0.0, 0.0, 0.0);
 
         V3d<float> base_forces;
         V3d<float> base_moments;
@@ -75,14 +75,14 @@ class TestTailplaneEffect :
         // baseline
         state.set_velocity(25.0, 0.0, 0.0);
         state.set_angular_velocity(0.0, 0.0, 0.0);
-        controls.set_controls(0.0, 0.0, 0.0, 0.0);
+        controls.set_controls(0.0, 0.0, 0.0, 0.0, 0.0);
         V3d<float> base_forces;
         V3d<float> base_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), base_forces, base_moments);
 
 
         // forward stick(positive) reduces tailplane AoA per model implementation
-        controls.set_controls(1.0, 0.0, 0.0, 0.0);
+        controls.set_controls(1.0, 0.0, 0.0, 0.0, 0.0);
         V3d<float> elev_forces;
         V3d<float> elev_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), elev_forces, elev_moments);
@@ -96,7 +96,7 @@ class TestTailplaneEffect :
         // Descending vertically with zero forward speed(w positive = down)
         state.set_velocity(0.0, 0.0, 5.0);
         state.set_angular_velocity(0.0, 0.0, 0.0);
-        controls.set_controls(0.0, 0.0, 0.0, 0.0);
+        controls.set_controls(0.0, 0.0, 0.0, 0.0, 0.0);
 
         V3d<float> tp_forces;
         V3d<float> tp_moments;
@@ -130,7 +130,7 @@ class TestTailplaneEffect :
         // Ascending vertically with zero forward speed(w negative = up in body axes)
         state.set_velocity(0.0, 0.0, -5.0);
         state.set_angular_velocity(0.0, 0.0, 0.0);
-        controls.set_controls(0.0, 0.0, 0.0, 0.0);
+        controls.set_controls(0.0, 0.0, 0.0, 0.0, 0.0);
 
         V3d<float> tp_forces;
         V3d<float> tp_moments;

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "state_vector.h"
 #include "contact_point.h"
+#include "control_inputs.h"
 #include "world.h"
 #include "v3d.h"
 
@@ -50,16 +51,16 @@ public:
     GroundContact();
 
     // Calculate total ground contact forces and moments.
-    void calculate_ground_forces(const StateVector<float>& state, std::vector<const ContactPoint*>& contact_points, const World& world, float cg_offset,
+    void calculate_ground_forces(const StateVector<float>& state, std::vector<const ContactPoint*>& contact_points, const World& world, float cg_offset, float brake,
         V3d<float>& forces_body, V3d<float>& moments_body,
         std::vector<ContactResult>& results);
 
     // Calculate forces for a single contact point.
-    ContactResult _calculate_single_contact(const StateVector<float>& state, const ContactPoint& cp, const World& world, float cg_offset);
+    ContactResult _calculate_single_contact(const StateVector<float>& state, const ContactPoint& cp, const World& world, float cg_offset, float brake);
 
     // Calculate velocity of contact point in body frame.
      V3d<float> _get_contact_velocity(const StateVector<float>& state, const ContactPoint& cp, float cg_offset);
 
     // Calculate friction forces using Coulomb model with velocity blending.
-     void _calculate_friction(V3d<float> vel_earth, float normal_force, const ContactPoint& cp, const V3d<float>& heading_earth, float& F_x, float& F_y);
+     void _calculate_friction(V3d<float> vel_earth, float normal_force, const ContactPoint& cp, const V3d<float>& heading_earth, float brake, float& F_x, float& F_y);
 };

@@ -37,6 +37,7 @@ class StateInput :public SimObjectData
 		float elevator; //{ "ELEVATOR POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32 }, //	Elevator input deflection[-1.0:Full Down, 1.0 : Full Up]	Position	Y -
 		float aileron;  //{ "AILERON POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32 }, // Aileron input left/right [-1.0: Full Left, 1.0: Full Right]
 		float spoiler;  //{ "SPOILERS HANDLE POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32 }, //Spoiler handle position [0: Retracted, 1.0: Fully Extended]
+		float brake;    //{ "BRAKE LEFT POSITION", "Position", SIMCONNECT_DATATYPE_FLOAT32 }, //Brake input [0: Released, 1.0: Full]
 
 		float time; // {"SIM TIME", "Seconds", SIMCONNECT_DATATYPE_FLOAT32}, //	The elapsed simulation time	Seconds
 
