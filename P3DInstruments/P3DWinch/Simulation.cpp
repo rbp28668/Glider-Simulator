@@ -346,10 +346,21 @@ V3d<float> Simulation::apply_wind_to_state(const StateVector<float>& state, cons
 //     winch_distance: Distance to winch from starting position (m)
 //     weak_link: Weak link breaking tension (N)
 void Simulation::setup_winch_launch(float winch_distance, float weak_link) {
-	// Position winch ahead of glider (in X direction)
+	// Position winch ahead of glider along its heading direction
 	auto pos = state.position();
+	auto orientation = state.orientation();
 
-	auto winch_pos = V3d<float>(pos[0] + winch_distance, pos[1], pos[2]);  // On ground, same elevation as aircraft
+	// Get aircraft forward direction in earth frame and project onto ground plane
+	auto fwd_earth = orientation.rotate_vector(V3d<float>(1.0f, 0.0f, 0.0f));
+	float hx = fwd_earth[0];
+	float hy = fwd_earth[1];
+	float h_len = sqrtf(hx * hx + hy * hy);
+	if (h_len < 1e-6f) { hx = 1.0f; hy = 0.0f; h_len = 1.0f; }
+
+	auto winch_pos = V3d<float>(
+		pos[0] + winch_distance * hx / h_len,
+		pos[1] + winch_distance * hy / h_len,
+		pos[2]);  // On ground, same elevation as aircraft
 
 	winch = Winch(winch_pos, weak_link, winch_distance + 200.0f);
 }
