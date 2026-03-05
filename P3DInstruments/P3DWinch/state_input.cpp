@@ -1,12 +1,15 @@
 
 #include <iostream>
 #include <sstream>
+#include <conio.h>
 
 #include "state_input.h"
 #include "state_output.h"
 #include "control_inputs.h"
 #include "state_vector.h"
 #include "simulation.h"
+
+
 
 
 
@@ -44,7 +47,7 @@ SimObjectData::DataItem StateInput::dataItems[] = {
 	{"SIM ON GROUND","",SIMCONNECT_DATATYPE_INT32},
 };
 
-StateInput::StateInput(Prepar3D* p3d, Simulation* pFlightModel) : SimObjectData(p3d), pFlightModel(pFlightModel) {
+StateInput::StateInput(Prepar3D* p3d, Simulation* pFlightModel) : SimObjectData(p3d), pFlightModel(pFlightModel),  events(p3d) {
 	createDefinition();
 
 	pOutput = new StateOutput(p3d);
@@ -57,6 +60,30 @@ SimObjectData::DataItem* StateInput::items() {
 int StateInput::itemCount() {
 	return sizeof(dataItems) / sizeof(dataItems[0]);
 }
+
+void StateInput::engage() {
+
+	events.dispatchEvent(P3DEvent::FREEZE_LATITUDE_LONGITUDE_SET, 1);
+	events.dispatchEvent(P3DEvent::FREEZE_ALTITUDE_SET, 1);
+	events.dispatchEvent(P3DEvent::FREEZE_ATTITUDE_SET, 1);
+
+	initialised = false;
+	engaged = true;
+	std::cout << "ENGAGED" << std::endl;
+}
+
+void StateInput::disengage() {
+	initialised = false;
+	engaged = false;
+
+	events.dispatchEvent(P3DEvent::FREEZE_LATITUDE_LONGITUDE_SET, 0);
+	events.dispatchEvent(P3DEvent::FREEZE_ALTITUDE_SET, 0);
+	events.dispatchEvent(P3DEvent::FREEZE_ATTITUDE_SET, 0);
+
+	std::cout << "DISENGAGED" << std::endl;
+
+}
+
 
 void StateInput::onData(void* pData, SimObject* pObject) {
 
@@ -72,12 +99,49 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 	controls.rudder = data.rudder;
 	controls.spoiler = data.spoiler;
 	controls.brake = data.brake;
+	if (_kbhit()) {
+		char ch = _getch();
 
-	World world;  // update world from sim
-	world.set_wind_vector(data.windZ, data.windX, -data.windY); // convert from P3D world (East,Up,North) to NED (North,East,Down)
-	world.set_ground_height(-data.ground); // convert altitude (positive up) to NED Z (positive down)
+		switch (ch) {
+		case 'e':
+			engage();
+			break;
+
+		case 'd':
+			disengage();
+			break;
+
+		case 'w':
+			if (!data.onGround) {
+				std::cout << "You can't winch when you're airborne you muppet" << std::endl;
+			}
+			else {
+				engage();
+				pFlightModel->engage_winch();
+			}
+			break;
+		default: 
+			std::cout << "Unknown command" << std::endl;
+		}
+	}
+
+	if (!engaged) {
+		return;
+	}
+
 
 	if (initialised) {
+
+		ControlInputs controls;
+		controls.aileron = data.aileron;
+		controls.elevator = data.elevator;
+		controls.rudder = data.rudder;
+		controls.spoiler = data.spoiler;
+
+		World world;  // update world from sim
+		world.set_wind_vector(data.windZ, data.windX, -data.windY); // convert from P3D world (East,Up,North) to NED (North,East,Down)
+		world.set_ground_height(-data.ground); // convert altitude (positive up) to NED Z (positive down)
+
 		float dt = data.time - lastSimTime;
 		lastSimTime = data.time;
 
@@ -104,6 +168,7 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 		pOutput->data.acceleration_body_z = linear_acceleration[0];
 		pOutput->data.acceleration_body_x = linear_acceleration[1];
 		pOutput->data.acceleration_body_y = -linear_acceleration[2];
+
 
 		// Angular velocity/acceleration are pseudovectors: signs flip vs polar vectors
 		// because P3D↔NED transform has det=-1 (LH↔RH reflection)

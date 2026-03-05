@@ -107,12 +107,12 @@ struct Quaternion
     //     [qw, qx, qy, qz]
     static Quaternion from_euler_angles(T phi, T theta, T psi)
     {
-        T cy = cos(psi * 0.5);
-        T sy = sin(psi * 0.5);
-        T cp = cos(theta * 0.5);
-        T sp = sin(theta * 0.5);
-        T cr = cos(phi * 0.5);
-        T sr = sin(phi * 0.5);
+        T cy = cos(psi * (T)0.5);
+        T sy = sin(psi * (T)0.5);
+        T cp = cos(theta * (T)0.5);
+        T sp = sin(theta * (T)0.5);
+        T cr = cos(phi * (T)0.5);
+        T sr = sin(phi * (T)0.5);
 
         T qw = cr * cp * cy + sr * sp * sy;
         T qx = sr * cp * cy - cr * sp * sy;
