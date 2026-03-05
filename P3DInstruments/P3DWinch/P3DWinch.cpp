@@ -8,7 +8,6 @@
 #include "simulation.h"
 #include "Joystick.h"
 #include "state_input.h"
-#include "P3DEvent.h"
 
 #ifndef NDEBUG
 #include "TestFinEffect.h"
@@ -58,13 +57,6 @@ int main(int argc, char* argv[])
     Prepar3D* p3D = new Prepar3D("Winch", verbose);
 
     std::cout << p3D->userAircraft().name() << "," << p3D->userAircraft().id() << std::endl;
-
-    //
-    P3DEvent events(p3D);
-    events.dispatchEvent(P3DEvent::FREEZE_LATITUDE_LONGITUDE_SET, 1);
-    events.dispatchEvent(P3DEvent::FREEZE_ALTITUDE_SET, 1);
-    events.dispatchEvent(P3DEvent::FREEZE_ATTITUDE_SET, 1);
-
 
     StateInput input(p3D, &simulation);
     SimObjectDataRequest request(p3D, &input, &p3D->userAircraft(), SIMCONNECT_PERIOD_SIM_FRAME); // SIMCONNECT_PERIOD_SIM_FRAME
