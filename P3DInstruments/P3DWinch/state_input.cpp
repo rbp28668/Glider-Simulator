@@ -110,6 +110,8 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 			}
 			else {
 				engage();
+				// Set up and engage winch for launch
+				pFlightModel->setup_winch_launch();
 				pFlightModel->engage_winch();
 			}
 			break;
@@ -197,9 +199,7 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 
 		lastSimTime = data.time;
 
-		// Set up and engage winch for launch
-		pFlightModel->setup_winch_launch();
-		pFlightModel->engage_winch();
+
 
 		initialised = true;
 	}
