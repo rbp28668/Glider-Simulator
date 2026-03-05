@@ -18,14 +18,7 @@
 class SimObjectDataRequest;
 class ExternalSim;
 
-// Interface for receiving SimConnect facility data responses.
-class FacilityHandler {
-public:
-	virtual ~FacilityHandler() = default;
-	virtual void onAirportList(SIMCONNECT_RECV_AIRPORT_LIST* pData) {}
-	virtual void onFacilityData(SIMCONNECT_RECV_FACILITY_DATA* pData) {}
-	virtual void onFacilityDataEnd(SIMCONNECT_RECV_FACILITY_DATA_END* pData) {}
-};
+
 
 
 // Get the underlying int (or underlying type) of an enum value.
@@ -48,6 +41,13 @@ public:
 		virtual void quitEvent() {}
 	};
 
+	// Interface for receiving SimConnect facility data responses.
+	class FacilityHandler {
+	public:
+		virtual ~FacilityHandler() = default;
+		virtual void onAirportList(SIMCONNECT_RECV_AIRPORT_LIST* pData) {}
+	};
+
 private:
 
 
@@ -64,15 +64,18 @@ private:
 	// Provides a sequence number for calls or event IDs.
 	LONG volatile requestIdSequence;
 
-	CriticalSection eventHandersGuard;
+	CriticalSection eventHandersGuard; 
 	std::list<SystemEventHandler*> systemEventHandlers;
+
+	CriticalSection facilityHandlersGuard;
+	std::list<FacilityHandler*> facilityHandlers;
+
 
 	SimObjectList simObjects; // keyed by object ID (eventually).
 	SimObjectDataRequestList dataRequests; // keyed by request ID
 	bool waitingDataRequests;
 	WeatherStations wxStations;
 	ExternalSim* extSim;
-	FacilityHandler* facilityHandler;
 	SimObject userAc;
 	int majorVersion;
 	int minorVersion;
@@ -142,6 +145,7 @@ private:
 	void handleAssignedObjectId(SIMCONNECT_RECV* pData);
 	void handleWeatherObservation(SIMCONNECT_RECV* pData);
 	void handleObjectAddRemove(SIMCONNECT_RECV* pData);
+	void handleAirportList(SIMCONNECT_RECV* pData);
 
 #ifdef USE_EXTERNAL_SIM
 	void handleExternalSimCreate(SIMCONNECT_RECV_EXTERNAL_SIM_CREATE* pData);
@@ -166,7 +170,6 @@ public:
 	bool isVerbose() const { return verbose; } 
 	void setVerbose(bool isVerbose) { verbose = isVerbose; }
 
-	void setFacilityHandler(FacilityHandler* handler) { facilityHandler = handler; }
 	WeatherStations& weatherStations() { return wxStations; }
 	ExternalSim& externalSim() { return *extSim; }
 	SimObject& userAircraft() { return userAc; }
@@ -193,6 +196,10 @@ public:
 	// Register/unregister event handlers for system events.
 	void registerSystemEventHandler(SystemEventHandler* handler);
 	void unRegisterSystemEventHandler(SystemEventHandler* handler);
+
+	// Register/unregister facility handlers (get data on airports etc)
+	void registerFacilityHandler(FacilityHandler* handler);
+    void unRegisterFacilityEventHandler(FacilityHandler* handler);
 
 	virtual void aircraftAdded(DWORD objectId);
 	virtual void aircraftRemoved(DWORD objectId);

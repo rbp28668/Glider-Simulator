@@ -75,7 +75,7 @@
     <ClCompile Include="TestFuselageEffect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="runway_finder.cpp">
+    <ClCompile Include="winch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -165,9 +165,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TestFuselageEffect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="runway_finder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

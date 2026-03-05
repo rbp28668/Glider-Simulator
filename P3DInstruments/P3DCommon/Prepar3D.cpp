@@ -66,7 +66,6 @@ Prepar3D::Prepar3D(const char* appName, bool verbose)
 	simObjects(this),
 	wxStations(this),
 	extSim(0),
-	facilityHandler(nullptr),
 	userAc(this),
 	majorVersion(4), // until proven otherwise
 	minorVersion(0)
@@ -334,6 +333,30 @@ void Prepar3D::handleObjectAddRemove(SIMCONNECT_RECV* pData) {
 	}
 }
 
+//=========================================================================================
+// FACILITY HANDLERS
+//=========================================================================================
+
+void Prepar3D::handleAirportList(SIMCONNECT_RECV* pData) {
+	SIMCONNECT_RECV_AIRPORT_LIST* pal = reinterpret_cast<SIMCONNECT_RECV_AIRPORT_LIST*>(pData);
+	CriticalSection::Lock lock(facilityHandlersGuard);
+	for (auto iter = facilityHandlers.begin(); iter != facilityHandlers.end(); ++iter) {
+		(*iter)->onAirportList(pal);
+	}
+}
+
+void Prepar3D::registerFacilityHandler(FacilityHandler* handler) {
+	CriticalSection::Lock lock(facilityHandlersGuard);
+	facilityHandlers.push_back(handler);
+}
+
+
+void Prepar3D::unRegisterFacilityEventHandler(FacilityHandler* handler) {
+	CriticalSection::Lock lock(facilityHandlersGuard);
+	facilityHandlers.remove(handler);
+}
+
+
 #ifdef USE_EXTERNAL_SIM
 void Prepar3D::handleExternalSimCreate(SIMCONNECT_RECV_EXTERNAL_SIM_CREATE* pData)
 {
@@ -444,16 +467,10 @@ void Prepar3D::Process(SIMCONNECT_RECV* pData, DWORD cbData)
 		break;
 
 	case SIMCONNECT_RECV_ID_AIRPORT_LIST:
-		if (facilityHandler) facilityHandler->onAirportList(reinterpret_cast<SIMCONNECT_RECV_AIRPORT_LIST*>(pData));
+		handleAirportList(pData);
 		break;
 
-	case SIMCONNECT_RECV_ID_FACILITY_DATA:
-		if (facilityHandler) facilityHandler->onFacilityData(reinterpret_cast<SIMCONNECT_RECV_FACILITY_DATA*>(pData));
-		break;
-
-	case SIMCONNECT_RECV_ID_FACILITY_DATA_END:
-		if (facilityHandler) facilityHandler->onFacilityDataEnd(reinterpret_cast<SIMCONNECT_RECV_FACILITY_DATA_END*>(pData));
-		break;
+	
 
 #ifdef USE_EXTERNAL_SIM
 	case SIMCONNECT_RECV_ID_EXTERNAL_SIM_CREATE:

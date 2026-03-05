@@ -154,7 +154,6 @@
     <ClCompile Include="model.cpp" />
     <ClCompile Include="P3DEvent.cpp" />
     <ClCompile Include="P3DWinch.cpp" />
-    <ClCompile Include="runway_finder.cpp" />
     <ClCompile Include="panel.cpp" />
     <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="winch.cpp" />
@@ -184,7 +183,6 @@
     <ClInclude Include="P3DEvent.h" />
     <ClInclude Include="panel.h" />
     <ClInclude Include="quaternion.h" />
-    <ClInclude Include="runway_finder.h" />
     <ClInclude Include="simulation.h" />
     <ClInclude Include="Spline.h" />
     <ClInclude Include="state_input.h" />
