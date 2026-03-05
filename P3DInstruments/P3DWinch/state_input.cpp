@@ -47,10 +47,11 @@ SimObjectData::DataItem StateInput::dataItems[] = {
 	{"SIM ON GROUND","",SIMCONNECT_DATATYPE_INT32},
 };
 
-StateInput::StateInput(Prepar3D* p3d, Simulation* pFlightModel) : SimObjectData(p3d), pFlightModel(pFlightModel),  events(p3d) {
+StateInput::StateInput(Prepar3D* p3d, Simulation* pFlightModel) : SimObjectData(p3d), pFlightModel(pFlightModel), events(p3d), runwayFinder(p3d) {
 	createDefinition();
 
 	pOutput = new StateOutput(p3d);
+	p3d->setFacilityHandler(&runwayFinder);
 }
 
 SimObjectData::DataItem* StateInput::items() {
@@ -120,8 +121,35 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 				winch_launch_pending = true;  // defer until state is initialised
 			}
 			break;
-		default: 
+
+		case 'r':
+			if (!data.onGround) {
+				std::cout << "You can't winch when you're airborne you muppet" << std::endl;
+			}
+			else {
+				std::cout << "Finding runway..." << std::endl;
+				float heading_deg = data.heading * (180.0f / 3.14159265f);
+				runwayFinder.find(data.latitude, data.longitude, heading_deg);
+				runway_winch_searching = true;
+			}
+			break;
+
+		default:
 			std::cout << "Unknown command" << std::endl;
+		}
+	}
+
+	// Check for completed runway search (async)
+	if (runway_winch_searching) {
+		auto rwyState = runwayFinder.getState();
+		if (rwyState == RunwayFinder::State::DONE) {
+			runway_winch_searching = false;
+			runway_winch_ready = true;
+			engage();  // freeze P3D, triggers re-init on next frame
+		}
+		else if (rwyState == RunwayFinder::State::FAILED) {
+			runway_winch_searching = false;
+			std::cout << "Runway search failed - use 'w' for heading-based winch" << std::endl;
 		}
 	}
 
@@ -206,7 +234,24 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 
 		initialised = true;
 
-		if (winch_launch_pending) {
+		if (runway_winch_ready) {
+			runway_winch_ready = false;
+			auto& rwy = runwayFinder.getResult();
+
+			// Convert runway end lat/lon (degrees) to NED (metres) relative to start position
+			constexpr double DEG_TO_RAD = 3.14159265358979 / 180.0;
+			float north_m = (float)((rwy.far_end_lat * DEG_TO_RAD - start_lat) * metresPerRadianLat);
+			float east_m = (float)((rwy.far_end_lon * DEG_TO_RAD - start_lon) * metresPerRadianLon);
+			float down_m = -data.altitude;  // ground level in NED
+
+			pFlightModel->setup_winch_launch_at(V3d<float>(north_m, east_m, down_m));
+			pFlightModel->engage_winch();
+
+			std::cout << "Winch at end of runway " << (int)rwy.heading
+				<< " at " << rwy.icao
+				<< " (" << (int)rwy.length << "m)" << std::endl;
+		}
+		else if (winch_launch_pending) {
 			winch_launch_pending = false;
 			pFlightModel->setup_winch_launch();
 			pFlightModel->engage_winch();

@@ -365,6 +365,15 @@ void Simulation::setup_winch_launch(float winch_distance, float weak_link) {
 	winch = Winch(winch_pos, weak_link, winch_distance + 200.0f);
 }
 
+//Set up for a winch launch at an explicit position (NED metres).
+void Simulation::setup_winch_launch_at(const V3d<float>& winch_pos, float weak_link) {
+	auto pos = state.position();
+	float dx = winch_pos[0] - pos[0];
+	float dy = winch_pos[1] - pos[1];
+	float cable_length = sqrtf(dx * dx + dy * dy) + 200.0f;
+	winch = Winch(winch_pos, weak_link, cable_length);
+}
+
 //Engage the winch cable.
 void Simulation::engage_winch() {
 	winch.engage();

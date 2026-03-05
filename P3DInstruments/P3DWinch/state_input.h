@@ -2,6 +2,7 @@
 
 #include "..\P3DCommon\simobjectdata.h"
 #include "P3DEvent.h"
+#include "runway_finder.h"
 
 class Prepar3D;
 class Simulation;
@@ -59,6 +60,9 @@ class StateInput :public SimObjectData
 	bool initialised = false;
 	bool engaged = false;  // set true if should be controlling the sim.
 	bool winch_launch_pending = false;  // deferred until state is initialised
+	bool runway_winch_searching = false;  // async runway search in progress
+	bool runway_winch_ready = false;      // runway found, winch setup deferred until init
+	RunwayFinder runwayFinder;
 
 	float start_lat;
 	float start_lon;

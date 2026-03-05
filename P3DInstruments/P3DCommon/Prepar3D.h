@@ -18,6 +18,15 @@
 class SimObjectDataRequest;
 class ExternalSim;
 
+// Interface for receiving SimConnect facility data responses.
+class FacilityHandler {
+public:
+	virtual ~FacilityHandler() = default;
+	virtual void onAirportList(SIMCONNECT_RECV_AIRPORT_LIST* pData) {}
+	virtual void onFacilityData(SIMCONNECT_RECV_FACILITY_DATA* pData) {}
+	virtual void onFacilityDataEnd(SIMCONNECT_RECV_FACILITY_DATA_END* pData) {}
+};
+
 
 // Get the underlying int (or underlying type) of an enum value.
 // Use when you have enum class ... and want to convert to an integer.
@@ -63,6 +72,7 @@ private:
 	bool waitingDataRequests;
 	WeatherStations wxStations;
 	ExternalSim* extSim;
+	FacilityHandler* facilityHandler;
 	SimObject userAc;
 	int majorVersion;
 	int minorVersion;
@@ -156,6 +166,7 @@ public:
 	bool isVerbose() const { return verbose; } 
 	void setVerbose(bool isVerbose) { verbose = isVerbose; }
 
+	void setFacilityHandler(FacilityHandler* handler) { facilityHandler = handler; }
 	WeatherStations& weatherStations() { return wxStations; }
 	ExternalSim& externalSim() { return *extSim; }
 	SimObject& userAircraft() { return userAc; }

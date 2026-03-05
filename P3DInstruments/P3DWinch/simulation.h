@@ -61,6 +61,7 @@ public:
     StateVector<float> update(float dt, const ControlInputs& controls, const World& world);
     void setup_winch_launch(float winch_distance = 1500.0f,
         float weak_link = 10000.0f);
+    void setup_winch_launch_at(const V3d<float>& winch_pos, float weak_link = 10000.0f);
     void engage_winch();
     void release_winch();
 

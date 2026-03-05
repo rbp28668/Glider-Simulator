@@ -13,7 +13,7 @@
 
 // Folder in documents that P3D uses for its files.
 //char* Prepar3D::DOCUMENTS; = "Prepar3D v4 Files";
-//Lockheed Martin« Prepar3D« v5 5.3 Build 17.28160
+//Lockheed Martinï¿½ Prepar3Dï¿½ v5 5.3 Build 17.28160
 
 /// <summary>
 /// Event definitions.  Used as a lookup table to convert event IDs to the corresponding strings
@@ -66,6 +66,7 @@ Prepar3D::Prepar3D(const char* appName, bool verbose)
 	simObjects(this),
 	wxStations(this),
 	extSim(0),
+	facilityHandler(nullptr),
 	userAc(this),
 	majorVersion(4), // until proven otherwise
 	minorVersion(0)
@@ -440,6 +441,18 @@ void Prepar3D::Process(SIMCONNECT_RECV* pData, DWORD cbData)
 
 	case SIMCONNECT_RECV_ID_EVENT_OBJECT_ADDREMOVE:
 		handleObjectAddRemove(pData);
+		break;
+
+	case SIMCONNECT_RECV_ID_AIRPORT_LIST:
+		if (facilityHandler) facilityHandler->onAirportList(reinterpret_cast<SIMCONNECT_RECV_AIRPORT_LIST*>(pData));
+		break;
+
+	case SIMCONNECT_RECV_ID_FACILITY_DATA:
+		if (facilityHandler) facilityHandler->onFacilityData(reinterpret_cast<SIMCONNECT_RECV_FACILITY_DATA*>(pData));
+		break;
+
+	case SIMCONNECT_RECV_ID_FACILITY_DATA_END:
+		if (facilityHandler) facilityHandler->onFacilityDataEnd(reinterpret_cast<SIMCONNECT_RECV_FACILITY_DATA_END*>(pData));
 		break;
 
 #ifdef USE_EXTERNAL_SIM
