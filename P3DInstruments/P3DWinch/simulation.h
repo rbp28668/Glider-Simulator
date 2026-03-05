@@ -32,7 +32,6 @@ class Simulation {
     Model model;
     GroundContact ground_contact;
     Winch winch;
-    std::map<std::string, float> winch_info;  // Diagnostic info from last winch calculation
 
     // Derived values for driving P3d    
     V3d<float> vel_dot; // Linear velocity derivative - linear acceleration
@@ -61,9 +60,16 @@ public:
     void reset();
     StateVector<float> update(float dt, const ControlInputs& controls, const World& world);
     void setup_winch_launch(float winch_distance = 1500.0f,
-        float max_tension = 9000.0f,
         float weak_link = 10000.0f);
     void engage_winch();
     void release_winch();
-    
+
+    // Winch throttle passthrough
+    void set_winch_throttle(float t);
+    void clear_winch_throttle_override();
+    float get_winch_throttle() const;
+    float get_winch_cable_angle() const;
+    bool  is_winch_engaged() const;
+    float get_winch_tension() const;
+
 };
