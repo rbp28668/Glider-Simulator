@@ -156,6 +156,7 @@
     <ClCompile Include="P3DWinch.cpp" />
     <ClCompile Include="panel.cpp" />
     <ClCompile Include="Simulation.cpp" />
+    <ClCompile Include="winch.cpp" />
     <ClCompile Include="Spline.cpp" />
     <ClCompile Include="state_input.cpp" />
     <ClCompile Include="state_output.cpp" />

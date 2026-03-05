@@ -344,15 +344,14 @@ V3d<float> Simulation::apply_wind_to_state(const StateVector<float>& state, cons
 //     Set up for a winch launch.
 // Args:
 //     winch_distance: Distance to winch from starting position (m)
-//     max_tension: Maximum cable tension (N)
 //     weak_link: Weak link breaking tension (N)
-void Simulation::setup_winch_launch(float winch_distance, float max_tension, float weak_link) {
+void Simulation::setup_winch_launch(float winch_distance, float weak_link) {
 	// Position winch ahead of glider (in X direction)
 	auto pos = state.position();
 
 	auto winch_pos = V3d<float>(pos[0] + winch_distance, pos[1], 0.0f);  // On ground
 
-	winch = Winch(winch_pos, max_tension, weak_link, winch_distance + 200.0f);
+	winch = Winch(winch_pos, weak_link, winch_distance + 200.0f);
 }
 
 //Engage the winch cable.
@@ -360,7 +359,15 @@ void Simulation::engage_winch() {
 	winch.engage();
 }
 
-//Release the winch cable."""
+//Release the winch cable.
 void Simulation::release_winch() {
 	winch.release("manual");
 }
+
+// Winch throttle passthrough
+void Simulation::set_winch_throttle(float t) { winch.set_throttle(t); }
+void Simulation::clear_winch_throttle_override() { winch.clear_throttle_override(); }
+float Simulation::get_winch_throttle() const { return winch.get_throttle(); }
+float Simulation::get_winch_cable_angle() const { return winch.get_cable_angle(); }
+bool  Simulation::is_winch_engaged() const { return winch.is_engaged(); }
+float Simulation::get_winch_tension() const { return winch.get_tension(); }
