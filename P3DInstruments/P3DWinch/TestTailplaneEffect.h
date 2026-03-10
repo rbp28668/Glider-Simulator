@@ -8,9 +8,9 @@ class TestTailplaneEffect :
     float MAX_MOMENT = 500000.0f;
 
     void test_straight_and_level() {
-        state.set_velocity(25.0, 0.0, 0.0);
-        state.set_angular_velocity(0.0, 0.0, 0.0);
-        controls.set_controls(0.0, 0.0, 0.0, 0.0, 0.0);
+        state.set_velocity(25.0f, 0.0f, 0.0f);
+        state.set_angular_velocity(0.0f, 0.0f, 0.0f);
+        controls.set_controls(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
         V3d<float> tp_forces;
         V3d<float> tp_moments;
@@ -18,17 +18,17 @@ class TestTailplaneEffect :
 
         std::cout << "S&L, Tailplane Force: " << tp_forces << "," << "Tailplane moments : " << tp_moments << std::endl;
 
-        assertLess(tp_forces[0], 0.0, "Tailplane X force should be negative due to drag");
-        assertEqual(tp_forces[1], 0.0, "Tailplane Y force should be zero");
-        assertGreater(tp_forces[2], 0.0, "Tailplane Z component should be positive (downforce at trim)");
+        assertLess(tp_forces[0], 0.0f, "Tailplane X force should be negative due to drag");
+        assertEqual(tp_forces[1], 0.0f, "Tailplane Y force should be zero");
+        assertGreater(tp_forces[2], 0.0f, "Tailplane Z component should be positive (downforce at trim)");
     }
 
 
     void test_increased_aoa_increases_tail_lift() {
         // baseline
-        state.set_velocity(25.0, 0.0, 0.0);
-        state.set_angular_velocity(0.0, 0.0, 0.0);
-        controls.set_controls(0.0, 0.0, 0.0, 0.0, 0.0);
+        state.set_velocity(25.0f, 0.0f, 0.0f);
+        state.set_angular_velocity(0.0f, 0.0f, 0.0f);
+        controls.set_controls(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
         V3d<float> base_forces;
         V3d<float> base_moments;
@@ -36,7 +36,7 @@ class TestTailplaneEffect :
 
 
         // increase local AoA by adding a small downward velocity(w positive = down)
-        state.set_velocity(25.0, 0.0, 1.0);
+        state.set_velocity(25.0f, 0.0f, 1.0);
         V3d<float> inc_forces;
         V3d<float> inc_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), inc_forces, inc_moments);
@@ -49,9 +49,9 @@ class TestTailplaneEffect :
 
     void test_pitch_rate_increases_tail_lift() {
         // baseline
-        state.set_velocity(25.0, 0.0, 0.0);
-        state.set_angular_velocity(0.0, 0.0, 0.0);
-        controls.set_controls(0.0, 0.0, 0.0, 0.0, 0.0);
+        state.set_velocity(25.0f, 0.0f, 0.0f);
+        state.set_angular_velocity(0.0f, 0.0f, 0.0f);
+        controls.set_controls(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
         V3d<float> base_forces;
         V3d<float> base_moments;
@@ -59,8 +59,8 @@ class TestTailplaneEffect :
         std::cout << "Pitch rate base - tail forces" << base_forces << std::endl;
 
         // apply positive pitch rate(nose up) which moves tail down and increases local AoA
-        state.set_velocity(25.0, 0.0, 0.0);
-        state.set_angular_velocity(0.0, 0.1f, 0.0);
+        state.set_velocity(25.0f, 0.0f, 0.0f);
+        state.set_angular_velocity(0.0f, 0.1f, 0.0f);
         V3d<float> pr_forces;
         V3d<float> pr_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), pr_forces, pr_moments);
@@ -73,16 +73,16 @@ class TestTailplaneEffect :
 
     void test_elevator_deflection_reduces_tail_lift() {
         // baseline
-        state.set_velocity(25.0, 0.0, 0.0);
-        state.set_angular_velocity(0.0, 0.0, 0.0);
-        controls.set_controls(0.0, 0.0, 0.0, 0.0, 0.0);
+        state.set_velocity(25.0f, 0.0f, 0.0f);
+        state.set_angular_velocity(0.0f, 0.0f, 0.0f);
+        controls.set_controls(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         V3d<float> base_forces;
         V3d<float> base_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), base_forces, base_moments);
 
 
         // forward stick(positive) reduces tailplane AoA per model implementation
-        controls.set_controls(1.0, 0.0, 0.0, 0.0, 0.0);
+        controls.set_controls(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         V3d<float> elev_forces;
         V3d<float> elev_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), elev_forces, elev_moments);
@@ -94,9 +94,9 @@ class TestTailplaneEffect :
 
     void test_vertical_descent_zero_forward_speed() {
         // Descending vertically with zero forward speed(w positive = down)
-        state.set_velocity(0.0, 0.0, 5.0);
-        state.set_angular_velocity(0.0, 0.0, 0.0);
-        controls.set_controls(0.0, 0.0, 0.0, 0.0, 0.0);
+        state.set_velocity(0.0f, 0.0f, 5.0);
+        state.set_angular_velocity(0.0f, 0.0f, 0.0f);
+        controls.set_controls(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
         V3d<float> tp_forces;
         V3d<float> tp_moments;
@@ -114,23 +114,23 @@ class TestTailplaneEffect :
         assertLess(abs(tp_moments[1]), MAX_MOMENT, "Moments limit");
 
         // Should be negative Z force(upwards) as effectively flat plate drag at zero forward speed with tailplane facing into the flow
-        assertLess(tp_forces[2], 0.0, "Tailplane Z force should be negative (upwards) at zero forward speed with tailplane facing into the flow");
+        assertLess(tp_forces[2], 0.0f, "Tailplane Z force should be negative (upwards) at zero forward speed with tailplane facing into the flow");
 
         // Should be small X force as tailplane is mostly flat to the flow at zero forward speed, but may have a small positive X force due to model implementation of tailplane drag at zero forward speed
-        assertLess(abs(tp_forces[0]), 10.0, "Tailplane X force should be small at zero forward speed with tailplane facing into the flow");
+        assertLess(abs(tp_forces[0]), 10.0f, "Tailplane X force should be small at zero forward speed with tailplane facing into the flow");
 
         // Should be zero Y force due to symmetry
-        assertEqual(tp_forces[1], 0.0, "Tailplane Y force should be zero at zero forward speed with tailplane facing into the flow");
+        assertEqual(tp_forces[1], 0.0f, "Tailplane Y force should be zero at zero forward speed with tailplane facing into the flow");
 
         // Should be nose down moment(negative pitch moment) as tailplane drag produces a nose - down moment when tail is behind CG
-        assertLess(tp_moments[1], 0.0, "Tailplane should produce a nose-down moment (negative pitch moment) at zero forward speed with tailplane facing into the flow");
+        assertLess(tp_moments[1], 0.0f, "Tailplane should produce a nose-down moment (negative pitch moment) at zero forward speed with tailplane facing into the flow");
     }
 
     void test_vertical_ascent_zero_forward_speed() {
         // Ascending vertically with zero forward speed(w negative = up in body axes)
-        state.set_velocity(0.0, 0.0, -5.0);
-        state.set_angular_velocity(0.0, 0.0, 0.0);
-        controls.set_controls(0.0, 0.0, 0.0, 0.0, 0.0);
+        state.set_velocity(0.0f, 0.0f, -5.0);
+        state.set_angular_velocity(0.0f, 0.0f, 0.0f);
+        controls.set_controls(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
         V3d<float> tp_forces;
         V3d<float> tp_moments;
@@ -148,16 +148,16 @@ class TestTailplaneEffect :
         assertLess(abs(tp_moments[1]), MAX_MOMENT, "Moments limit");
 
         // Should be positive Z force(upwards) as effectively flat plate drag at zero forward speed with tailplane facing into the flow
-        assertGreater(tp_forces[2], 0.0, "Tailplane Z force should be positive (downwards) at zero forward speed with tailplane facing into the flow");
+        assertGreater(tp_forces[2], 0.0f, "Tailplane Z force should be positive (downwards) at zero forward speed with tailplane facing into the flow");
 
         // Should be small X force as tailplane is mostly flat to the flow at zero forward speed, but may have a small positive X force due to model implementation of tailplane drag at zero forward speed
-        assertLess(abs(tp_forces[0]), 10.0, "Tailplane X force should be small at zero forward speed with tailplane facing into the flow");
+        assertLess(abs(tp_forces[0]), 10.0f, "Tailplane X force should be small at zero forward speed with tailplane facing into the flow");
 
         // Should be zero Y force due to symmetry
-        assertEqual(tp_forces[1], 0.0, "Tailplane Y force should be zero at zero forward speed with tailplane facing into the flow");
+        assertEqual(tp_forces[1], 0.0f, "Tailplane Y force should be zero at zero forward speed with tailplane facing into the flow");
 
         // Should be nose down moment(negative pitch moment) as tailplane drag produces a nose - down moment when tail is behind CG
-        assertGreater(tp_moments[1], 0.0, "Tailplane should produce a nose-up moment (positive pitch moment) at zero forward speed with tailplane facing into the flow");
+        assertGreater(tp_moments[1], 0.0f, "Tailplane should produce a nose-up moment (positive pitch moment) at zero forward speed with tailplane facing into the flow");
     }
 
     public:

@@ -38,9 +38,8 @@ public:
 	LaunchController(Prepar3D* pSim,  Simulation* pSimulation);
 	bool launch(float time);
 	void tick(float time);
-
 	bool isLaunching() { return inProgress; }
-
+	void release();
 
 };
 

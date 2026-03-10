@@ -39,6 +39,7 @@ class StateInput :public SimObjectData
 		float aileron;  //{ "AILERON POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32 }, // Aileron input left/right [-1.0: Full Left, 1.0: Full Right]
 		float spoiler;  //{ "SPOILERS HANDLE POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32 }, //Spoiler handle position [0: Retracted, 1.0: Fully Extended]
 		float brake;    //{ "BRAKE LEFT POSITION", "Position", SIMCONNECT_DATATYPE_FLOAT32 }, //Brake input [0: Released, 1.0: Full]
+		float release;  // {"TOW RELEASE HANDLE","Position", SIMCONNECT_DATATYPE_FLOAT32},  //Position of tow release handle. 100 is fully deployed.	Percent over 100	N
 
 		float time; // {"SIM TIME", "Seconds", SIMCONNECT_DATATYPE_FLOAT32}, //	The elapsed simulation time	Seconds
 
@@ -61,6 +62,7 @@ class StateInput :public SimObjectData
 	bool initialised = false;
 	bool engaged = false;  // set true if should be controlling the sim.
 	bool winch_launch_pending = false;  // deferred until state is initialised
+	bool releasePulled = false;
 	bool spinKit = false;
 
 	float start_lat;

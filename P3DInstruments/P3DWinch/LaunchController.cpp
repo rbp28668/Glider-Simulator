@@ -146,3 +146,11 @@ void LaunchController::tick(float time)
 		break;
 	}
 }
+
+void LaunchController::release()
+{
+	std::cout << "RELEASE" << std::endl;
+	stage = Stage::IDLE;
+	inProgress = false;
+	pSimulation->release_winch();
+}

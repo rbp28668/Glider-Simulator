@@ -35,6 +35,7 @@ SimObjectData::DataItem StateInput::dataItems[] = {
 	{"AILERON POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32}, // Aileron input left/right [-1.0: Full Left, 1.0: Full Right]
 	{"SPOILERS HANDLE POSITION", "Position",SIMCONNECT_DATATYPE_FLOAT32}, //Spoiler handle position [0: Retracted, 1.0: Fully Extended]
 	{"BRAKE LEFT POSITION", "Position", SIMCONNECT_DATATYPE_FLOAT32}, //Brake input [0: Released, 1.0: Full]
+	{"TOW RELEASE HANDLE","Position", SIMCONNECT_DATATYPE_FLOAT32},  //Position of tow release handle. 100 is fully deployed.	Percent over 100	N
 
 	{"SIM TIME","Seconds", SIMCONNECT_DATATYPE_FLOAT32}, //	The elapsed simulation time	Seconds
 
@@ -95,6 +96,7 @@ void StateInput::tickModel(const Data& data)
 	controls.rudder = data.rudder;
 	controls.spoiler = data.spoiler;
 	controls.brake = data.brake;
+	controls.release = data.release;
 
 	World world;  // update world from sim
 	world.set_wind_vector(data.windZ, data.windX, -data.windY); // convert from P3D world (East,Up,North) to NED (North,East,Down)
@@ -225,16 +227,33 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 		}
 	}
 
-	
+	// Start a launch?
+	if (data.onGround && ! launcher.isLaunching()) {
+		if (data.release > 0.5) {
+			releasePulled = true;
+		}
+		else { // not pulled
+			if (releasePulled) {  // if it was....
+				// Start the launch
+				engage();
+				winch_launch_pending = true;  // defer until state is initialised
+				releasePulled = false;
+			}
+		}
+	}
+
+
 	if (!engaged) {
 		return;
 	}
 
 
 	if (initialised) {
-		
 		// In the middle of a winch launch?
 		if (launcher.isLaunching()) {
+			if (data.release > 0.5f) {
+				launcher.release();
+			}
 			launcher.tick(data.time);
 		}
 

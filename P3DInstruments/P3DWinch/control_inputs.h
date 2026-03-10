@@ -10,16 +10,18 @@ public:
     float rudder;    // [-1, +1] left/right
     float spoiler;  // [0, 1] retracted/extended
     float brake;    // [0, 1] released/full
+    float release;  // 
 
     ControlInputs(){
-        aileron = 0.0;
-        elevator = 0.0;
-        rudder = 0.0;
-        spoiler = 0.0;
-        brake = 0.0;
+        aileron = 0.0f;
+        elevator = 0.0f;
+        rudder = 0.0f;
+        spoiler = 0.0f;
+        brake = 0.0f;
+        release = 0.0f;
     }
 
-    void set_controls(float elevator, float aileron, float rudder, float spoiler, float brake);
+    void set_controls(float elevator, float aileron, float rudder, float spoiler, float brake, float release);
 
 };
  
