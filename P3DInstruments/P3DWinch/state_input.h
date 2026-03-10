@@ -64,6 +64,7 @@ class StateInput :public SimObjectData
 	bool winch_launch_pending = false;  // deferred until state is initialised
 	bool releasePulled = false;
 	bool spinKit = false;
+	bool autoDisengage = true;
 
 	float start_lat;
 	float start_lon;
@@ -85,6 +86,10 @@ public:
 	virtual void onData(void* pData, SimObject* pObject);
 
 	StateInput(Prepar3D*, Simulation* pFlightModel);
+
+	void setAutoDisengage(bool ad = true) {
+		autoDisengage = ad;
+	}
 
 };
 

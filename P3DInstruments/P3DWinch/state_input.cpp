@@ -242,7 +242,7 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 		}
 	}
 
-
+	// only continue on if actually engaged
 	if (!engaged) {
 		return;
 	}
@@ -255,6 +255,9 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 				launcher.release();
 			}
 			launcher.tick(data.time);
+			if (!launcher.isLaunching() && autoDisengage) {
+				disengage(); // auto disengage
+			}
 		}
 
 		tickModel(data);
