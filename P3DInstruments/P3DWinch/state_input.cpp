@@ -47,10 +47,101 @@ SimObjectData::DataItem StateInput::dataItems[] = {
 	{"SIM ON GROUND","",SIMCONNECT_DATATYPE_INT32},
 };
 
-StateInput::StateInput(Prepar3D* p3d, Simulation* pFlightModel) : SimObjectData(p3d), pFlightModel(pFlightModel), events(p3d) {
+StateInput::StateInput(Prepar3D* p3d, Simulation* pFlightModel) : SimObjectData(p3d)
+, pFlightModel(pFlightModel)
+, events(p3d) 
+, launcher(p3d, pFlightModel)
+{
 	createDefinition();
 
 	pOutput = new StateOutput(p3d);
+}
+
+
+// Initialises the model state from the input data so the alternative flight model is going in the same direction at the same place etc.
+// Critically, also initialises lastSimTime so the first subsequent call to tick() has a valid time period.
+void StateInput::initialiseModel(const Data& data)
+{
+	StateVector<float>& state = pFlightModel->get_state();
+	state.set_orientation(Quaternion<float>::from_euler_angles(-data.bank, -data.pitch, data.heading)); // negate bank & pitch: P3D LH→NED RH
+	state.set_position(0.0f, 0.0f, -data.altitude);
+	state.set_velocity(data.velocity_body_z, data.velocity_body_x, -data.velocity_body_y); // polar vector: convert from P3D to NED
+	state.set_angular_velocity(-data.rotation_velocity_body_z, -data.rotation_velocity_body_x, data.rotation_velocity_body_y); // pseudovector: signs flip vs polar
+	start_lat = data.latitude;
+	start_lon = data.longitude;
+
+	constexpr float earthEquatorialRadius = 6378.1f * 1000.0f; //  metres
+	constexpr float earthPolarRadius = 6356.8f * 1000.0f; // metres
+	const float pi = 3.14159265358979f;
+
+	metresPerRadianLat = earthPolarRadius;   // polar circumference / 360
+	metresPerRadianLon = earthEquatorialRadius * std::cos(start_lat);
+
+
+	lastSimTime = data.time;
+
+	initialised = true;
+
+	
+
+}
+
+void StateInput::tickModel(const Data& data)
+{
+
+	ControlInputs controls;
+	controls.aileron = data.aileron;
+	controls.elevator = data.elevator;
+	controls.rudder = data.rudder;
+	controls.spoiler = data.spoiler;
+	controls.brake = data.brake;
+
+	World world;  // update world from sim
+	world.set_wind_vector(data.windZ, data.windX, -data.windY); // convert from P3D world (East,Up,North) to NED (North,East,Down)
+	world.set_ground_height(-data.ground); // convert altitude (positive up) to NED Z (positive down)
+
+	float dt = data.time - lastSimTime;
+	lastSimTime = data.time;
+
+	StateVector<float> sv = pFlightModel->update(dt, controls, world);
+
+	auto pos = sv.position(); // Position in meters NED
+	pOutput->data.latitude = start_lat + pos[0] / metresPerRadianLat;  // North
+	pOutput->data.longitude = start_lon + pos[1] / metresPerRadianLon;  // East
+	pOutput->data.altitude = -pos[2]; // Down
+
+	auto orientation = sv.orientation();
+	auto rpy = orientation.to_euler();  // as roll, pitch and yaw
+
+	pOutput->data.bank = -rpy[0];	// NED right-bank positive → P3D left-bank positive
+	pOutput->data.pitch = -rpy[1];	// NED nose-up positive → P3D nose-down positive
+	pOutput->data.heading = rpy[2];
+
+	auto v = sv.velocity();
+	pOutput->data.velocity_body_z = v[0];
+	pOutput->data.velocity_body_x = v[1];
+	pOutput->data.velocity_body_y = -v[2];
+
+	auto linear_acceleration = pFlightModel->get_linear_acceleration();
+	pOutput->data.acceleration_body_z = linear_acceleration[0];
+	pOutput->data.acceleration_body_x = linear_acceleration[1];
+	pOutput->data.acceleration_body_y = -linear_acceleration[2];
+
+
+	// Angular velocity/acceleration are pseudovectors: signs flip vs polar vectors
+	// because P3D↔NED transform has det=-1 (LH↔RH reflection)
+	auto av = sv.angular_velocity();
+	pOutput->data.rotation_body_z = -av[0];
+	pOutput->data.rotation_body_x = -av[1];
+	pOutput->data.rotation_body_y = av[2];
+
+	auto angular_acceleration = pFlightModel->get_angular_acceleration();
+	pOutput->data.rotation_acceleration_body_z = -angular_acceleration[0];
+	pOutput->data.rotation_acceleration_body_x = -angular_acceleration[1];
+	pOutput->data.rotation_acceleration_body_y = angular_acceleration[2];
+
+	pOutput->sendData();
+
 }
 
 SimObjectData::DataItem* StateInput::items() {
@@ -93,12 +184,7 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 		//show(pData);
 	}
 
-	ControlInputs controls;
-	controls.aileron = data.aileron;
-	controls.elevator = data.elevator;
-	controls.rudder = data.rudder;
-	controls.spoiler = data.spoiler;
-	controls.brake = data.brake;
+
 	if (_kbhit()) {
 		char ch = _getch();
 
@@ -113,11 +199,24 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 
 		case 'w':
 			if (!data.onGround) {
-				std::cout << "You can't winch when you're airborne you muppet" << std::endl;
+				std::cout << "You can't winch when you're airborne" << std::endl;
 			}
 			else {
 				engage();
 				winch_launch_pending = true;  // defer until state is initialised
+			}
+			break;
+
+		case 's':
+			if (spinKit) {
+				pFlightModel->set_spin_kit(0);
+				spinKit = false;
+				std::cout << "Spin kit removed" << std::endl;
+			}
+			else {
+				pFlightModel->set_spin_kit(20);  // bolt 20kg of lead to the tail.
+				spinKit = true;
+				std::cout << "Spin kit attached" << std::endl;
 			}
 			break;
 
@@ -133,85 +232,20 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 
 
 	if (initialised) {
-
-		ControlInputs controls;
-		controls.aileron = data.aileron;
-		controls.elevator = data.elevator;
-		controls.rudder = data.rudder;
-		controls.spoiler = data.spoiler;
-
-		World world;  // update world from sim
-		world.set_wind_vector(data.windZ, data.windX, -data.windY); // convert from P3D world (East,Up,North) to NED (North,East,Down)
-		world.set_ground_height(-data.ground); // convert altitude (positive up) to NED Z (positive down)
-
-		float dt = data.time - lastSimTime;
-		lastSimTime = data.time;
-
-		StateVector<float> sv = pFlightModel->update(dt, controls, world);
-
-		auto pos = sv.position(); // Position in meters NED
-		pOutput->data.latitude = start_lat + pos[0] / metresPerRadianLat;  // North
-		pOutput->data.longitude = start_lon + pos[1] / metresPerRadianLon;  // East
-		pOutput->data.altitude = -pos[2]; // Down
-
-		auto orientation = sv.orientation();
-		auto rpy = orientation.to_euler();  // as roll, pitch and yaw
-
-		pOutput->data.bank = -rpy[0];	// NED right-bank positive → P3D left-bank positive
-		pOutput->data.pitch = -rpy[1];	// NED nose-up positive → P3D nose-down positive
-		pOutput->data.heading = rpy[2];
-
-		auto v = sv.velocity();
-		pOutput->data.velocity_body_z = v[0];
-		pOutput->data.velocity_body_x = v[1];
-		pOutput->data.velocity_body_y = -v[2];
-
-		auto linear_acceleration = pFlightModel->get_linear_acceleration();
-		pOutput->data.acceleration_body_z = linear_acceleration[0];
-		pOutput->data.acceleration_body_x = linear_acceleration[1];
-		pOutput->data.acceleration_body_y = -linear_acceleration[2];
-
-
-		// Angular velocity/acceleration are pseudovectors: signs flip vs polar vectors
-		// because P3D↔NED transform has det=-1 (LH↔RH reflection)
-		auto av = sv.angular_velocity();
-		pOutput->data.rotation_body_z = -av[0];
-		pOutput->data.rotation_body_x = -av[1];
-		pOutput->data.rotation_body_y = av[2];
-
-		auto angular_acceleration = pFlightModel->get_angular_acceleration();
-		pOutput->data.rotation_acceleration_body_z = -angular_acceleration[0];
-		pOutput->data.rotation_acceleration_body_x = -angular_acceleration[1];
-		pOutput->data.rotation_acceleration_body_y = angular_acceleration[2];
-
-		pOutput->sendData();
-	}
-	else { // not initialised
-
-		StateVector<float>& state = pFlightModel->get_state();
-		state.set_orientation(Quaternion<float>::from_euler_angles(-data.bank, -data.pitch, data.heading)); // negate bank & pitch: P3D LH→NED RH
-		state.set_position( 0.0f, 0.0f, -data.altitude );
-		state.set_velocity(data.velocity_body_z, data.velocity_body_x, -data.velocity_body_y); // polar vector: convert from P3D to NED
-		state.set_angular_velocity(-data.rotation_velocity_body_z, -data.rotation_velocity_body_x, data.rotation_velocity_body_y); // pseudovector: signs flip vs polar
-		start_lat = data.latitude;
-		start_lon = data.longitude;
 		
-		constexpr float earthEquatorialRadius = 6378.1f * 1000.0f; //  metres
-		constexpr float earthPolarRadius = 6356.8f * 1000.0f; // metres
-		const float pi = 3.14159265358979f;
+		// In the middle of a winch launch?
+		if (launcher.isLaunching()) {
+			launcher.tick(data.time);
+		}
 
-		metresPerRadianLat = earthPolarRadius;   // polar circumference / 360
-		metresPerRadianLon = earthEquatorialRadius * std::cos(start_lat);
-
-
-		lastSimTime = data.time;
-
-		initialised = true;
-
-		 if (winch_launch_pending) {
+		tickModel(data);
+	}
+	else { // not initialised, so initialise - also sets clock so next tick will have valid dt.
+		initialiseModel(data);
+		
+		if (winch_launch_pending) {
 			winch_launch_pending = false;
-			pFlightModel->setup_winch_launch();
-			pFlightModel->engage_winch();
+			launcher.launch(data.time);
 		}
 	}
 

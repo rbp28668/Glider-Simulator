@@ -19,6 +19,15 @@ class ASK21 : public AircraftParameters
 public:
     // Initialize ASK21-specific parameters here
 
+    // Set base values on to which we can add spin kits etc.
+    float base_Ixx = 1285.0f; // kg·m²
+    float base_Iyy = 1824.0f; // kg·m²
+    float base_Izz = 2663.0f; // kg·m²
+    float base_Ixz = 100.0f;  // kg·m² Wild guess
+
+    float base_mass = 687.0f; // kg
+    float base_cg = -0.30f; // m from datum (negative is aft of datum), was 30 originally
+
     // Moments of inertia about principal axes through center of gravity (roll, pitch, yaw)
     float Ixx = 1285.0f; // kg·m²
     float Iyy = 1824.0f; // kg·m²
@@ -159,5 +168,21 @@ public:
     virtual float DihedralAngle() const 
     {
         return dihedral_angle;
+    }
+
+    // Simulates having kg of spin kit bolted to the fin.
+    void set_spin_kit(float kg) {
+        // Ixx not impacted - no moment arm for roll as weight pretty much on the axis.
+        float dist = fin_quarter_chord - base_cg;  // distance back from base cb
+        Iyy = base_Iyy + kg * dist * dist;  // pitch
+        Izz = base_Izz + kg * dist * dist;  // yaw
+        moments_of_inertia[1] = Iyy;
+        moments_of_inertia[2] = Izz;
+
+        cg = base_cg + (dist * kg)/base_mass; // dist is -ve so moves cg back
+
+        mass = base_mass + kg;
+
+
     }
 };

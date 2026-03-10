@@ -73,4 +73,14 @@ public:
     bool  is_winch_engaged() const;
     float get_winch_tension() const;
 
+    // Spin-kit
+    void set_spin_kit(float kg) {
+        aircraft.set_spin_kit(kg);
+    }
+
+
+    // ground contact
+    bool is_on_ground() {
+        return ground_contact.is_on_ground();
+    }
 };

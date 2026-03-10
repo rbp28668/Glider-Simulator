@@ -1,6 +1,11 @@
 // P3DWinch.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+#include <windows.h>
+#include <mfapi.h>
+#include <mfidl.h>
+#include <shlwapi.h>
+#include <iostream>
 #include <iostream>
 
 #include "../P3DCommon/Prepar3D.h"
@@ -22,6 +27,12 @@ int main(int argc, char* argv[])
     
                                                                                                                                                                                                         
     std::cout << "Hello Winch!\n";
+    
+    // COM needed for sound playing
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+
+    //SimplePlayer player;
+    //player.Play(L"music.m4a");
 
 #ifndef NDEBUG
     {
@@ -66,6 +77,8 @@ int main(int argc, char* argv[])
 
     delete p3D;
 
+    MFShutdown();
+    CoUninitialize();
 
     return 0;
 

@@ -41,6 +41,7 @@ GroundContact::GroundContact()
         V3d<float> total_moment;
         results.clear();
 
+        on_ground = false;
         for (auto iter = contact_points.begin(); iter != contact_points.end(); ++iter)
         {
             const ContactPoint* cp = *iter;
@@ -51,6 +52,7 @@ GroundContact::GroundContact()
             {
                 total_force += result.force_body;   // Accumulate forces
                 total_moment += result.moment_body; // Accumulate moments
+                on_ground = true;
             }
         }
 
@@ -306,4 +308,9 @@ GroundContact::GroundContact()
         F_y = std::max(-MAX_CONTACT_FORCE, std::min(MAX_CONTACT_FORCE, F_y));
 
         return;
+    }
+
+    bool GroundContact::is_on_ground() const
+    {
+        return on_ground;
     }

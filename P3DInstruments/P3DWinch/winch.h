@@ -106,7 +106,7 @@ class Winch {
     SolveResult solve_gear(int gear, float cable_speed, float thr, float cable_out_m);
     SolveResult solve(float cable_speed, float thr, float cable_out_m);
 
-    float default_throttle() const;
+    //float default_throttle() const;
 
     V3d<float> get_hook_velocity(const StateVector<float>& state, const V3d<float>& hook_body) const;
 
@@ -134,7 +134,6 @@ public:
 
     // --- External throttle API ---
     void  set_throttle(float t);
-    void  clear_throttle_override();
     float get_throttle() const { return throttle; }
     float get_cable_angle() const { return cable_angle; }
     bool  is_engaged() const { return engaged; }

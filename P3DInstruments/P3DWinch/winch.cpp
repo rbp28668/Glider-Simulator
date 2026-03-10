@@ -209,12 +209,9 @@ void Winch::release(const std::string& reason) {
 
 void Winch::set_throttle(float t) {
     throttle = std::max(0.0f, std::min(1.0f, t));
-    throttle_override = true;
 }
 
-void Winch::clear_throttle_override() {
-    throttle_override = false;
-}
+
 
 
 // ---------------------------------------------------------------------------
@@ -391,29 +388,6 @@ Winch::SolveResult Winch::solve(float cable_speed, float thr, float cable_out_m)
 }
 
 
-// ---------------------------------------------------------------------------
-//  Default throttle profile
-// ---------------------------------------------------------------------------
-
-float Winch::default_throttle() const {
-    // Ramp from 0.3 to 0.8 over first 200m of cable reeled in
-    float base_throttle = 0.8f;
-    if (initial_cable_out > 0.0f) {
-        float reeled_in = initial_cable_out - cable_out;
-        if (reeled_in < 200.0f) {
-            float ramp = std::max(0.0f, reeled_in) / 200.0f;
-            base_throttle = 0.3f + 0.5f * ramp;
-        }
-    }
-
-    // Reduce throttle when cable angle is steep (near top of winch launch)
-    if (cable_angle > 80.0f * PI / 180.0f) {
-        return 0.5f;
-    }
-
-    return base_throttle;
-}
-
 
 // ---------------------------------------------------------------------------
 //  Hook velocity in body frame: V_hook = V_cg + omega x r_hook
@@ -515,12 +489,6 @@ void Winch::calculate_forces(const StateVector<float>& state, const V3d<float>& 
         cable_angle = atan2f(cable_vec[2], horiz_dist);
     }
 
-    // Determine throttle
-    float current_throttle = throttle_override ? throttle : default_throttle();
-    if (!throttle_override) {
-        throttle = current_throttle;  // store for get_throttle() queries
-    }
-
     // Get hook velocity in earth frame
     auto hook_vel_body = get_hook_velocity(state, hook_position_body);
     auto hook_vel_earth = orientation.rotate_vector(hook_vel_body);
@@ -539,7 +507,7 @@ void Winch::calculate_forces(const StateVector<float>& state, const V3d<float>& 
     } else {
         // Use drivetrain solver (minimum 0.5 m/s for stability near stall)
         float solver_speed = std::max(0.5f, v_cable);
-        auto result = solve(solver_speed, current_throttle, cable_out);
+        auto result = solve(solver_speed, throttle, cable_out);
         tension = result.valid ? result.cable_tension_n : 100.0f;
     }
 

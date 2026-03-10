@@ -2,6 +2,7 @@
 
 #include "..\P3DCommon\simobjectdata.h"
 #include "P3DEvent.h"
+#include "LaunchController.h"
 
 class Prepar3D;
 class Simulation;
@@ -54,11 +55,13 @@ class StateInput :public SimObjectData
 	Simulation* pFlightModel;
 	StateOutput* pOutput;
 	P3DEvent events;
+	LaunchController launcher;
 
 	float lastSimTime = 0.0f;
 	bool initialised = false;
 	bool engaged = false;  // set true if should be controlling the sim.
 	bool winch_launch_pending = false;  // deferred until state is initialised
+	bool spinKit = false;
 
 	float start_lat;
 	float start_lon;
@@ -67,6 +70,9 @@ class StateInput :public SimObjectData
 
 	void engage();
 	void disengage();
+
+	void initialiseModel(const Data& data);
+	void tickModel(const Data& data);
 
 public:
 

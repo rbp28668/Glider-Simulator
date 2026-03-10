@@ -386,7 +386,6 @@ void Simulation::release_winch() {
 
 // Winch throttle passthrough
 void Simulation::set_winch_throttle(float t) { winch.set_throttle(t); }
-void Simulation::clear_winch_throttle_override() { winch.clear_throttle_override(); }
 float Simulation::get_winch_throttle() const { return winch.get_throttle(); }
 float Simulation::get_winch_cable_angle() const { return winch.get_cable_angle(); }
 bool  Simulation::is_winch_engaged() const { return winch.is_engaged(); }

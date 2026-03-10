@@ -151,10 +151,12 @@
     <ClCompile Include="control_inputs.cpp" />
     <ClCompile Include="ground_contact.cpp" />
     <ClCompile Include="Joystick.cpp" />
+    <ClCompile Include="LaunchController.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="P3DEvent.cpp" />
     <ClCompile Include="P3DWinch.cpp" />
     <ClCompile Include="panel.cpp" />
+    <ClCompile Include="SimplePlayer.cpp" />
     <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="winch.cpp" />
     <ClCompile Include="Spline.cpp" />
@@ -178,11 +180,13 @@
     <ClInclude Include="control_inputs.h" />
     <ClInclude Include="ground_contact.h" />
     <ClInclude Include="Joystick.h" />
+    <ClInclude Include="LaunchController.h" />
     <ClInclude Include="local_math.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="P3DEvent.h" />
     <ClInclude Include="panel.h" />
     <ClInclude Include="quaternion.h" />
+    <ClInclude Include="SimplePlayer.h" />
     <ClInclude Include="simulation.h" />
     <ClInclude Include="Spline.h" />
     <ClInclude Include="state_input.h" />
