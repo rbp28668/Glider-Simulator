@@ -42,10 +42,16 @@ SimObjectData::DataItem* StateOutput::items() {
 	return dataItems;
 }
 
+StateOutput::Data* StateOutput::getData()
+{
+	return &data[current];
+}
+
 int StateOutput::itemCount() {
 	return sizeof(dataItems) / sizeof(dataItems[0]);
 }
 
 void StateOutput::sendData() {
-	send(&data, sizeof(data), SIMCONNECT_OBJECT_ID_USER);
+	send(&data[current], sizeof(Data), SIMCONNECT_OBJECT_ID_USER);
+	current = (current == 0) ? 1 : 0;
 }

@@ -44,8 +44,10 @@ public:
 		//int32_t onGround; //{ "SIM ON GROUND","",SIMCONNECT_DATATYPE_INT32 },
 	};
 #pragma pack(pop)
-
-	Data data;
+private:
+	// Double buffered
+	Data data[2];
+	int current = 0;
 
 public:
 
@@ -56,6 +58,9 @@ public:
 	StateOutput(Prepar3D*);
 
 	void sendData();
+
+	Data* getData();
+
 };
 
 

@@ -71,6 +71,8 @@ class StateInput :public SimObjectData
 	NumberT metresPerRadianLat;
 	NumberT metresPerRadianLon;
 
+	CriticalSection criticalSection;
+	
 	void engage();
 	void disengage();
 

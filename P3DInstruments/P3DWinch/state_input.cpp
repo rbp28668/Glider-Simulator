@@ -108,40 +108,41 @@ void StateInput::tickModel(const Data& data)
 
 	StateVector<NumberT> sv = pFlightModel->update(dt, controls, world);
 
+	StateOutput::Data* pData = pOutput->getData();
 	auto pos = sv.position(); // Position in meters NED
-	pOutput->data.latitude = start_lat + pos[0] / metresPerRadianLat;  // North
-	pOutput->data.longitude = start_lon + pos[1] / metresPerRadianLon;  // East
-	pOutput->data.altitude = -pos[2]; // Down
+	pData->latitude = start_lat + pos[0] / metresPerRadianLat;  // North
+	pData->longitude = start_lon + pos[1] / metresPerRadianLon;  // East
+	pData->altitude = -pos[2]; // Down
 
 	auto orientation = sv.orientation();
 	auto rpy = orientation.to_euler();  // as roll, pitch and yaw
 
-	pOutput->data.bank = -rpy[0];	// NED right-bank positive → P3D left-bank positive
-	pOutput->data.pitch = -rpy[1];	// NED nose-up positive → P3D nose-down positive
-	pOutput->data.heading = rpy[2];
+	pData->bank = -rpy[0];	// NED right-bank positive → P3D left-bank positive
+	pData->pitch = -rpy[1];	// NED nose-up positive → P3D nose-down positive
+	pData->heading = rpy[2];
 
 	auto v = sv.velocity();
-	pOutput->data.velocity_body_z = v[0];
-	pOutput->data.velocity_body_x = v[1];
-	pOutput->data.velocity_body_y = -v[2];
+	pData->velocity_body_z = v[0];
+	pData->velocity_body_x = v[1];
+	pData->velocity_body_y = -v[2];
 
 	auto linear_acceleration = pFlightModel->get_linear_acceleration();
-	pOutput->data.acceleration_body_z = linear_acceleration[0];
-	pOutput->data.acceleration_body_x = linear_acceleration[1];
-	pOutput->data.acceleration_body_y = -linear_acceleration[2];
+	pData->acceleration_body_z = linear_acceleration[0];
+	pData->acceleration_body_x = linear_acceleration[1];
+	pData->acceleration_body_y = -linear_acceleration[2];
 
 
 	// Angular velocity/acceleration are pseudovectors: signs flip vs polar vectors
 	// because P3D↔NED transform has det=-1 (LH↔RH reflection)
 	auto av = sv.angular_velocity();
-	pOutput->data.rotation_body_z = -av[0];
-	pOutput->data.rotation_body_x = -av[1];
-	pOutput->data.rotation_body_y = av[2];
+	pData->rotation_body_z = -av[0];
+	pData->rotation_body_x = -av[1];
+	pData->rotation_body_y = av[2];
 
 	auto angular_acceleration = pFlightModel->get_angular_acceleration();
-	pOutput->data.rotation_acceleration_body_z = -angular_acceleration[0];
-	pOutput->data.rotation_acceleration_body_x = -angular_acceleration[1];
-	pOutput->data.rotation_acceleration_body_y = angular_acceleration[2];
+	pData->rotation_acceleration_body_z = -angular_acceleration[0];
+	pData->rotation_acceleration_body_x = -angular_acceleration[1];
+	pData->rotation_acceleration_body_y = angular_acceleration[2];
 
 	pOutput->sendData();
 
@@ -186,6 +187,11 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 		//std::cout << "StateInput Data received" << std::endl;
 		//show(pData);
 	}
+
+
+
+	// Make sure these are serialised
+	CriticalSection::Lock lock(criticalSection);
 
 	Timer t;
 	auto start = t.raw();
@@ -271,10 +277,12 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 			}
 		}
 
-		auto tickStart = t.raw();
+		//auto tickStart = t.raw();
+		
 		tickModel(data);
-		auto modelTime = t.since(tickStart);
-		std::cout << "T:" << modelTime * 1000000 << "us" << std::endl;
+		
+		//auto modelTime = t.since(tickStart);
+		//std::cout << "T:" << modelTime * 1000000 << "us" << std::endl;
 	}
 	else { // not initialised, so initialise - also sets clock so next tick will have valid dt.
 		initialiseModel(data);
