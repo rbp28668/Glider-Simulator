@@ -5,19 +5,19 @@
 
 
 //Clamp value to range [min_val, max_val].
-float Simulation::clamp(float value, float min_val, float max_val) {
+NumberT Simulation::clamp(NumberT value, NumberT min_val, NumberT max_val) {
 	return std::max(min_val, std::min(max_val, value));
 }
 
 // Return default if value is NaN or Inf.
-float Simulation::safe_value(float value, float dflt) {
+NumberT Simulation::safe_value(NumberT value, NumberT dflt) {
 	return  (isnan(value) || isinf(value)) ? dflt : value;
 }
 
 
 //Clamp velocity components to safe range.
-V3d<float> Simulation::sanitize_velocity(float vx, float vy, float vz) {
-	return V3d<float>(
+V3d<NumberT> Simulation::sanitize_velocity(NumberT vx, NumberT vy, NumberT vz) {
+	return V3d<NumberT>(
 		clamp(safe_value(vx), -MAX_VELOCITY, MAX_VELOCITY),
 		clamp(safe_value(vy), -MAX_VELOCITY, MAX_VELOCITY),
 		clamp(safe_value(vz), -MAX_VELOCITY, MAX_VELOCITY)
@@ -25,8 +25,8 @@ V3d<float> Simulation::sanitize_velocity(float vx, float vy, float vz) {
 }
 
 //Clamp angular velocity components to safe range.
-V3d<float> Simulation::sanitize_angular_velocity(float p, float q, float r) {
-	return V3d<float>(
+V3d<NumberT> Simulation::sanitize_angular_velocity(NumberT p, NumberT q, NumberT r) {
+	return V3d<NumberT>(
 		clamp(safe_value(p), -MAX_ANGULAR_RATE, MAX_ANGULAR_RATE),
 		clamp(safe_value(q), -MAX_ANGULAR_RATE, MAX_ANGULAR_RATE),
 		clamp(safe_value(r), -MAX_ANGULAR_RATE, MAX_ANGULAR_RATE)
@@ -37,7 +37,7 @@ V3d<float> Simulation::sanitize_angular_velocity(float p, float q, float r) {
 // Reset simulation to initial state
 void Simulation::reset() {
 	total_time = 0.0;
-	state = StateVector<float>();
+	state = StateVector<NumberT>();
 }
 
 
@@ -45,7 +45,7 @@ void Simulation::reset() {
 
 // Update aircraft state based on physics, control inputs, and world conditions
 // Uses Runge-Kutta 4th order integration
-StateVector<float> Simulation::update(float dt, const ControlInputs& controls, const World& world) {
+StateVector<NumberT> Simulation::update(NumberT dt, const ControlInputs& controls, const World& world) {
 
 	// Update control positions & world view
 	this->controls = controls;
@@ -71,31 +71,31 @@ StateVector<float> Simulation::update(float dt, const ControlInputs& controls, c
 // Returns:
 //     new_state: Updated state vector
 
-StateVector<float> Simulation::rk4_step(const StateVector<float>& state, float dt) {
+StateVector<NumberT> Simulation::rk4_step(const StateVector<NumberT>& state, NumberT dt) {
 
 	// k1
-	V3d<float>forces1, moments1;
+	V3d<NumberT>forces1, moments1;
 	calculate_forces_moments(state, forces1, moments1);
 	auto k1 = state_derivative(state, forces1, moments1);
 
 	// k2
 	auto state2 = state.offset(k1, 0.5f * dt); //[state[i] + 0.5*dt*k1[i] for i in range(13)]
 	state2.normalize_orientation();
-	V3d<float>forces2, moments2;
+	V3d<NumberT>forces2, moments2;
 	calculate_forces_moments(state2, forces2, moments2);
 	auto k2 = state_derivative(state2, forces2, moments2);
 
 	// k3
 	auto state3 = state.offset(k2, 0.5f * dt); //[state[i] + 0.5*dt*k2[i] for i in range(13)]
 	state3.normalize_orientation();
-	V3d<float>forces3, moments3;
+	V3d<NumberT>forces3, moments3;
 	calculate_forces_moments(state3, forces3, moments3);
 	auto k3 = state_derivative(state3, forces3, moments3);
 
 	// k4
 	auto state4 = state.offset(k3, dt); //[state[i] + dt*k3[i] for i in range(13)]
 	state4.normalize_orientation();
-	V3d<float>forces4, moments4;
+	V3d<NumberT>forces4, moments4;
 	calculate_forces_moments(state4, forces4, moments4);
 	auto k4 = state_derivative(state4, forces4, moments4);
 
@@ -114,7 +114,7 @@ StateVector<float> Simulation::rk4_step(const StateVector<float>& state, float d
 // Returns:
 //     forces_body: [Fx, Fy, Fz] (N)
 //     moments_body: [L, M, N] (N·m)
-void Simulation::calculate_forces_moments(const StateVector<float>& state, V3d<float>& forces, V3d<float>& moments) {
+void Simulation::calculate_forces_moments(const StateVector<NumberT>& state, V3d<NumberT>& forces, V3d<NumberT>& moments) {
 
 	// Get wind
 	auto wind_earth = world.get_wind_vector(state.position(), total_time);
@@ -123,28 +123,30 @@ void Simulation::calculate_forces_moments(const StateVector<float>& state, V3d<f
 	auto V_air_body = apply_wind_to_state(state, wind_earth);
 
 	// Calculate aerodynamics
-	V3d<float>aero_forces, aero_moments;
+	V3d<NumberT>aero_forces, aero_moments;
 	model.calculate_aerodynamics(state, aircraft, controls, world, V_air_body, aero_forces, aero_moments);
 
 	// Calculate ground contact forces
-	V3d<float>ground_forces, ground_moments;
+	V3d<NumberT>ground_forces, ground_moments;
 	std::vector<ContactResult> results;
 	ground_contact.calculate_ground_forces(state, aircraft.contact_points, world, aircraft.cg, controls.brake, ground_forces, ground_moments, results);
 
 
 	// Calculate winch forces
-	V3d<float>winch_forces, winch_moments;
-	auto hook_body = aircraft.winch_hook;
+	V3d<NumberT>winch_forces, winch_moments;
+	
+	auto winchHook = aircraft.winch_hook;
+	V3d<NumberT> hook_body = V3d<NumberT>(winchHook[0], winchHook[1], winchHook[2]);
 	winch.calculate_forces(state, hook_body, winch_forces, winch_moments);
 
 	// Accumulate total forces and moments
-	forces = V3d<float>(
+	forces = V3d<NumberT>(
 		aero_forces[0] + ground_forces[0] + winch_forces[0],
 		aero_forces[1] + ground_forces[1] + winch_forces[1],
 		aero_forces[2] + ground_forces[2] + winch_forces[2]
 		);
 
-	moments = V3d<float>(
+	moments = V3d<NumberT>(
 		aero_moments[0] + ground_moments[0] + winch_moments[0],
 		aero_moments[1] + ground_moments[1] + winch_moments[1],
 		aero_moments[2] + ground_moments[2] + winch_moments[2]
@@ -166,7 +168,7 @@ void Simulation::calculate_forces_moments(const StateVector<float>& state, V3d<f
 //     inertia: Inertia tensor [Ixx, Iyy, Izz, Ixz]
 // Returns:
 //     state_dot: Time derivative of state vector
-StateVector<float> Simulation::state_derivative(const StateVector<float>& state, const V3d<float>& forces_body, const V3d<float>& moments_body) {
+StateVector<NumberT> Simulation::state_derivative(const StateVector<NumberT>& state, const V3d<NumberT>& forces_body, const V3d<NumberT>& moments_body) {
 	// Position derivative
 	auto pos_dot = calculate_position_derivative(state);
 
@@ -182,7 +184,7 @@ StateVector<float> Simulation::state_derivative(const StateVector<float>& state,
 	omega_dot = calculate_angular_acceleration(state, moments_body);
 
 	// Assemble complete derivative.  Returned state vector contains derivatives of each value rather than the values.
-	StateVector<float> state_dot;
+	StateVector<NumberT> state_dot;
 	state_dot.set_position(pos_dot);           // [Ẋ, Ẏ, Ż]
 	state_dot.set_velocity(vel_dot);           // [u̇, v̇, ẇ]
 	state_dot.set_orientation(quat_dot);          // [q̇w, q̇x, q̇y, q̇z]
@@ -199,7 +201,7 @@ StateVector<float> Simulation::state_derivative(const StateVector<float>& state,
 //     mass: Aircraft mass (kg)
 // Returns:
 //     [u̇, v̇, ẇ] - acceleration in body frame (m/s²)
-V3d<float> Simulation::calculate_linear_acceleration(const StateVector<float>& state, const V3d<float>& forces_body) {
+V3d<NumberT> Simulation::calculate_linear_acceleration(const StateVector<NumberT>& state, const V3d<NumberT>& forces_body) {
 	auto velocity = state.velocity();
 	auto u = velocity[0];
 	auto v = velocity[1];
@@ -215,7 +217,7 @@ V3d<float> Simulation::calculate_linear_acceleration(const StateVector<float>& s
 
 	// Gravity in body frame
 	auto g = 9.81f;
-	auto g_earth = V3d<float>(0, 0, g);
+	auto g_earth = V3d<NumberT>(0, 0, g);
 	auto g_body = orientation.rotate_vector_inverse(g_earth);
 
 	auto mass = aircraft.mass;
@@ -231,7 +233,7 @@ V3d<float> Simulation::calculate_linear_acceleration(const StateVector<float>& s
 	auto w_dot = Fz_total / mass + q * u - p * v;
 
 
-	return V3d<float>(u_dot, v_dot, w_dot);
+	return V3d<NumberT>(u_dot, v_dot, w_dot);
 
 }
 
@@ -243,7 +245,7 @@ V3d<float> Simulation::calculate_linear_acceleration(const StateVector<float>& s
 //     inertia: Inertia tensor components [Ixx, Iyy, Izz, Ixz]
 // Returns:
 //     [ṗ, q̇, ṙ] - angular acceleration (rad/s²)
-V3d<float> Simulation::calculate_angular_acceleration(const StateVector<float>& state, const V3d<float>& moments_body) {
+V3d<NumberT> Simulation::calculate_angular_acceleration(const StateVector<NumberT>& state, const V3d<NumberT>& moments_body) {
 	auto av = state.angular_velocity();
 	auto p = av[0];
 	auto q = av[1];
@@ -292,7 +294,7 @@ V3d<float> Simulation::calculate_angular_acceleration(const StateVector<float>& 
 	// Solve using Cramer's Rule (Pre-calculated Gamma)
 	auto dp = (Izz * L_prime + Ixz * N_prime) / Gamma;
 	auto dr = (Ixz * L_prime + Ixx * N_prime) / Gamma;
-	return V3d<float>(dp, dq, dr);
+	return V3d<NumberT>(dp, dq, dr);
 }
 
 
@@ -304,7 +306,7 @@ V3d<float> Simulation::calculate_angular_acceleration(const StateVector<float>& 
 //     state: Current state vector
 // Returns:
 //     [Ẋ, Ẏ, Ż] - velocity in Earth frame (m/s)
-V3d<float> Simulation::calculate_position_derivative(const StateVector<float>& state) {
+V3d<NumberT> Simulation::calculate_position_derivative(const StateVector<NumberT>& state) {
 	auto v_body = state.velocity();
 	auto q = state.orientation();
 
@@ -322,7 +324,7 @@ V3d<float> Simulation::calculate_position_derivative(const StateVector<float>& s
 // Returns:
 //    new state object with corrected
 //    airspeed vector in body frame (m/s)
-V3d<float> Simulation::apply_wind_to_state(const StateVector<float>& state, const V3d<float>& wind_earth) {
+V3d<NumberT> Simulation::apply_wind_to_state(const StateVector<NumberT>& state, const V3d<NumberT>& wind_earth) {
 	auto velocity = state.velocity();
 	auto u = velocity[0];
 	auto v = velocity[1];
@@ -338,7 +340,7 @@ V3d<float> Simulation::apply_wind_to_state(const StateVector<float>& state, cons
 	auto v_air = v - wind_body[1];
 	auto w_air = w - wind_body[2];
 
-	return V3d<float>(u_air, v_air, w_air);
+	return V3d<NumberT>(u_air, v_air, w_air);
 }
 
 //     Set up for a winch launch.
@@ -351,16 +353,16 @@ void Simulation::setup_winch_launch(float winch_distance, float weak_link) {
 	auto orientation = state.orientation();
 
 	// Get aircraft forward direction in earth frame and project onto ground plane
-	auto fwd_earth = orientation.rotate_vector(V3d<float>(1.0f, 0.0f, 0.0f));
-	float hx = fwd_earth[0];
-	float hy = fwd_earth[1];
-	float h_len = sqrtf(hx * hx + hy * hy);
+	auto fwd_earth = orientation.rotate_vector(V3d<NumberT>(1.0f, 0.0f, 0.0f));
+	NumberT hx = fwd_earth[0];
+	NumberT hy = fwd_earth[1];
+	NumberT h_len = sqrt(hx * hx + hy * hy);
 	if (h_len < 1e-6f) { hx = 1.0f; hy = 0.0f; h_len = 1.0f; }
 
 	auto winch_pos = V3d<float>(
-		pos[0] + winch_distance * hx / h_len,
-		pos[1] + winch_distance * hy / h_len,
-		pos[2]);  // On ground, same elevation as aircraft
+		float(pos[0] + winch_distance * hx / h_len),
+		float(pos[1] + winch_distance * hy / h_len),
+		float(pos[2]) );  // On ground, same elevation as aircraft
 
 	winch = Winch(winch_pos, weak_link, winch_distance + 200.0f);
 }
@@ -368,8 +370,8 @@ void Simulation::setup_winch_launch(float winch_distance, float weak_link) {
 //Set up for a winch launch at an explicit position (NED metres).
 void Simulation::setup_winch_launch_at(const V3d<float>& winch_pos, float weak_link) {
 	auto pos = state.position();
-	float dx = winch_pos[0] - pos[0];
-	float dy = winch_pos[1] - pos[1];
+	float dx = float(winch_pos[0] - pos[0]);
+	float dy = float(winch_pos[1] - pos[1]);
 	float cable_length = sqrtf(dx * dx + dy * dy) + 200.0f;
 	winch = Winch(winch_pos, weak_link, cable_length);
 }
@@ -389,4 +391,4 @@ void Simulation::set_winch_throttle(float t) { winch.set_throttle(t); }
 float Simulation::get_winch_throttle() const { return winch.get_throttle(); }
 float Simulation::get_winch_cable_angle() const { return winch.get_cable_angle(); }
 bool  Simulation::is_winch_engaged() const { return winch.is_engaged(); }
-float Simulation::get_winch_tension() const { return winch.get_tension(); }
+NumberT Simulation::get_winch_tension() const { return winch.get_tension(); }

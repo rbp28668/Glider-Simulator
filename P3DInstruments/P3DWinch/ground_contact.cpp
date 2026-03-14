@@ -32,13 +32,13 @@ GroundContact::GroundContact()
     //     forces_body: Total force in body frame (Fx, Fy, Fz)
     //     moments_body: Total moment about CG in body frame (L, M, N)
     //     results: List of ContactResult for each contact point
-    void GroundContact::calculate_ground_forces(const StateVector<float>& state, std::vector<const ContactPoint*>& contact_points, const World& world, float cg_offset, float brake,
-        V3d<float>& forces_body, V3d<float>& moments_body,
+    void GroundContact::calculate_ground_forces(const StateVector<NumberT>& state, std::vector<const ContactPoint*>& contact_points, const World& world, NumberT cg_offset, float brake,
+        V3d<NumberT>& forces_body, V3d<NumberT>& moments_body,
         std::vector<ContactResult>& results)
     {
 
-        V3d<float> total_force;
-        V3d<float> total_moment;
+        V3d<NumberT> total_force;
+        V3d<NumberT> total_moment;
         results.clear();
 
         on_ground = false;
@@ -61,7 +61,7 @@ GroundContact::GroundContact()
     }
 
     // Calculate forces for a single contact point.
-    ContactResult GroundContact::_calculate_single_contact(const StateVector<float>& state, const ContactPoint& cp, const World& world, float cg_offset, float brake)
+    ContactResult GroundContact::_calculate_single_contact(const StateVector<NumberT>& state, const ContactPoint& cp, const World& world, NumberT cg_offset, float brake)
     {
 
         ContactResult result;
@@ -118,9 +118,9 @@ GroundContact::GroundContact()
         // Use quadratic stiffening for smoother response
         if (penetration > max_pen)
         {
-            float hard_stop_stiffness = 200000.0; // Stiff but not extreme (N/m)
-            float hard_stop_damping = 10000.0;    // Additional damping for hard stop
-            float excess_penetration = penetration - max_pen;
+            NumberT hard_stop_stiffness = 200000.0; // Stiff but not extreme (N/m)
+            NumberT hard_stop_damping = 10000.0;    // Additional damping for hard stop
+            NumberT excess_penetration = penetration - max_pen;
             // Quadratic stiffening: force increases rapidly with penetration
             F_normal = (k * max_pen +
                 hard_stop_stiffness * excess_penetration * (1 + 10 * excess_penetration) +
@@ -128,31 +128,31 @@ GroundContact::GroundContact()
                 hard_stop_damping * v_z);
         }
 
-        F_normal = std::max(0.0f, F_normal); // Can only push, not pull
+        F_normal = std::max(0.0, F_normal); // Can only push, not pull
         F_normal = std::min(F_normal, MAX_CONTACT_FORCE);
         result.normal_force = F_normal;
 
         // 6. Calculate friction forces
         // Get aircraft's forward direction projected onto ground plane (for wheel alignment)
-        auto fwd_earth = orientation.rotate_vector(V3d<float>(1.0f, 0.0f, 0.0f));
+        auto fwd_earth = orientation.rotate_vector(V3d<NumberT>(1.0f, 0.0f, 0.0f));
         auto hx = fwd_earth[0];
         auto hy = fwd_earth[1];
         auto h_len = std::sqrt(hx * hx + hy * hy);
-        V3d<float> heading_earth;
+        V3d<NumberT> heading_earth;
         if (h_len > 1e-6f)
-            heading_earth = V3d<float>(hx / h_len, hy / h_len, 0.0f);
+            heading_earth = V3d<NumberT>(hx / h_len, hy / h_len, 0.0f);
         else
-            heading_earth = V3d<float>(1.0f, 0.0f, 0.0f); // fallback if pointing straight up/down
+            heading_earth = V3d<NumberT>(1.0f, 0.0f, 0.0f); // fallback if pointing straight up/down
 
-        float F_friction_x = 0;
-        float F_friction_y = 0;
+        NumberT F_friction_x = 0;
+        NumberT F_friction_y = 0;
         _calculate_friction(cp_vel_earth, F_normal, cp, heading_earth, brake, F_friction_x, F_friction_y);
         result.friction_force_long = F_friction_x;
         result.friction_force_lat = F_friction_y;
 
         // 7. Total force in earth frame
         // Normal force acts upward (-Z), friction acts in XY plane
-        auto F_earth = V3d<float>(F_friction_x, F_friction_y, -F_normal);
+        auto F_earth = V3d<NumberT>(F_friction_x, F_friction_y, -F_normal);
 
         // 8. Transform force to body frame
         auto F_body = orientation.rotate_vector_inverse(F_earth);
@@ -161,7 +161,7 @@ GroundContact::GroundContact()
         // 9. Calculate moment about CG
         // Moment arm from CG to contact point in body frame
         // CG is at (cg_offset, 0, 0) relative to datum
-        auto arm = V3d<float>(
+        auto arm = V3d<NumberT>(
             cp.x - cg_offset,
             cp.y,
             cp.z);
@@ -171,7 +171,7 @@ GroundContact::GroundContact()
         auto M_y = arm[2] * F_body[0] - arm[0] * F_body[2]; // Pitch moment
         auto M_z = arm[0] * F_body[1] - arm[1] * F_body[0]; // Yaw moment
 
-        result.moment_body = V3d<float>(M_x, M_y, M_z);
+        result.moment_body = V3d<NumberT>(M_x, M_y, M_z);
 
         return result;
     }
@@ -179,7 +179,7 @@ GroundContact::GroundContact()
     // Calculate velocity of contact point in body frame.
     // V_cp = V_cg + omega x r_cp
     // where r_cp is vector from CG to contact point
-    V3d<float> GroundContact::_get_contact_velocity(const StateVector<float>& state, const ContactPoint& cp, float cg_offset)
+    V3d<NumberT> GroundContact::_get_contact_velocity(const StateVector<NumberT>& state, const ContactPoint& cp, NumberT cg_offset)
     {
 
         auto u = state.velocity()[0];
@@ -196,13 +196,13 @@ GroundContact::GroundContact()
         auto rz = cp.z;
 
         // omega x r (cross product)
-        auto omega_cross_r = V3d<float>(
+        auto omega_cross_r = V3d<NumberT>(
             q * rz - r * ry,
             r * rx - p * rz,
             p * ry - q * rx);
 
         // Total velocity at contact point
-        return V3d<float>(
+        return V3d<NumberT>(
             u + omega_cross_r[0],
             v + omega_cross_r[1],
             w + omega_cross_r[2]);
@@ -216,7 +216,7 @@ GroundContact::GroundContact()
     //     contact_type: 'wheel', 'skid', or 'wingtip'
     // Returns:
     //     (F_x, F_y) friction forces in earth frame
-    void GroundContact::_calculate_friction(V3d<float> vel_earth, float normal_force, const ContactPoint& cp, const V3d<float>& heading_earth, float brake, float& F_x, float& F_y)
+    void GroundContact::_calculate_friction(V3d<NumberT> vel_earth, NumberT normal_force, const ContactPoint& cp, const V3d<NumberT>& heading_earth, float brake, NumberT& F_x, NumberT& F_y)
     {
 
         // Horizontal velocity components
@@ -232,8 +232,8 @@ GroundContact::GroundContact()
         }
 
         // Determine friction coefficient
-        auto mu_s = cp.friction_static;  // params['friction_static']
-        auto mu_d = cp.friction_dynamic; // params['friction_dynamic']
+        NumberT mu_s = cp.friction_static;  // params['friction_static']
+        NumberT mu_d = cp.friction_dynamic; // params['friction_dynamic']
 
         // Smooth transition between static and dynamic friction
         auto mu = mu_d;
@@ -263,9 +263,9 @@ GroundContact::GroundContact()
             auto v_lat  = v_x * lx + v_y * ly;   // velocity perpendicular to heading
 
             // Longitudinal: rolling resistance, blended up to full friction when braked
-            float F_long;
+            NumberT F_long;
             auto F_roll = ROLLING_RESISTANCE * normal_force;
-            float F_long_max = F_roll;
+            NumberT F_long_max = F_roll;
             if (cp.has_brake && brake > 0)
             {
                 F_long_max = F_roll + brake * (F_friction_max - F_roll);
@@ -280,7 +280,7 @@ GroundContact::GroundContact()
             }
 
             // Lateral: full friction (wheels don't roll sideways)
-            float F_lat;
+            NumberT F_lat;
             if (std::abs(v_lat) < FRICTION_VELOCITY_THRESHOLD)
             {
                 // Proportional friction at low speed (prevents jitter)

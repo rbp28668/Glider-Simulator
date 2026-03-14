@@ -127,6 +127,11 @@ public:
         rightTip
     };
 
+    // Distance below datum of main-wheel.
+    inline float zOffset() {
+       return  mainWheel->z;
+    }
+
     // Special contact points (i.e. just positions) for aerotow and winch hooks
     V3d<float> aerotow_hook = V3d<float>(2.291851852f, 0.0f, 0.447037037f);  // Approximate position of aerotow hook
     V3d<float> winch_hook = V3d<float>(0.1574074074f, -0.05f, 0.572962963f); // approximate position of winch hook, slightly left of centerline

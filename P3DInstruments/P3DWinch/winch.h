@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include <algorithm>
+#include "sim_types.h"
 #include "state_vector.h"
 #include "v3d.h"
 #include "quaternion.h"
@@ -74,15 +75,15 @@ class Winch {
     float weak_link;            // Tension at which weak link breaks (N)
     float cable_length;         // Total cable length on drum (m)
     bool  engaged;              // Is the winch cable currently engaged
-    float cable_out;            // Current distance from hook to winch (m)
-    float tension;              // Current cable tension (N)
+    NumberT cable_out;            // Current distance from hook to winch (m)
+    NumberT tension;              // Current cable tension (N)
     std::string release_reason; // Why cable was released
-    float initial_cable_out;    // Cable distance at engage time (for throttle ramp)
+    //float initial_cable_out;    // Cable distance at engage time (for throttle ramp)
 
     // --- Throttle state ---
     float throttle;             // Current throttle position (0.0 - 1.0)
     bool  throttle_override;    // Is external throttle override active
-    float cable_angle;          // Current cable angle below horizontal (radians)
+    NumberT cable_angle;          // Current cable angle below horizontal (radians)
 
     // --- Drivetrain result from solver ---
     struct SolveResult {
@@ -103,12 +104,12 @@ class Winch {
     float drum_rpm(float cable_speed, float cable_out_m) const;
     float gear_ratio(int gear) const;
 
-    SolveResult solve_gear(int gear, float cable_speed, float thr, float cable_out_m);
-    SolveResult solve(float cable_speed, float thr, float cable_out_m);
+    SolveResult solve_gear(int gear, NumberT cable_speed, float thr, NumberT cable_out_m);
+    SolveResult solve(NumberT cable_speed, float thr, NumberT cable_out_m);
 
     //float default_throttle() const;
 
-    V3d<float> get_hook_velocity(const StateVector<float>& state, const V3d<float>& hook_body) const;
+    V3d<NumberT> get_hook_velocity(const StateVector<NumberT>& state, const V3d<NumberT>& hook_body) const;
 
 public:
 
@@ -129,13 +130,13 @@ public:
     void release(const std::string& reason = "manual");
 
     // Calculate winch cable forces and moments.
-    void calculate_forces(const StateVector<float>& state, const V3d<float>& hook_position_body,
-                         V3d<float>& forces_body, V3d<float>& moments_body);
+    void calculate_forces(const StateVector<NumberT>& state, const V3d<NumberT>& hook_position_body,
+                         V3d<NumberT>& forces_body, V3d<NumberT>& moments_body);
 
     // --- External throttle API ---
     void  set_throttle(float t);
     float get_throttle() const { return throttle; }
-    float get_cable_angle() const { return cable_angle; }
+    NumberT get_cable_angle() const { return cable_angle; }
     bool  is_engaged() const { return engaged; }
-    float get_tension() const { return tension; }
+    NumberT get_tension() const { return tension; }
 };

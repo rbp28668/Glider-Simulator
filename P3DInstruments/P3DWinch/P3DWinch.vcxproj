@@ -179,6 +179,8 @@
     <ClInclude Include="contact_point.h" />
     <ClInclude Include="control_inputs.h" />
     <ClInclude Include="ground_contact.h" />
+    <ClInclude Include="sim_types.h" />
+    <ClInclude Include="Timer.h" />
     <ClInclude Include="Joystick.h" />
     <ClInclude Include="LaunchController.h" />
     <ClInclude Include="local_math.h" />

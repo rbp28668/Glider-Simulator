@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sim_types.h"
 class Prepar3D;
 class Simulation;
 
@@ -14,7 +15,8 @@ class LaunchController
 	bool inProgress = false;
 	float startTime = 0.0f;
 	float stageStartTime = 0.0f;
-	float startingBank = 0.0f;
+	NumberT startingBank = 0.0f;
+	unsigned long textEventId; // SIMCONNECT_CLIENT_EVENT_ID
 
 	enum class Stage {
 		IDLE,
@@ -33,6 +35,8 @@ class LaunchController
 
 	void levelWings(float dt);
 	void holdWingsLevel();
+
+	void showText(const char* lpszText);
 
 public:
 	LaunchController(Prepar3D* pSim,  Simulation* pSimulation);

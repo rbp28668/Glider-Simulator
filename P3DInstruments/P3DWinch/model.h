@@ -4,6 +4,7 @@
 #include <cmath>
 #include <algorithm>
 
+#include "sim_types.h"
 #include "ask21.h"
 #include "state_vector.h"
 #include "control_inputs.h"
@@ -14,18 +15,18 @@
 class Model {
 
 	// Minimum airspeed for aerodynamic calculations (m/s)
-	float MIN_AIRSPEED = 0.1f;
+	NumberT MIN_AIRSPEED = 0.1f;
 
 	// Maximum total force/moment to prevent numerical overflow
-	float MAX_FORCE = 100000.0f;
-	float MAX_MOMENT = 500000.0f;
+	NumberT MAX_FORCE = 100000.0f;
+	NumberT MAX_MOMENT = 500000.0f;
 
-	inline float clamp(float value, float min_val, float max_val) {
+	inline NumberT clamp(NumberT value, NumberT min_val, NumberT max_val) {
 		// Clamp value to range [min_val, max_val].
 		return std::max(min_val, std::min(max_val, value));
 	}
 
-	inline float safe_value(float value, float dflt = 0.0) {
+	inline NumberT safe_value(NumberT value, NumberT dflt = 0.0) {
 		// Return default if value is NaN or Inf.
 		return isnan(value) || isinf(value) ? dflt : value;
 	}
@@ -34,17 +35,17 @@ class Model {
 public:
 
 	// Note - these are public for testing
-	void wing_forces(const StateVector<float>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<float>& relative_velocity,
-		V3d<float>& forces, V3d<float>& moments);
+	void wing_forces(const StateVector<NumberT>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<NumberT>& relative_velocity,
+		V3d<NumberT>& forces, V3d<NumberT>& moments);
 
-	void tailplane_forces(const StateVector<float>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<float>& relative_velocity,
-		V3d<float>& forces, V3d<float>& moments);
+	void tailplane_forces(const StateVector<NumberT>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<NumberT>& relative_velocity,
+		V3d<NumberT>& forces, V3d<NumberT>& moments);
 
-	void fin_forces(const StateVector<float>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<float>& relative_velocity,
-		V3d<float>& forces, V3d<float>& moments);
+	void fin_forces(const StateVector<NumberT>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<NumberT>& relative_velocity,
+		V3d<NumberT>& forces, V3d<NumberT>& moments);
 
-	void fuselage_forces(const StateVector<float>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<float>& relative_velocity,
-		V3d<float>& forces, V3d<float>& moments);
+	void fuselage_forces(const StateVector<NumberT>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<NumberT>& relative_velocity,
+		V3d<NumberT>& forces, V3d<NumberT>& moments);
 
 
 
@@ -62,7 +63,7 @@ public:
 	// Returns:
 	//     forces_body: [Fx, Fy, Fz] (N)
 	//     moments_body: [L, M, N] (N·m)
-	void calculate_aerodynamics(const StateVector<float>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<float>& relative_velocity,
-		V3d<float>& forces, V3d<float>& moments);
+	void calculate_aerodynamics(const StateVector<NumberT>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<NumberT>& relative_velocity,
+		V3d<NumberT>& forces, V3d<NumberT>& moments);
 
 };

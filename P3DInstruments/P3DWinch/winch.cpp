@@ -132,7 +132,6 @@ Winch::Winch(const V3d<float>& winch_position, float weak_link, float cable_leng
     , engaged(false)
     , cable_out(0.0f)
     , tension(0.0f)
-    , initial_cable_out(-1.0f)
     , throttle(0.0f)
     , throttle_override(false)
     , cable_angle(0.0f)
@@ -156,7 +155,6 @@ Winch::Winch(Winch&& other) noexcept
     , cable_out(other.cable_out)
     , tension(other.tension)
     , release_reason(std::move(other.release_reason))
-    , initial_cable_out(other.initial_cable_out)
     , throttle(other.throttle)
     , throttle_override(other.throttle_override)
     , cable_angle(other.cable_angle)
@@ -175,7 +173,6 @@ Winch& Winch::operator=(Winch&& other) noexcept {
         cable_out       = other.cable_out;
         tension         = other.tension;
         release_reason  = std::move(other.release_reason);
-        initial_cable_out = other.initial_cable_out;
         throttle        = other.throttle;
         throttle_override = other.throttle_override;
         cable_angle     = other.cable_angle;
@@ -193,7 +190,6 @@ void Winch::engage(float initial_cable_out_param) {
     release_reason = "";
     if (initial_cable_out_param > 0)
         cable_out = initial_cable_out_param;
-    initial_cable_out = -1.0f;  // will be set on first calculate_forces call
 }
 
 void Winch::release(const std::string& reason) {
@@ -303,7 +299,7 @@ float Winch::gear_ratio(int gear) const {
 //  Finds engine RPM where T_engine(RPM, throttle) = T_pump(RPM, SR)
 // ---------------------------------------------------------------------------
 
-Winch::SolveResult Winch::solve_gear(int gear, float cable_speed, float thr, float cable_out_m) {
+Winch::SolveResult Winch::solve_gear(int gear, NumberT cable_speed, float thr, NumberT cable_out_m) {
     SolveResult result = { false, 0.0f, 0.0f, gear };
 
     float r_eff = drum_effective_radius(cable_out_m);
@@ -364,7 +360,7 @@ Winch::SolveResult Winch::solve_gear(int gear, float cable_speed, float thr, flo
 //  Auto gear selection - prefer highest gear with RPM >= 1400
 // ---------------------------------------------------------------------------
 
-Winch::SolveResult Winch::solve(float cable_speed, float thr, float cable_out_m) {
+Winch::SolveResult Winch::solve(NumberT cable_speed, float thr, NumberT cable_out_m) {
     SolveResult best = { false, 0.0f, 0.0f, 0 };
 
     if (cable_speed <= 0.0f)
@@ -393,7 +389,7 @@ Winch::SolveResult Winch::solve(float cable_speed, float thr, float cable_out_m)
 //  Hook velocity in body frame: V_hook = V_cg + omega x r_hook
 // ---------------------------------------------------------------------------
 
-V3d<float> Winch::get_hook_velocity(const StateVector<float>& state, const V3d<float>& hook_body) const {
+V3d<NumberT> Winch::get_hook_velocity(const StateVector<NumberT>& state, const V3d<NumberT>& hook_body) const {
     auto u = state.velocity()[0];
     auto v = state.velocity()[1];
     auto w = state.velocity()[2];
@@ -401,13 +397,13 @@ V3d<float> Winch::get_hook_velocity(const StateVector<float>& state, const V3d<f
     auto q = state.angular_velocity()[1];
     auto r = state.angular_velocity()[2];
 
-    V3d<float> omega_cross_r(
+    V3d<NumberT> omega_cross_r(
         q * hook_body[2] - r * hook_body[1],
         r * hook_body[0] - p * hook_body[2],
         p * hook_body[1] - q * hook_body[0]
     );
 
-    return V3d<float>(
+    return V3d<NumberT>(
         u + omega_cross_r[0],
         v + omega_cross_r[1],
         w + omega_cross_r[2]
@@ -419,8 +415,8 @@ V3d<float> Winch::get_hook_velocity(const StateVector<float>& state, const V3d<f
 //  Calculate winch cable forces and moments
 // ---------------------------------------------------------------------------
 
-void Winch::calculate_forces(const StateVector<float>& state, const V3d<float>& hook_position_body,
-                             V3d<float>& forces_body, V3d<float>& moments_body) {
+void Winch::calculate_forces(const StateVector<NumberT>& state, const V3d<NumberT>& hook_position_body,
+                             V3d<NumberT>& forces_body, V3d<NumberT>& moments_body) {
 
     // No force if not engaged
     if (!engaged) return;
@@ -430,21 +426,21 @@ void Winch::calculate_forces(const StateVector<float>& state, const V3d<float>& 
     auto hook_earth_offset = orientation.rotate_vector(hook_position_body);
     auto aircraft_pos = state.position();
 
-    auto hook_earth = V3d<float>(
+    auto hook_earth = V3d<NumberT>(
         aircraft_pos[0] + hook_earth_offset[0],
         aircraft_pos[1] + hook_earth_offset[1],
         aircraft_pos[2] + hook_earth_offset[2]
     );
 
     // Vector from hook to winch (cable direction)
-    auto cable_vec = V3d<float>(
+    auto cable_vec = V3d<NumberT>(
         winch_position[0] - hook_earth[0],
         winch_position[1] - hook_earth[1],
         winch_position[2] - hook_earth[2]
     );
 
     // Cable length (distance from hook to winch)
-    float cable_distance = sqrtf(cable_vec[0] * cable_vec[0]
+    auto cable_distance = sqrt(cable_vec[0] * cable_vec[0]
         + cable_vec[1] * cable_vec[1]
         + cable_vec[2] * cable_vec[2]);
 
@@ -454,7 +450,7 @@ void Winch::calculate_forces(const StateVector<float>& state, const V3d<float>& 
     }
 
     // Unit vector along cable (from hook towards winch)
-    auto cable_unit = V3d<float>(
+    auto cable_unit = V3d<NumberT>(
         cable_vec[0] / cable_distance,
         cable_vec[1] / cable_distance,
         cable_vec[2] / cable_distance
@@ -472,10 +468,6 @@ void Winch::calculate_forces(const StateVector<float>& state, const V3d<float>& 
     // Update cable out length
     cable_out = cable_distance;
 
-    // Record initial cable distance for throttle ramp
-    if (initial_cable_out < 0.0f)
-        initial_cable_out = cable_out;
-
     // Check if cable has run out
     if (cable_out > cable_length) {
         release("cable_run_out");
@@ -484,9 +476,9 @@ void Winch::calculate_forces(const StateVector<float>& state, const V3d<float>& 
 
     // Calculate cable angle below horizontal (NED: Z positive = down)
     // cable_vec.z > 0 when winch is below hook (glider above ground)
-    float horiz_dist = sqrtf(cable_vec[0] * cable_vec[0] + cable_vec[1] * cable_vec[1]);
+    NumberT horiz_dist = sqrt(cable_vec[0] * cable_vec[0] + cable_vec[1] * cable_vec[1]);
     if (horiz_dist > 0.1f) {
-        cable_angle = atan2f(cable_vec[2], horiz_dist);
+        cable_angle = atan2(cable_vec[2], horiz_dist);
     }
 
     // Get hook velocity in earth frame
@@ -494,7 +486,7 @@ void Winch::calculate_forces(const StateVector<float>& state, const V3d<float>& 
     auto hook_vel_earth = orientation.rotate_vector(hook_vel_body);
 
     // Velocity component along cable (positive = towards winch)
-    float v_cable = (
+    auto v_cable = (
         hook_vel_earth[0] * cable_unit[0] +
         hook_vel_earth[1] * cable_unit[1] +
         hook_vel_earth[2] * cable_unit[2]
@@ -506,7 +498,7 @@ void Winch::calculate_forces(const StateVector<float>& state, const V3d<float>& 
         tension = 100.0f;
     } else {
         // Use drivetrain solver (minimum 0.5 m/s for stability near stall)
-        float solver_speed = std::max(0.5f, v_cable);
+        NumberT solver_speed = std::max(NumberT(0.5f), v_cable);
         auto result = solve(solver_speed, throttle, cable_out);
         tension = result.valid ? result.cable_tension_n : 100.0f;
     }
@@ -518,7 +510,7 @@ void Winch::calculate_forces(const StateVector<float>& state, const V3d<float>& 
     }
 
     // Apply force along cable direction (in earth frame, towards winch)
-    auto force_earth = V3d<float>(
+    auto force_earth = V3d<NumberT>(
         tension * cable_unit[0],
         tension * cable_unit[1],
         tension * cable_unit[2]
@@ -529,7 +521,7 @@ void Winch::calculate_forces(const StateVector<float>& state, const V3d<float>& 
 
     // Calculate moment about CG
     auto arm = hook_position_body;
-    moments_body = V3d<float>(
+    moments_body = V3d<NumberT>(
         arm[1] * forces_body[2] - arm[2] * forces_body[1],
         arm[2] * forces_body[0] - arm[0] * forces_body[2],
         arm[0] * forces_body[1] - arm[1] * forces_body[0]

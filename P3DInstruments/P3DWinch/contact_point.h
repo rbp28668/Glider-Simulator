@@ -1,4 +1,5 @@
 #pragma once
+#include "sim_types.h"
 #include "v3d.h"
 
 //    Class representing a contact point in 3D space for use in ground detection.
@@ -50,9 +51,9 @@ class ContactPoint
     {
     }
 
-    V3d<float> position_body() const
+    V3d<NumberT> position_body() const
     {
         // Return position as tuple for vector operations.
-        return V3d<float>(x, y, z);
+        return V3d<NumberT>(x, y, z);
     }
 };

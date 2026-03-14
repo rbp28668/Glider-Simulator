@@ -1,6 +1,7 @@
 #pragma once
 
 #include "v3d.h"
+#include "sim_types.h"
 #include "local_math.h"
 
 //  Represents the environmental conditions of the simulation world.
@@ -10,11 +11,11 @@ class World {
     const float air_density = 1.225f;  // kg/m³ at sea level
      
     // Wind vector
-    float wx = 0.0f;
-    float wy = 0.0f;
-    float wz = 0.0f;
+    NumberT wx = 0.0f;
+    NumberT wy = 0.0f;
+    NumberT wz = 0.0f;
 
-    float ground_height = 0.0f;
+    NumberT ground_height = 0.0f;
 
 public:
 
@@ -30,15 +31,15 @@ public:
         return *this;
     }
 
-    inline float G() const { return gravity; }
+    inline NumberT G() const { return gravity; }
 
-    inline float AirDensity() const { return air_density; }
+    inline NumberT AirDensity() const { return air_density; }
 
     // Set the wind conditions in the world.
     // Args:
     //     speed: Wind speed in m/s
     //     direction: Wind direction in degrees from north (meteorological: direction wind blows FROM)
-    void set_wind(float speed, float direction, float vertical = 0.0f) {
+    void set_wind(NumberT speed, NumberT direction, NumberT vertical = 0.0f) {
         auto dir_rad = radians(direction);
         wx = -speed * cos(dir_rad);  // wind FROM north → blows south (negative North)
         wy = -speed * sin(dir_rad);  // wind FROM east → blows west (negative East)
@@ -51,22 +52,22 @@ public:
     //     t: Current time in seconds.
     // Returns:
     //     A tuple (wx, wy, wz) representing the wind vector components in m/s.
-    V3d<float> get_wind_vector(const V3d<float>& position, float t) const {
-       return V3d<float>(wx, wy, wz); 
+    V3d<NumberT> get_wind_vector(const V3d<NumberT>& position, NumberT t) const {
+       return V3d<NumberT>(wx, wy, wz); 
     }
 
-    void set_wind_vector(float wx, float wy, float wz) {
+    void set_wind_vector(NumberT wx, NumberT wy, NumberT wz) {
         this->wx = wx;
         this->wy = wy;
         this->wz = wz;
     }
 
     // Get the ground height at the current position
-    float get_ground_height() const {
+    NumberT get_ground_height() const {
         return ground_height;
     }
 
-    void set_ground_height(float height) {
+    void set_ground_height(NumberT height) {
         this->ground_height = height;
     }
 };

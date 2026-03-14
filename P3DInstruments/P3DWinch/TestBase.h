@@ -3,6 +3,7 @@
 #include<iostream>
 #include<assert.h>
 
+#include "sim_types.h"
 #include "v3d.h"
 #include  "state_vector.h"
 #include  "model.h"
@@ -13,26 +14,26 @@ class TestBase
 {
 
 protected:
-	StateVector<float> state;
+	StateVector<NumberT> state;
 	Model model;
 	ASK21 aircraft;
 	World world;
 	ControlInputs controls;
 
 
-	void assertLess(float first, float second, const char* msg) {
+	void assertLess(NumberT first, NumberT second, const char* msg) {
 		if (!(first < second)) {
 			std::cout << "FAIL: " << msg << std::endl;
 		}
 	}
 
-	void assertGreater(float first, float second, const char* msg) {
+	void assertGreater(NumberT first, NumberT second, const char* msg) {
 		if (!(first > second)) {
 			std::cout << "FAIL: " << msg << std::endl;
 		}
 	}
 
-	void assertEqual(float first, float second, const char* msg) {
+	void assertEqual(NumberT first, NumberT second, const char* msg) {
 		if (!(first == second)) {
 			std::cout << "FAIL: " << msg << std::endl;
 		}

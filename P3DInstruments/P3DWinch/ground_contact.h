@@ -24,13 +24,13 @@ class ContactResult
 
 public:
 	bool in_contact = false;
-	float penetration = 0.0;  // m (positive = into ground)
-	float normal_force = 0.0; // N (positive = pushing up)
-	float friction_force_long = 0.0;
-	float friction_force_lat = 0.0; // (longitudinal, lateral) in N
-	V3d<float> force_body;          // Force in body frame
-	V3d<float> moment_body;         // Moment about CG in body frame
-	V3d<float> position_earth;      // Contact position in earth frame
+	NumberT penetration = 0.0;  // m (positive = into ground)
+	NumberT normal_force = 0.0; // N (positive = pushing up)
+	NumberT friction_force_long = 0.0;
+	NumberT friction_force_lat = 0.0; // (longitudinal, lateral) in N
+	V3d<NumberT> force_body;          // Force in body frame
+	V3d<NumberT> moment_body;         // Moment about CG in body frame
+	V3d<NumberT> position_earth;      // Contact position in earth frame
 };
 
 // Ground contact physics calculator.
@@ -39,12 +39,12 @@ class GroundContact
 {
 
 	// Velocity threshold for static/dynamic friction transition
-	float FRICTION_VELOCITY_THRESHOLD = 0.1f; // m/s
+	NumberT FRICTION_VELOCITY_THRESHOLD = 0.1f; // m/s
 
-	float ROLLING_RESISTANCE = 0.03f; // Coefficient of rolling resistance for wheels
+	NumberT ROLLING_RESISTANCE = 0.03f; // Coefficient of rolling resistance for wheels
 
 	// Maximum force per contact point (numerical stability)
-	float MAX_CONTACT_FORCE = 100000.0f; // 
+	NumberT MAX_CONTACT_FORCE = 100000.0f; // 
 
 	bool on_ground = false;
 
@@ -53,18 +53,18 @@ public:
 	GroundContact();
 
 	// Calculate total ground contact forces and moments.
-	void calculate_ground_forces(const StateVector<float>& state, std::vector<const ContactPoint*>& contact_points, const World& world, float cg_offset, float brake,
-		V3d<float>& forces_body, V3d<float>& moments_body,
+	void calculate_ground_forces(const StateVector<NumberT>& state, std::vector<const ContactPoint*>& contact_points, const World& world, NumberT cg_offset, float brake,
+		V3d<NumberT>& forces_body, V3d<NumberT>& moments_body,
 		std::vector<ContactResult>& results);
 
 	// Calculate forces for a single contact point.
-	ContactResult _calculate_single_contact(const StateVector<float>& state, const ContactPoint& cp, const World& world, float cg_offset, float brake);
+	ContactResult _calculate_single_contact(const StateVector<NumberT>& state, const ContactPoint& cp, const World& world, NumberT cg_offset, float brake);
 
 	// Calculate velocity of contact point in body frame.
-	V3d<float> _get_contact_velocity(const StateVector<float>& state, const ContactPoint& cp, float cg_offset);
+	V3d<NumberT> _get_contact_velocity(const StateVector<NumberT>& state, const ContactPoint& cp, NumberT cg_offset);
 
 	// Calculate friction forces using Coulomb model with velocity blending.
-	void _calculate_friction(V3d<float> vel_earth, float normal_force, const ContactPoint& cp, const V3d<float>& heading_earth, float brake, float& F_x, float& F_y);
+	void _calculate_friction(V3d<NumberT> vel_earth, NumberT normal_force, const ContactPoint& cp, const V3d<NumberT>& heading_earth, float brake, NumberT& F_x, NumberT& F_y);
 
 	bool is_on_ground() const;
 

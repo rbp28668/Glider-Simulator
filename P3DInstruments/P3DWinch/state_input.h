@@ -58,7 +58,7 @@ class StateInput :public SimObjectData
 	P3DEvent events;
 	LaunchController launcher;
 
-	float lastSimTime = 0.0f;
+	NumberT lastSimTime = 0.0f;
 	bool initialised = false;
 	bool engaged = false;  // set true if should be controlling the sim.
 	bool winch_launch_pending = false;  // deferred until state is initialised
@@ -66,10 +66,10 @@ class StateInput :public SimObjectData
 	bool spinKit = false;
 	bool autoDisengage = true;
 
-	float start_lat;
-	float start_lon;
-	float metresPerRadianLat;
-	float metresPerRadianLon;
+	NumberT start_lat;
+	NumberT start_lon;
+	NumberT metresPerRadianLat;
+	NumberT metresPerRadianLon;
 
 	void engage();
 	void disengage();

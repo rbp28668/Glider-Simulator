@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <iostream>
+#include "sim_types.h"
 #include "Spline.h"
 
 // Provides Coefficients of lift, drag and moment for a given alpha (AoA)
@@ -18,26 +19,26 @@
 class Aerofoil {
 
     // Lookup table
-    float* alphas = nullptr; // in radians
-    float* cls = nullptr;
-    float* cds = nullptr;
-    float* cms = nullptr;
+    NumberT* alphas = nullptr; // in radians
+    NumberT* cls = nullptr;
+    NumberT* cds = nullptr;
+    NumberT* cms = nullptr;
 
     // Interpolation
-    Spline<float>* _cl_spline = nullptr;
-    Spline<float>* _cd_spline = nullptr;
-    Spline<float>* _cm_spline = nullptr;
+    Spline<NumberT>* _cl_spline = nullptr;
+    Spline<NumberT>* _cd_spline = nullptr;
+    Spline<NumberT>* _cm_spline = nullptr;
 
-    const float two_pi = float(3.14159265358979323846 * 2); //double pi = 3.14159265358979323846;
+    const NumberT two_pi = NumberT(3.14159265358979323846 * 2); //double pi = 3.14159265358979323846;
 
 public:
 
     // Tuple to hold the results at a given alpha
     struct Coefficients {
-        float Cl;
-        float Cd;
-        float Cm;
-        Coefficients(float cl, float cd, float cm) {
+        NumberT Cl;
+        NumberT Cd;
+        NumberT Cm;
+        Coefficients(NumberT cl, NumberT cd, NumberT cm) {
             Cl = cl;
             Cd = cd;
             Cm = cm;
@@ -50,26 +51,26 @@ protected:
     Aerofoil(float data[][4], int nlines) {
         assert(nlines > 0);
 
-        alphas = new float[nlines];
-        cls = new float[nlines];
-        cds = new float[nlines];
-        cms = new float[nlines];
+        alphas = new NumberT[nlines];
+        cls = new NumberT[nlines];
+        cds = new NumberT[nlines];
+        cms = new NumberT[nlines];
 
         //std::cout << "START AEROFOIL" << std::endl;
         for (int i = 0; i < nlines; ++i) {
             float* line = data[i];
             //std::cout << line[0] << ',' << line[1] << ',' << line[2] << ',' << line[3] << std::endl;
 
-            alphas[i] = line[0] * two_pi / 360; // store as radians
+            alphas[i] = NumberT(line[0] * two_pi / 360); // store as radians
             cls[i] = line[1];
             cds[i] = line[2];
             cms[i] = line[3];
         }
         //std::cout << "END AEROFOIL" << std::endl;
 
-        _cl_spline = new Spline<float>(alphas, cls, nlines);
-        _cd_spline = new Spline<float>(alphas, cds, nlines);
-        _cm_spline = new Spline<float>(alphas, cms, nlines);
+        _cl_spline = new Spline<NumberT>(alphas, cls, nlines);
+        _cd_spline = new Spline<NumberT>(alphas, cds, nlines);
+        _cm_spline = new Spline<NumberT>(alphas, cms, nlines);
     }
 
 public:
@@ -95,7 +96,7 @@ public:
         cms = nullptr;
     }
 
-    Coefficients coefficients_at(float alpha_rad) const {
+    Coefficients coefficients_at(NumberT alpha_rad) const {
         //Return (CL, CD, CM) for a given alpha in radians.
         //Alpha is wrapped into [0, 2pi) radians before interpolation.
         assert(!isnan(alpha_rad));

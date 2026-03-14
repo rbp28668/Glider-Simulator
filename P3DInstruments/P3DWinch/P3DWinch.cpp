@@ -29,12 +29,17 @@ int main(int argc, char* argv[])
     std::cout << "Hello Winch!\n";
 
     bool nodisengage = false;
-    for (int i = 0; i < argc; ++i) {
+    for (int i = 1; i < argc; ++i) {
+        //std::cout << argv[i] << std::endl;
         if (argv[i] == "-nodisengage") {
             nodisengage = true;
         }
     }
     
+    // Full path  to program e.g. D:\Projects\Glider-Simulator\P3DInstruments\x64\Debug\P3DWinch.exe
+    char* pszCommandPath = argv[0];
+
+
     // COM needed for sound playing
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 

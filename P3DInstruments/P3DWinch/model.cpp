@@ -18,12 +18,12 @@
 // Returns:
 //     forces_body: [Fx, Fy, Fz] (N)
 //     moments_body: [L, M, N] (N·m)
-void Model::calculate_aerodynamics(const StateVector<float>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<float>& relative_velocity,
-	V3d<float>& forces, V3d<float>& moments) {
+void Model::calculate_aerodynamics(const StateVector<NumberT>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<NumberT>& relative_velocity,
+	V3d<NumberT>& forces, V3d<NumberT>& moments) {
 
 
-	V3d<float> forces_body;
-	V3d<float> moments_body;
+	V3d<NumberT> forces_body;
+	V3d<NumberT> moments_body;
 
 	//Wing
 	wing_forces(state, aircraft, control_inputs, world, relative_velocity, forces_body, moments_body);
@@ -51,12 +51,12 @@ void Model::calculate_aerodynamics(const StateVector<float>& state, const ASK21&
 	auto yaw_rate = state.angular_velocity()[2];
 
 	if (std::abs(roll_rate) > HIGH_RATE_THRESHOLD) {
-		float excess_rate = roll_rate - std::copysign(HIGH_RATE_THRESHOLD, roll_rate);
+		NumberT excess_rate = roll_rate - std::copysign(HIGH_RATE_THRESHOLD, roll_rate);
 		moments_body[0] -= HIGH_RATE_DAMP * excess_rate;
 	}
 
 	if (std::abs(yaw_rate) > HIGH_RATE_THRESHOLD) {
-		float excess_rate = yaw_rate - std::copysign(HIGH_RATE_THRESHOLD, yaw_rate);
+		NumberT excess_rate = yaw_rate - std::copysign(HIGH_RATE_THRESHOLD, yaw_rate);
 		moments_body[2] -= HIGH_RATE_DAMP * excess_rate;
 	}
 
@@ -71,8 +71,8 @@ void Model::calculate_aerodynamics(const StateVector<float>& state, const ASK21&
 	return;
 }
 
-void Model::wing_forces(const StateVector<float>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<float>& relative_velocity,
-	V3d<float>& forces, V3d<float>& moments) {
+void Model::wing_forces(const StateVector<NumberT>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<NumberT>& relative_velocity,
+	V3d<NumberT>& forces, V3d<NumberT>& moments) {
 	//Wings
 	for (auto iter = aircraft.wing.begin(); iter != aircraft.wing.end(); ++iter) {
 		Panel* panel = *iter;
@@ -91,15 +91,15 @@ void Model::wing_forces(const StateVector<float>& state, const ASK21& aircraft, 
 //     world: The simulation world
 // Returns:
 //     nothing - updates forces and moments passed by reference
-void Model::tailplane_forces(const StateVector<float>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<float>& relative_velocity,
-	V3d<float>& forces, V3d<float>& moments) {
+void Model::tailplane_forces(const StateVector<NumberT>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<NumberT>& relative_velocity,
+	V3d<NumberT>& forces, V3d<NumberT>& moments) {
 
 	//Allow for pitch rate to change airflow at tail.  Pitching up then tail going down (+ve direction)
 	auto dist = aircraft.tailplane_quarter_chord - aircraft.cg;  // distance of tailplane A/C from c of g  (-ve )
 	auto pitch_rate = state.angular_velocity()[1];               // +ve pitch rate -> nose up so tail down (+ve z dirn)
 	auto vz_pitch = pitch_rate * -dist;
 
-	auto tailplane_velocity = V3d<float>(
+	auto tailplane_velocity = V3d<NumberT>(
 		relative_velocity[0],  // u - velocity forward
 		relative_velocity[1],  // v - velocity to right
 		relative_velocity[2] + vz_pitch); // add in extra vertical velocity do to pitch rate
@@ -147,8 +147,8 @@ void Model::tailplane_forces(const StateVector<float>& state, const ASK21& aircr
 	moments[1] += pitchMoment;  // pitch moment due to lift at tailplane quarter chord (- sign as dist is -ve as behind c.g.)
 }
 
-void Model::fin_forces(const StateVector<float>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<float>& relative_velocity,
-	V3d<float>& forces, V3d<float>& moments) {
+void Model::fin_forces(const StateVector<NumberT>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<NumberT>& relative_velocity,
+	V3d<NumberT>& forces, V3d<NumberT>& moments) {
 	// Distance from CG to fin (positive = aft of CG)
 	auto fin_arm = aircraft.cg - aircraft.fin_quarter_chord;  // positive value (~4.78m)
 	assert(fin_arm > 0);
@@ -158,7 +158,7 @@ void Model::fin_forces(const StateVector<float>& state, const ASK21& aircraft, c
 	// This reduces the v-component of airflow at fin, creating restoring moment
 	auto yaw_rate = state.angular_velocity()[2];
 	auto v_y_induced = yaw_rate * fin_arm;
-	auto fin_airflow = V3d<float>(relative_velocity[0],
+	auto fin_airflow = V3d<NumberT>(relative_velocity[0],
 		relative_velocity[1] - v_y_induced,
 		relative_velocity[2]);
 
@@ -204,8 +204,8 @@ void Model::fin_forces(const StateVector<float>& state, const ASK21& aircraft, c
 // Calculate forces and moments for the fuselage using a slender - body
 // aerodynamic approximation.
 
-void Model::fuselage_forces(const StateVector<float>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<float>& relative_velocity,
-	V3d<float>& forces, V3d<float>& moments) {
+void Model::fuselage_forces(const StateVector<NumberT>& state, const ASK21& aircraft, const ControlInputs& control_inputs, const World& world, const V3d<NumberT>& relative_velocity,
+	V3d<NumberT>& forces, V3d<NumberT>& moments) {
 
 
 	auto u = relative_velocity[0];

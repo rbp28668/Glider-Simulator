@@ -10,8 +10,8 @@ class TestWingEffect :
 		state.set_velocity(25.0, 0.0, 0.0);  // 25 m / s level flight
 		state.set_angular_velocity(0.0, 0.0, 0.0); // Zero yaw rate
 
-		V3d<float> forces;
-		V3d<float> moments;
+		V3d<NumberT> forces;
+		V3d<NumberT> moments;
 		model.wing_forces(state, aircraft, controls, world, state.velocity(), forces, moments);
 		std::cout << "S&L, Wing Force: " << forces << ", Wing moments : " << moments << std::endl;
 
@@ -30,8 +30,8 @@ class TestWingEffect :
 		state.set_velocity(25.0, 1.0, 0.0);  // 25 m / s level flight
 		state.set_angular_velocity(0.0, 0.0, 0.0); // Zero yaw rate
 
-		V3d<float> forces;
-		V3d<float> moments;
+		V3d<NumberT> forces;
+		V3d<NumberT> moments;
 		model.wing_forces(state, aircraft, controls, world, state.velocity(), forces, moments);
 		std::cout << "Yawed left, Wing Force: " << forces << ", Wing moments : " << moments << std::endl;
 
@@ -49,8 +49,8 @@ class TestWingEffect :
 		state.set_velocity(25.0, -1.0, 0.0);  // 25 m / s level flight
 		state.set_angular_velocity(0.0, 0.0, 0.0); // Zero yaw rate
 
-		V3d<float> forces;
-		V3d<float> moments;
+		V3d<NumberT> forces;
+		V3d<NumberT> moments;
 		model.wing_forces(state, aircraft, controls, world, state.velocity(), forces, moments);
 		std::cout << "Yawed right, Wing Force: " << forces << ", Wing moments : " << moments << std::endl;
 
@@ -69,8 +69,8 @@ class TestWingEffect :
 		state.set_velocity(25.0, 0.0, 0.0);  // 25 m / s level flight
 		state.set_angular_velocity(0.0, 0.0, 0.1f);  // Yaw rate to right
 
-		V3d<float> forces;
-		V3d<float> moments;
+		V3d<NumberT> forces;
+		V3d<NumberT> moments;
 		model.wing_forces(state, aircraft, controls, world, state.velocity(), forces, moments);
 		std::cout << "Yawing right, Wing Force: " << forces << ", Wing moments : " << moments << std::endl;
 
@@ -87,8 +87,8 @@ class TestWingEffect :
 		state.set_velocity(25.0f, 0.0, 0.0);  // 25 m / s level flight
 		state.set_angular_velocity(0.0, 0.0, -0.1f);  // Yaw rate to left
 
-		V3d<float> forces;
-		V3d<float> moments;
+		V3d<NumberT> forces;
+		V3d<NumberT> moments;
 		model.wing_forces(state, aircraft, controls, world, state.velocity(), forces, moments);
 		std::cout << "Yawing left, Wing Force: " << forces << ", Wing moments : " << moments << std::endl;
 
@@ -107,9 +107,9 @@ class TestWingEffect :
 
 		state.set_angular_velocity(0.0, 0.0, 0.0); // Zero yaw rate
 		for (int vy = 1; vy < 25; ++vy) {
-			state.set_velocity(25.0, (float)vy, 0.0);  // 25 m / s level flight, increasing vy
-			V3d<float> forces;
-			V3d<float> moments;
+			state.set_velocity(25.0, (NumberT)vy, 0.0);  // 25 m / s level flight, increasing vy
+			V3d<NumberT> forces;
+			V3d<NumberT> moments;
 			model.wing_forces(state, aircraft, controls, world, state.velocity(), forces, moments);
 			//print(f"Yawed left Vy:{vy} Wing Force: {forces}, Wing moments: {moments}")
 
@@ -127,10 +127,10 @@ class TestWingEffect :
 		state.set_angular_velocity(0.0, 0.0, 0.0); // Zero yaw rate
 
 		for (int vy = 1; vy < 25; ++vy) {
-			state.set_velocity(25.0f, (float)-vy, 0.0);  // 25 m / s level flight, increasing vy
+			state.set_velocity(25.0f, (NumberT)-vy, 0.0);  // 25 m / s level flight, increasing vy
 
-			V3d<float> forces;
-			V3d<float> moments;
+			V3d<NumberT> forces;
+			V3d<NumberT> moments;
 			model.wing_forces(state, aircraft, controls, world, state.velocity(), forces, moments);
 			//print(f"Yawed right, Vy={-vy}, Wing Force: {forces}, Wing moments: {moments}")
 
@@ -148,8 +148,8 @@ class TestWingEffect :
 		state.set_velocity(25.0f, 0.0, 0.0);  // 25 m / s level flight
 		state.set_angular_velocity(0.1f, 0.0, 0.0); //  + ve roll rate
 
-		V3d<float> forces;
-		V3d<float> moments;
+		V3d<NumberT> forces;
+		V3d<NumberT> moments;
 		model.wing_forces(state, aircraft, controls, world, state.velocity(), forces, moments);
 		std::cout << "Rolling right, Wing Force: " << forces << ", Wing moments : " << moments << std::endl;
 
@@ -166,8 +166,8 @@ class TestWingEffect :
 		state.set_velocity(25.0f, 0.0, 0.0);  // 25 m / s level flight
 		state.set_angular_velocity(-0.1f, 0.0, 0.0); //  - ve roll rate
 
-		V3d<float> forces;
-		V3d<float> moments;
+		V3d<NumberT> forces;
+		V3d<NumberT> moments;
 		model.wing_forces(state, aircraft, controls, world, state.velocity(), forces, moments);
 		std::cout << "Rolling left, Wing Force: " << forces << ", Wing moments : " << moments << std::endl;
 

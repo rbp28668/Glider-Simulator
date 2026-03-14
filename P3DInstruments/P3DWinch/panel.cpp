@@ -22,8 +22,8 @@ Panel::Panel(float area, float mid_span, float quater_chord, float mean_chord, f
 //         sign: +1 for right wing, -1 for left wing
 //         forces - updated by adding in forces_body: [Fx, Fy, Fz] (N)
 //         moments - updated by adding in moments_body: [L, M, N] (N.m)
-void Panel::process(const StateVector<float>& state, const V3d<float>& relative_velocity, AircraftParameters& aircraft,
-	World& world, ControlInputs& controls, float sign, V3d<float>& forces, V3d<float>& moments)
+void Panel::process(const StateVector<NumberT>& state, const V3d<NumberT>& relative_velocity, AircraftParameters& aircraft,
+	World& world, ControlInputs& controls, NumberT sign, V3d<NumberT>& forces, V3d<NumberT>& moments)
 {
 	// Get local airflow at panel due to angular velocity
 	auto local_velocity = get_local_velocity(state, relative_velocity, sign);
@@ -31,7 +31,7 @@ void Panel::process(const StateVector<float>& state, const V3d<float>& relative_
 	auto local_tas = local_velocity.TotalAirspeed();
 
 	// Protection against very low airspeed (stall/spin conditions)
-	float airspeed_factor = 1.0f;
+	NumberT airspeed_factor = 1.0f;
 	if (local_tas < MIN_AIRSPEED)
 	{
 		// Scale forces smoothly to zero as airspeed drops
@@ -54,7 +54,7 @@ void Panel::process(const StateVector<float>& state, const V3d<float>& relative_
 	// The sign parameter differentiates right (+1) from left (-1) wing.
 	// Simple linear model: delta_aoa = dihedral * beta * sign
 	// Limited to prevent runaway at extreme sideslip
-	const float MAX_DIHEDRAL_BETA = 0.35f;  // ~20 degrees
+	const NumberT MAX_DIHEDRAL_BETA = 0.35f;  // ~20 degrees
 	auto beta_limited = clamp(beta, -MAX_DIHEDRAL_BETA, MAX_DIHEDRAL_BETA);
 	aoa += aircraft.DihedralAngle() * beta_limited * sign;
 
@@ -68,7 +68,7 @@ void Panel::process(const StateVector<float>& state, const V3d<float>& relative_
 	auto Cd = coeffs.Cd;
 	auto Cm = coeffs.Cm;
 	// Lift dependent drag
-	auto Cdi = (Cl * Cl) / (float(PI) * aircraft.AR() * aircraft.Oswald());
+	auto Cdi = (Cl * Cl) / (NumberT(PI) * aircraft.AR() * aircraft.Oswald());
 	Cd += Cdi;
 
 	auto q = 0.5f * world.AirDensity() * local_tas * local_tas; // dynamic pressure
@@ -95,13 +95,13 @@ void Panel::process(const StateVector<float>& state, const V3d<float>& relative_
 	Fz = clamp(safe_value(Fz), -MAX_PANEL_FORCE, MAX_PANEL_FORCE);
 	M = clamp(safe_value(M), -MAX_PANEL_FORCE * 10, MAX_PANEL_FORCE * 10);
 
-	auto forces_body = V3d<float>(Fx, 0.0, Fz); // drag in body X, side force 0, lift in body Z
+	auto forces_body = V3d<NumberT>(Fx, 0.0, Fz); // drag in body X, side force 0, lift in body Z
 
 	auto dist = quater_chord - aircraft.CG(); // calculate moments from c.g. not datum
 
 	// Moments (about c.g.)
 	// Roll moment due to lift at panel mid-span
-	auto moments_body = V3d<float>(
+	auto moments_body = V3d<NumberT>(
 		Fz * mid_span * sign, // roll moment
 		M - Fz * dist,        // pitch moment about c.g.
 		-Fx * mid_span * sign // yaw moment due to drag
@@ -114,7 +114,7 @@ void Panel::process(const StateVector<float>& state, const V3d<float>& relative_
 // --- Hook methods for subclasses to override ---
 
 // Hook: modify angle of attack based on control inputs. Override in subclasses.
-float Panel::modify_aoa(float aoa, ControlInputs& controls, float sign)
+NumberT Panel::modify_aoa(NumberT aoa, ControlInputs& controls, NumberT sign)
 {
 	return aoa;
 }
@@ -125,7 +125,7 @@ void Panel::modify_coefficients(Aerofoil::Coefficients& coeffs, ControlInputs& c
 }
 
 // Hook: add additional drag based on control inputs. Override in subclasses.
-float Panel::additional_drag(float q, ControlInputs& controls)
+NumberT Panel::additional_drag(NumberT q, ControlInputs& controls)
 {
 	return 0.0;
 }
@@ -142,7 +142,7 @@ float Panel::additional_drag(float q, ControlInputs& controls)
 //     sign: +1 for right wing, -1 for left wing
 // Returns:
 //     local_airflow: Local airflow vector [u, v, w] at panel in body frame.
-V3d<float> Panel::get_local_velocity(const StateVector<float>& state, const V3d<float>& relative_velocity, float sign) const
+V3d<NumberT> Panel::get_local_velocity(const StateVector<NumberT>& state, const V3d<NumberT>& relative_velocity, NumberT sign) const
 {
 	auto p = state.angular_velocity()[0];
 	auto r = state.angular_velocity()[2];
@@ -152,7 +152,7 @@ V3d<float> Panel::get_local_velocity(const StateVector<float>& state, const V3d<
 	// Change in x velocity. If yawing right, right panel retreating and X decreasing
 	auto dx = -r * mid_span * sign;
 
-	auto local_airflow = V3d<float>(relative_velocity[0] + dx, relative_velocity[1], relative_velocity[2] + dz);
+	auto local_airflow = V3d<NumberT>(relative_velocity[0] + dx, relative_velocity[1], relative_velocity[2] + dz);
 	return local_airflow;
 }
 
@@ -161,7 +161,7 @@ V3d<float> Panel::get_local_velocity(const StateVector<float>& state, const V3d<
 //     aoa: Angle of attack in radians
 // Returns:
 //     (Cl, Cd, Cm) - lift, drag, moment coefficients
-Aerofoil::Coefficients Panel::coefficients_at(float aoa) const
+Aerofoil::Coefficients Panel::coefficients_at(NumberT aoa) const
 {
 
 	auto rootFraction = 1.0f - interp;
@@ -210,7 +210,7 @@ AileronPanel::AileronPanel(float area, float mid_span, float quater_chord, float
 // - controls.roll * sign < 0: aileron goes down (increases AoA/lift)
 // The lift_effectiveness factor accounts for the fact that a plain flap
 // is less effective at changing lift than a pure AoA change.
-float AileronPanel::modify_aoa(float aoa, ControlInputs& controls, float sign)
+NumberT AileronPanel::modify_aoa(NumberT aoa, ControlInputs& controls, NumberT sign)
 {
 	auto command = controls.aileron * sign;
 	auto deflection = (command >= 0) ?
@@ -237,7 +237,7 @@ void AileronPanel::modify_coefficients(Aerofoil::Coefficients& coeffs, ControlIn
 	coeffs.Cm += delta_Cm;
 }
 
-float AileronPanel::additional_drag(float q, ControlInputs& controls)
+NumberT AileronPanel::additional_drag(NumberT q, ControlInputs& controls)
 {
 	// Deflected aileron adds profile drag proportional to deflection².
 	//  Drag increment: Cd = k * δ²
@@ -263,7 +263,7 @@ void AirbrakePanel::modify_coefficients(Aerofoil::Coefficients& coeffs, ControlI
 	coeffs.Cl *= (1.0f - lift_reduction);
 }
 
-float AirbrakePanel::additional_drag(float q, ControlInputs& controls)
+NumberT AirbrakePanel::additional_drag(NumberT q, ControlInputs& controls)
 {
 	// Deployed airbrake adds significant drag.
 	auto Cd_spoiler = 1.8f;          // flat plate drag coefficient

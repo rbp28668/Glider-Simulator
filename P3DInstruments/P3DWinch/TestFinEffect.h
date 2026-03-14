@@ -12,8 +12,8 @@ class TestFinEffect : public TestBase
 		state.set_velocity(25.0f, 0.0f, 0.0f);  // 25 m / s level flight
 		state.set_position(0.0f, 0.0f, -500.0f);
 
-		V3d<float> fin_forces;
-		V3d<float> fin_moments;
+		V3d<NumberT> fin_forces;
+		V3d<NumberT> fin_moments;
 		model.fin_forces(state, aircraft, controls, world, state.velocity(), fin_forces, fin_moments);
 
 
@@ -31,8 +31,8 @@ class TestFinEffect : public TestBase
 	// Case 2 - aircraft with right velocity component in body frame(nose yawed left)
 	void test_yawed_left() {
 		state.set_velocity(25.0f, 1.0f, 0.0f);  // 25 m / s level flight
-		V3d<float> fin_forces;
-		V3d<float> fin_moments;
+		V3d<NumberT> fin_forces;
+		V3d<NumberT> fin_moments;
 		model.fin_forces(state, aircraft, controls, world, state.velocity(), fin_forces, fin_moments);
 
 		std::cout << "Yawed left, Fin Force: " << fin_forces << "," << "Fin moments : " << fin_moments << std::endl;
@@ -46,8 +46,8 @@ class TestFinEffect : public TestBase
 	// Case 3 - aircraft with left velocity component in body frame(nose yawed right)
 	void test_yawed_right() {
 		state.set_velocity(25.0f, -1.0f, 0.0f);  // 25 m / s level flight
-		V3d<float> fin_forces;
-		V3d<float> fin_moments;
+		V3d<NumberT> fin_forces;
+		V3d<NumberT> fin_moments;
 		model.fin_forces(state, aircraft, controls, world, state.velocity(), fin_forces, fin_moments);
 		std::cout << "Yawed right, Fin Force: " << fin_forces << "," << "Fin moments : " << fin_moments << std::endl;
 
@@ -63,8 +63,8 @@ class TestFinEffect : public TestBase
 	void test_yawing_right() {
 		state.set_velocity(25.0f, 0.0f, 0.0f);  // 25 m / s level flight
 		state.set_angular_velocity(0.0f, 0.0f, 0.1f);  // Yaw rate to right
-		V3d<float> fin_forces;
-		V3d<float> fin_moments;
+		V3d<NumberT> fin_forces;
+		V3d<NumberT> fin_moments;
 
 		model.fin_forces(state, aircraft, controls, world, state.velocity(), fin_forces, fin_moments);
 		std::cout << "Yawing right, Fin Force: " << fin_forces << "," << "Fin moments : " << fin_moments << std::endl;
@@ -81,8 +81,8 @@ class TestFinEffect : public TestBase
 	void test_yawing_left() {
 		state.set_velocity(25.0f, 0.0f, 0.0f);  // 25 m / s level flight
 		state.set_angular_velocity(0.0f, 0.0f, -0.1f);  // Yaw rate to left
-		V3d<float> fin_forces;
-		V3d<float> fin_moments;
+		V3d<NumberT> fin_forces;
+		V3d<NumberT> fin_moments;
 		model.fin_forces(state, aircraft, controls, world, state.velocity(), fin_forces, fin_moments);
 		std::cout << "Yawing left, Fin Force: " << fin_forces << "," << "Fin moments : " << fin_moments << std::endl;
 
@@ -97,10 +97,10 @@ class TestFinEffect : public TestBase
 		state.set_angular_velocity(0.0f, 0.0f, 0.0f);  // No yaw rate
 
 		// Just increasing yaw, constant Vx - i.e. 0 to 45 degrees
-		for (float vy = 1; vy <= 25; vy += 1) {
+		for (NumberT vy = 1; vy <= 25; vy += 1) {
 			state.set_velocity(25.0f, vy, 0.0f);  // 25 m / s level flight
-			V3d<float> fin_forces;
-			V3d<float> fin_moments;
+			V3d<NumberT> fin_forces;
+			V3d<NumberT> fin_moments;
 			model.fin_forces(state, aircraft, controls, world, state.velocity(), fin_forces, fin_moments);
 			std::cout << "Yawed left: Vy=" << vy << ", Fin Force : " << fin_forces << ", " << "Fin moments : " << fin_moments << std::endl;
 
@@ -112,11 +112,11 @@ class TestFinEffect : public TestBase
 
 
 		// increasing side velocity, decreasing forward 0..90 degrees
-		for (float vy = 1; vy <= 25; vy += 1) {
+		for (NumberT vy = 1; vy <= 25; vy += 1) {
 			state.set_velocity(25.0f - vy, vy, 0.0f);  // 25 m / s level flight
 
-			V3d<float> fin_forces;
-			V3d<float> fin_moments;
+			V3d<NumberT> fin_forces;
+			V3d<NumberT> fin_moments;
 			model.fin_forces(state, aircraft, controls, world, state.velocity(), fin_forces, fin_moments);
 			std::cout << "Yawed left: Vy=" << vy << ", Fin Force : " << fin_forces << ", " << "Fin moments : " << fin_moments << std::endl;
 
@@ -132,10 +132,10 @@ class TestFinEffect : public TestBase
 
 		state.set_angular_velocity(0.0f, 0.0f, 0.0f);  // No yaw rate
 
-		for (float vy = 1; vy <= 25; vy += 1) {
+		for (NumberT vy = 1; vy <= 25; vy += 1) {
 			state.set_velocity(25.0f, -vy, 0.0f);  // 25 m / s level flight
-			V3d<float> fin_forces;
-			V3d<float> fin_moments;
+			V3d<NumberT> fin_forces;
+			V3d<NumberT> fin_moments;
 			model.fin_forces(state, aircraft, controls, world, state.velocity(), fin_forces, fin_moments);
 			std::cout << "Yawed right: Vy=" << vy << ", Fin Force : " << fin_forces << ", " << "Fin moments : " << fin_moments << std::endl;
 
@@ -144,10 +144,10 @@ class TestFinEffect : public TestBase
 
 			assertLess(fin_moments[2], 0.0f, "Fin moment yaw should be negative "); // should yaw into oncoming airflow
 		}
-		for (float vy = 1; vy <= 25; vy += 1) {
+		for (NumberT vy = 1; vy <= 25; vy += 1) {
 			state.set_velocity(25.0f - vy, -vy, 0.0f);  // 25 m / s level flight
-			V3d<float> fin_forces;
-			V3d<float> fin_moments;
+			V3d<NumberT> fin_forces;
+			V3d<NumberT> fin_moments;
 			model.fin_forces(state, aircraft, controls, world, state.velocity(), fin_forces, fin_moments);
 			std::cout << "Yawed right: Vy=" << vy << ", Fin Force : " << fin_forces << ", " << "Fin moments : " << fin_moments << std::endl;
 

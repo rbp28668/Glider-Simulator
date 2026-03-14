@@ -3,6 +3,7 @@
 #include <cmath>
 #include <algorithm>
 
+#include "sim_types.h"
 #include "aerofoil.h"
 #include "v3d.h"
 #include "state_vector.h"
@@ -46,13 +47,13 @@ protected:
     float interp;     // interpolation factor between root and tip aerofoils (0.0 = root, 1.0 = tip)
     float mean_chord; // mean aerodynamic chord (m)
 
-    inline float clamp(float value, float min_val, float max_val) const
+    inline NumberT clamp(NumberT value, NumberT min_val, NumberT max_val) const
     {
         // Clamp value to range [min_val, max_val].
         return std::max(min_val, std::min(max_val, value));
     }
 
-    inline float safe_value(float value, float dflt = 0.0f)
+    inline NumberT safe_value(NumberT value, NumberT dflt = 0.0f)
     {
         // Return default if value is NaN or Inf.
         return (std::isnan(value) || std::isinf(value)) ? dflt : value;
@@ -73,27 +74,27 @@ public:
     //         sign: +1 for right wing, -1 for left wing
     //         forces - updated by adding in forces_body: [Fx, Fy, Fz] (N)
     //         moments - updated by adding in moments_body: [L, M, N] (N.m)
-    void process(const StateVector<float>& state, const V3d<float>& relative_velocity, AircraftParameters& aircraft,
-        World& world, ControlInputs& controls, float sign, V3d<float>& forces, V3d<float>& moments);
+    void process(const StateVector<NumberT>& state, const V3d<NumberT>& relative_velocity, AircraftParameters& aircraft,
+        World& world, ControlInputs& controls, NumberT sign, V3d<NumberT>& forces, V3d<NumberT>& moments);
     
     // --- Hook methods for subclasses to override ---
 
     // Hook: modify angle of attack based on control inputs. Override in subclasses.
-    virtual float modify_aoa(float aoa, ControlInputs& controls, float sign);
+    virtual NumberT modify_aoa(NumberT aoa, ControlInputs& controls, NumberT sign);
 
     // Hook: modify aerodynamic coefficients. Override in subclasses.
     virtual void modify_coefficients(Aerofoil::Coefficients& coeffs, ControlInputs& controls);
 
     // Hook: add additional drag based on control inputs. Override in subclasses.
-    virtual float additional_drag(float q, ControlInputs& controls);
+    virtual NumberT additional_drag(NumberT q, ControlInputs& controls);
 
     // --- Utility methods ---
 
     // Calculate local velocity at panel due to angular velocity.
-    V3d<float> get_local_velocity(const StateVector<float>& state, const V3d<float>& relative_velocity, float sign) const;
+    V3d<NumberT> get_local_velocity(const StateVector<NumberT>& state, const V3d<NumberT>& relative_velocity, NumberT sign) const;
 
     // Get lift, drag, moment coefficients at given angle of attack.
-    Aerofoil::Coefficients coefficients_at(float aoa) const;
+    Aerofoil::Coefficients coefficients_at(NumberT aoa) const;
 };
 
 // Panel with aileron control surface.
@@ -108,7 +109,7 @@ public:
 class AileronPanel : public Panel
 {
 
-    float _last_deflection = 0.0f; // store for drag and moment calculation
+    NumberT _last_deflection = 0.0f; // store for drag and moment calculation
 
     float max_up;             // max deflection for up-going aileron
     float max_down;           // max deflection for down-going aileron
@@ -130,12 +131,12 @@ public:
         float profile_drag_coeff = 0.01);
 
     // Aileron deflection changes effective angle of attack (camber effect on lift).
-    virtual float modify_aoa(float aoa, ControlInputs& controls, float sign);
+    virtual NumberT modify_aoa(NumberT aoa, ControlInputs& controls, NumberT sign);
 
     // Modify pitching moment due to aileron camber change.
     virtual void modify_coefficients(Aerofoil::Coefficients& coeffs, ControlInputs& controls);
 
-    virtual float additional_drag(float q, ControlInputs& controls);
+    virtual NumberT additional_drag(NumberT q, ControlInputs& controls);
 };
 
 // Panel with airbrake/spoiler control surface.
@@ -148,5 +149,5 @@ class AirbrakePanel : public Panel
 
         virtual void modify_coefficients(Aerofoil::Coefficients& coeffs, ControlInputs& controls);
 
-        virtual float additional_drag(float q, ControlInputs& controls);
+        virtual NumberT additional_drag(NumberT q, ControlInputs& controls);
 };

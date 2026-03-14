@@ -4,16 +4,16 @@ class TestTailplaneEffect :
     public TestBase
 {
 
-    float MAX_FORCE = 100000.0f;
-    float MAX_MOMENT = 500000.0f;
+    NumberT MAX_FORCE = 100000.0f;
+    NumberT MAX_MOMENT = 500000.0f;
 
     void test_straight_and_level() {
         state.set_velocity(25.0f, 0.0f, 0.0f);
         state.set_angular_velocity(0.0f, 0.0f, 0.0f);
         controls.set_controls(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-        V3d<float> tp_forces;
-        V3d<float> tp_moments;
+        V3d<NumberT> tp_forces;
+        V3d<NumberT> tp_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), tp_forces, tp_moments);
 
         std::cout << "S&L, Tailplane Force: " << tp_forces << "," << "Tailplane moments : " << tp_moments << std::endl;
@@ -30,15 +30,15 @@ class TestTailplaneEffect :
         state.set_angular_velocity(0.0f, 0.0f, 0.0f);
         controls.set_controls(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-        V3d<float> base_forces;
-        V3d<float> base_moments;
+        V3d<NumberT> base_forces;
+        V3d<NumberT> base_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), base_forces, base_moments);
 
 
         // increase local AoA by adding a small downward velocity(w positive = down)
         state.set_velocity(25.0f, 0.0f, 1.0);
-        V3d<float> inc_forces;
-        V3d<float> inc_moments;
+        V3d<NumberT> inc_forces;
+        V3d<NumberT> inc_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), inc_forces, inc_moments);
 
 
@@ -53,16 +53,16 @@ class TestTailplaneEffect :
         state.set_angular_velocity(0.0f, 0.0f, 0.0f);
         controls.set_controls(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-        V3d<float> base_forces;
-        V3d<float> base_moments;
+        V3d<NumberT> base_forces;
+        V3d<NumberT> base_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), base_forces, base_moments);
         std::cout << "Pitch rate base - tail forces" << base_forces << std::endl;
 
         // apply positive pitch rate(nose up) which moves tail down and increases local AoA
         state.set_velocity(25.0f, 0.0f, 0.0f);
         state.set_angular_velocity(0.0f, 0.1f, 0.0f);
-        V3d<float> pr_forces;
-        V3d<float> pr_moments;
+        V3d<NumberT> pr_forces;
+        V3d<NumberT> pr_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), pr_forces, pr_moments);
         std::cout << "Pitch rate test - tail forces" << pr_forces << std::endl;
 
@@ -76,15 +76,15 @@ class TestTailplaneEffect :
         state.set_velocity(25.0f, 0.0f, 0.0f);
         state.set_angular_velocity(0.0f, 0.0f, 0.0f);
         controls.set_controls(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-        V3d<float> base_forces;
-        V3d<float> base_moments;
+        V3d<NumberT> base_forces;
+        V3d<NumberT> base_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), base_forces, base_moments);
 
 
         // forward stick(positive) reduces tailplane AoA per model implementation
         controls.set_controls(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-        V3d<float> elev_forces;
-        V3d<float> elev_moments;
+        V3d<NumberT> elev_forces;
+        V3d<NumberT> elev_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), elev_forces, elev_moments);
 
 
@@ -98,8 +98,8 @@ class TestTailplaneEffect :
         state.set_angular_velocity(0.0f, 0.0f, 0.0f);
         controls.set_controls(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-        V3d<float> tp_forces;
-        V3d<float> tp_moments;
+        V3d<NumberT> tp_forces;
+        V3d<NumberT> tp_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), tp_forces, tp_moments);
 
         std::cout << "Vertical Descent, Tailplane Force: " << tp_forces << "," << "Tailplane moments : " << tp_moments << std::endl;
@@ -132,8 +132,8 @@ class TestTailplaneEffect :
         state.set_angular_velocity(0.0f, 0.0f, 0.0f);
         controls.set_controls(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-        V3d<float> tp_forces;
-        V3d<float> tp_moments;
+        V3d<NumberT> tp_forces;
+        V3d<NumberT> tp_moments;
         model.tailplane_forces(state, aircraft, controls, world, state.velocity(), tp_forces, tp_moments);
 
         std::cout << "Vertical ascent, Tailplane Force: " << tp_forces << "," << "Tailplane moments : " << tp_moments << std::endl;

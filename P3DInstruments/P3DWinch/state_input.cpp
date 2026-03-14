@@ -8,6 +8,7 @@
 #include "control_inputs.h"
 #include "state_vector.h"
 #include "simulation.h"
+#include "Timer.h"
 
 
 
@@ -63,16 +64,16 @@ StateInput::StateInput(Prepar3D* p3d, Simulation* pFlightModel) : SimObjectData(
 // Critically, also initialises lastSimTime so the first subsequent call to tick() has a valid time period.
 void StateInput::initialiseModel(const Data& data)
 {
-	StateVector<float>& state = pFlightModel->get_state();
-	state.set_orientation(Quaternion<float>::from_euler_angles(-data.bank, -data.pitch, data.heading)); // negate bank & pitch: P3D LH→NED RH
-	state.set_position(0.0f, 0.0f, -data.altitude);
+	StateVector<NumberT>& state = pFlightModel->get_state();
+	state.set_orientation(Quaternion<NumberT>::from_euler_angles(-data.bank, -data.pitch, data.heading)); // negate bank & pitch: P3D LH→NED RH
+	state.set_position(0.0f, 0.0f, -(data.altitude + pFlightModel->zOffset()));
 	state.set_velocity(data.velocity_body_z, data.velocity_body_x, -data.velocity_body_y); // polar vector: convert from P3D to NED
 	state.set_angular_velocity(-data.rotation_velocity_body_z, -data.rotation_velocity_body_x, data.rotation_velocity_body_y); // pseudovector: signs flip vs polar
 	start_lat = data.latitude;
 	start_lon = data.longitude;
 
-	constexpr float earthEquatorialRadius = 6378.1f * 1000.0f; //  metres
-	constexpr float earthPolarRadius = 6356.8f * 1000.0f; // metres
+	constexpr NumberT earthEquatorialRadius = 6378.1f * 1000.0f; //  metres
+	constexpr NumberT earthPolarRadius = 6356.8f * 1000.0f; // metres
 	const float pi = 3.14159265358979f;
 
 	metresPerRadianLat = earthPolarRadius;   // polar circumference / 360
@@ -102,10 +103,10 @@ void StateInput::tickModel(const Data& data)
 	world.set_wind_vector(data.windZ, data.windX, -data.windY); // convert from P3D world (East,Up,North) to NED (North,East,Down)
 	world.set_ground_height(-data.ground); // convert altitude (positive up) to NED Z (positive down)
 
-	float dt = data.time - lastSimTime;
+	NumberT dt = data.time - lastSimTime;
 	lastSimTime = data.time;
 
-	StateVector<float> sv = pFlightModel->update(dt, controls, world);
+	StateVector<NumberT> sv = pFlightModel->update(dt, controls, world);
 
 	auto pos = sv.position(); // Position in meters NED
 	pOutput->data.latitude = start_lat + pos[0] / metresPerRadianLat;  // North
@@ -186,6 +187,8 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 		//show(pData);
 	}
 
+	Timer t;
+	auto start = t.raw();
 
 	if (_kbhit()) {
 		char ch = _getch();
@@ -247,6 +250,14 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 		return;
 	}
 
+	// Guards against invalid sim state
+	//if (!getSim()->isStarted()) return;
+	if (getSim()->isPaused()) return;
+	if (getSim()->isCrashed()) {
+		disengage();
+		return;
+	}
+
 
 	if (initialised) {
 		// In the middle of a winch launch?
@@ -260,7 +271,10 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 			}
 		}
 
+		auto tickStart = t.raw();
 		tickModel(data);
+		auto modelTime = t.since(tickStart);
+		std::cout << "T:" << modelTime * 1000000 << "us" << std::endl;
 	}
 	else { // not initialised, so initialise - also sets clock so next tick will have valid dt.
 		initialiseModel(data);
