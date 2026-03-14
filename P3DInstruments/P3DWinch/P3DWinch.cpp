@@ -26,13 +26,24 @@ int main(int argc, char* argv[])
 {
     
                                                                                                                                                                                                         
-    std::cout << "Hello Winch!\n";
+    std::cout << "CGC Winch" << std::endl;
+    std::cout << "-nodisengage  - don't disengage model on release" << std::endl;
+    std::cout << "-vf           - use visual frame rate (default is sim rate)" << std::endl;
+    std::cout << "-verbose      - print verbose debugging information" << std::endl;
 
     bool nodisengage = false;
+    bool useVisualFrame = false;
+    bool verbose = false;
+
+
     for (int i = 1; i < argc; ++i) {
         //std::cout << argv[i] << std::endl;
         if (argv[i] == "-nodisengage") {
             nodisengage = true;
+        }
+
+        if (argv[i] == "-vf") {
+            useVisualFrame = true;
         }
     }
     
@@ -76,7 +87,6 @@ int main(int argc, char* argv[])
 
 
     Simulation simulation;
-    bool verbose = true;
     Prepar3D* p3D = new Prepar3D("Winch", verbose);
 
     std::cout << p3D->userAircraft().name() << "," << p3D->userAircraft().id() << std::endl;
@@ -84,7 +94,8 @@ int main(int argc, char* argv[])
     StateInput input(p3D, &simulation);
     input.setAutoDisengage(!nodisengage);
 
-    SimObjectDataRequest request(p3D, &input, &p3D->userAircraft(), SIMCONNECT_PERIOD_SIM_FRAME); // SIMCONNECT_PERIOD_SIM_FRAME
+    SIMCONNECT_PERIOD rate = (useVisualFrame) ? SIMCONNECT_PERIOD_VISUAL_FRAME : SIMCONNECT_PERIOD_SIM_FRAME;
+    SimObjectDataRequest request(p3D, &input, &p3D->userAircraft(), rate);
 
 
     p3D->DispatchLoop();
