@@ -38,7 +38,7 @@ SimObjectData::DataItem StateInput::dataItems[] = {
 	{"BRAKE LEFT POSITION", "Position", SIMCONNECT_DATATYPE_FLOAT32}, //Brake input [0: Released, 1.0: Full]
 	{"TOW RELEASE HANDLE","Position", SIMCONNECT_DATATYPE_FLOAT32},  //Position of tow release handle. 100 is fully deployed.	Percent over 100	N
 
-	{"SIM TIME","Seconds", SIMCONNECT_DATATYPE_FLOAT32}, //	The elapsed simulation time	Seconds
+	{"SIM TIME","Seconds", SIMCONNECT_DATATYPE_FLOAT64}, //	The elapsed simulation time	Seconds
 
 	// World information
 	{"AMBIENT WIND X", "meters per second", SIMCONNECT_DATATYPE_FLOAT32}, //	Wind component in East / West direction.Feet per second	N -
@@ -143,6 +143,9 @@ void StateInput::tickModel(const Data& data)
 	pData->rotation_acceleration_body_z = -angular_acceleration[0];
 	pData->rotation_acceleration_body_x = -angular_acceleration[1];
 	pData->rotation_acceleration_body_y = angular_acceleration[2];
+
+	// optional small delay before we send the data.
+	if (useDelay) ::Sleep(5);
 
 	pOutput->sendData();
 
@@ -271,7 +274,7 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 			if (data.release > 0.5f) {
 				launcher.release();
 			}
-			launcher.tick(data.time);
+			launcher.tick(float(data.time));
 			if (!launcher.isLaunching() && autoDisengage) {
 				disengage(); // auto disengage
 			}
@@ -289,7 +292,7 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 		
 		if (winch_launch_pending) {
 			winch_launch_pending = false;
-			launcher.launch(data.time);
+			launcher.launch(float(data.time));
 		}
 	}
 

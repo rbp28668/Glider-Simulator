@@ -34,6 +34,7 @@ int main(int argc, char* argv[])
     bool nodisengage = false;
     bool useVisualFrame = false;
     bool verbose = false;
+    bool delay = false;
 
 
     for (int i = 1; i < argc; ++i) {
@@ -44,6 +45,14 @@ int main(int argc, char* argv[])
 
         if (argv[i] == "-vf") {
             useVisualFrame = true;
+        }
+
+        if (argv[i] == "-verbose") {
+            verbose = true;
+        }
+
+        if (argv[i] == "-delay") {
+            delay = true;
         }
     }
     
@@ -93,6 +102,7 @@ int main(int argc, char* argv[])
 
     StateInput input(p3D, &simulation);
     input.setAutoDisengage(!nodisengage);
+    input.setDelay(delay);
 
     SIMCONNECT_PERIOD rate = (useVisualFrame) ? SIMCONNECT_PERIOD_VISUAL_FRAME : SIMCONNECT_PERIOD_SIM_FRAME;
     SimObjectDataRequest request(p3D, &input, &p3D->userAircraft(), rate);

@@ -29,8 +29,8 @@ class LaunchController
 	Stage stage = Stage::IDLE;
 
 	const float WINGS_LEVEL_TIME = 2.0f; // Time to go to wings level (s)
-	const float UP_SLACK_TIME = 3.0f;  // Time to wait whilst up-slack
-	const float THROTTLE_RAMP_TIME = 2.0f;  // Time to go to full throttle
+	const float UP_SLACK_TIME = 1.0f;  // Time to wait whilst up-slack
+	const float THROTTLE_RAMP_TIME = 5.0f;  // Time to go to full throttle
 	const float WING_RELEASE_SPEED = 2.7f;  // a fast jog, time to let go...
 
 	void levelWings(float dt);

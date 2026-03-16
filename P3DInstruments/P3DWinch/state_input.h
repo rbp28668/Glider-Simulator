@@ -41,7 +41,7 @@ class StateInput :public SimObjectData
 		float brake;    //{ "BRAKE LEFT POSITION", "Position", SIMCONNECT_DATATYPE_FLOAT32 }, //Brake input [0: Released, 1.0: Full]
 		float release;  // {"TOW RELEASE HANDLE","Position", SIMCONNECT_DATATYPE_FLOAT32},  //Position of tow release handle. 100 is fully deployed.	Percent over 100	N
 
-		float time; // {"SIM TIME", "Seconds", SIMCONNECT_DATATYPE_FLOAT32}, //	The elapsed simulation time	Seconds
+		double time; // {"SIM TIME", "Seconds", SIMCONNECT_DATATYPE_FLOAT64}, //	The elapsed simulation time	Seconds
 
 	    // World information
 		float windX; // { "AMBIENT WIND X", "meters per second", SIMCONNECT_DATATYPE_FLOAT32 }, //	Wind component in East / West direction.Feet per second	N -
@@ -65,6 +65,7 @@ class StateInput :public SimObjectData
 	bool releasePulled = false;
 	bool spinKit = false;
 	bool autoDisengage = true;
+	bool useDelay = false;
 
 	NumberT start_lat;
 	NumberT start_lon;
@@ -91,6 +92,10 @@ public:
 
 	void setAutoDisengage(bool ad = true) {
 		autoDisengage = ad;
+	}
+
+	void setDelay(bool delay = false) {
+		useDelay = delay;
 	}
 
 };
