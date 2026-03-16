@@ -39,20 +39,16 @@ int main(int argc, char* argv[])
 
     for (int i = 1; i < argc; ++i) {
         //std::cout << argv[i] << std::endl;
-        if (argv[i] == "-nodisengage") {
+        if (strcmp(argv[i], "-nodisengage") == 0) {
             nodisengage = true;
         }
 
-        if (argv[i] == "-vf") {
+        if (strcmp(argv[i], "-vf") == 0) {
             useVisualFrame = true;
         }
 
-        if (argv[i] == "-verbose") {
+        if (strcmp(argv[i], "-verbose") == 0) {
             verbose = true;
-        }
-
-        if (argv[i] == "-delay") {
-            delay = true;
         }
     }
     
