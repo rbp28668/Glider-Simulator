@@ -17,6 +17,15 @@ class LaunchController
 	float stageStartTime = 0.0f;
 	NumberT startingBank = 0.0f;
 	unsigned long textEventId; // SIMCONNECT_CLIENT_EVENT_ID
+	
+	bool powerFade = false;
+	NumberT powerFadeStartTime = 0.0;
+	NumberT powerFadeDuration = 0.0;
+	NumberT powerFadeStartThrottle = 0.0;
+
+	bool wingdrop;
+	bool dropRightWing;
+	NumberT dropStartTime;
 
 	enum class Stage {
 		IDLE,
@@ -44,6 +53,8 @@ public:
 	void tick(float time);
 	bool isLaunching() { return inProgress; }
 	void release();
+	void startPowerFade(NumberT startTime, NumberT seconds = 10.0);
+	void dropWing(NumberT startTime, bool rollRight);
 
 };
 

@@ -30,11 +30,15 @@ int main(int argc, char* argv[])
     std::cout << "-nodisengage  - don't disengage model on release" << std::endl;
     std::cout << "-vf           - use visual frame rate (default is sim rate)" << std::endl;
     std::cout << "-verbose      - print verbose debugging information" << std::endl;
+    std::cout << "-test         - run model tests" << std::endl;
+    std::cout << "-early        - sends model state to P3d early in loop" << std::endl;
+
 
     bool nodisengage = false;
     bool useVisualFrame = false;
     bool verbose = false;
-    bool delay = false;
+    bool early = false;
+    bool test = false;
 
 
     for (int i = 1; i < argc; ++i) {
@@ -50,8 +54,36 @@ int main(int argc, char* argv[])
         if (strcmp(argv[i], "-verbose") == 0) {
             verbose = true;
         }
+
+        if (strcmp(argv[i], "-test") == 0) {
+            test = true;
+        }
+
+        if (strcmp(argv[i], "-early") == 0) {
+            early = true;
+        }
+
     }
-    
+
+
+    if (nodisengage) std::cout << "NODISENGAGE set" << std::endl;
+    if (useVisualFrame) std::cout << "Using visual frame" << std::endl;
+    if (verbose) std::cout << "VERBOSE output" << std::endl;
+    if (test) std::cout << "TEST model on startup" << std::endl;
+    if (early) std::cout << "EARLY send of output data" << std::endl;
+
+    std::cout << std::endl;
+    std::cout << "Keyboard commands:" << std::endl;
+    std::cout << "e: engage flight model" << std::endl;
+    std::cout << "d: disengage flight model" << std::endl;
+    std::cout << "w: winch" << std::endl;
+    std::cout << "f: fade power" << std::endl;
+    std::cout << "x: drop left wing" << std::endl;
+    std::cout << "c: drop right wing" << std::endl;
+
+
+
+
     // Full path  to program e.g. D:\Projects\Glider-Simulator\P3DInstruments\x64\Debug\P3DWinch.exe
     char* pszCommandPath = argv[0];
 
@@ -62,8 +94,8 @@ int main(int argc, char* argv[])
     //SimplePlayer player;
     //player.Play(L"music.m4a");
 
-#ifndef NDEBUG
-    {
+#ifndef NDEBUG // never in production!
+    if(test){
         //Aerofoil_NACA0010 naca0010;
         //std::cout << "---- NACA0010 -----" << std::endl;
         //for (int i = 0; i < 360; ++i) {
@@ -98,7 +130,9 @@ int main(int argc, char* argv[])
 
     StateInput input(p3D, &simulation);
     input.setAutoDisengage(!nodisengage);
-    input.setDelay(delay);
+    input.setEarly(early);
+
+    useVisualFrame = true; // DEBUG
 
     SIMCONNECT_PERIOD rate = (useVisualFrame) ? SIMCONNECT_PERIOD_VISUAL_FRAME : SIMCONNECT_PERIOD_SIM_FRAME;
     SimObjectDataRequest request(p3D, &input, &p3D->userAircraft(), rate);

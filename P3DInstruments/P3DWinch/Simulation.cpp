@@ -147,7 +147,7 @@ void Simulation::calculate_forces_moments(const StateVector<NumberT>& state, V3d
 		);
 
 	moments = V3d<NumberT>(
-		aero_moments[0] + ground_moments[0] + winch_moments[0],
+		aero_moments[0] + ground_moments[0] + winch_moments[0] + rollBias,
 		aero_moments[1] + ground_moments[1] + winch_moments[1],
 		aero_moments[2] + ground_moments[2] + winch_moments[2]
 		);

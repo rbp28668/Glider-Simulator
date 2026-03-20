@@ -90,6 +90,9 @@ void StateInput::initialiseModel(const Data& data)
 
 void StateInput::tickModel(const Data& data)
 {
+	if (early) {
+		sendOutput();
+	}
 
 	ControlInputs controls;
 	controls.aileron = data.aileron;
@@ -103,10 +106,28 @@ void StateInput::tickModel(const Data& data)
 	world.set_wind_vector(data.windZ, data.windX, -data.windY); // convert from P3D world (East,Up,North) to NED (North,East,Down)
 	world.set_ground_height(-data.ground); // convert altitude (positive up) to NED Z (positive down)
 
-	NumberT dt = data.time - lastSimTime;
-	lastSimTime = data.time;
+	//NumberT dt = data.time - lastSimTime;
+	//lastSimTime = data.time;
 
-	StateVector<NumberT> sv = pFlightModel->update(dt, controls, world);
+	// Tick the simulation loop a fixed period until caught up with sim time.
+	NumberT dt = 0.002; // 2mS
+	StateVector<NumberT> sv;
+	while (lastSimTime < data.time) {
+		pFlightModel->update(dt, controls, world);
+		lastSimTime += dt;
+	}
+
+	if (!early) {
+		sendOutput();
+	}
+
+}
+
+
+// Sends the data from the flight model to P3D
+void StateInput::sendOutput()
+{
+	const StateVector<NumberT>& sv = pFlightModel->get_state();
 
 	StateOutput::Data* pData = pOutput->getData();
 	auto pos = sv.position(); // Position in meters NED
@@ -144,11 +165,8 @@ void StateInput::tickModel(const Data& data)
 	pData->rotation_acceleration_body_x = -angular_acceleration[1];
 	pData->rotation_acceleration_body_y = angular_acceleration[2];
 
-	// optional small delay before we send the data.
-	if (useDelay) ::Sleep(5);
 
 	pOutput->sendData();
-
 }
 
 SimObjectData::DataItem* StateInput::items() {
@@ -234,6 +252,27 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 			}
 			break;
 
+		case 'f':
+			std::cout << "Power fade" << std::endl;
+			if (launcher.isLaunching()) {
+				launcher.startPowerFade(data.time);
+			}
+			break;
+
+		case 'x':
+			std::cout << "wing-drop left" << std::endl;
+			if (pFlightModel->is_on_ground()) {
+				launcher.dropWing(data.time, false);
+			}
+			break;
+
+		case 'c':
+			std::cout << "wing-drop right" << std::endl;
+			if (pFlightModel->is_on_ground()) {
+				launcher.dropWing(data.time, true);
+			}
+			break;
+
 		default:
 			std::cout << "Unknown command" << std::endl;
 		}
@@ -244,7 +283,7 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 		if (data.release > 0.5) {
 			releasePulled = true;
 		}
-		else { // not pulled
+		else { // not pulled now - i.e. don't start launch until release closed
 			if (releasePulled) {  // if it was....
 				// Start the launch
 				engage();
@@ -271,9 +310,11 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 	if (initialised) {
 		// In the middle of a winch launch?
 		if (launcher.isLaunching()) {
+			
 			if (data.release > 0.5f) {
 				launcher.release();
 			}
+
 			launcher.tick(float(data.time));
 			if (!launcher.isLaunching() && autoDisengage) {
 				disengage(); // auto disengage

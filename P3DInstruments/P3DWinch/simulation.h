@@ -39,6 +39,8 @@ class Simulation {
     V3d<NumberT> vel_dot; // Linear velocity derivative - linear acceleration
     V3d<NumberT> omega_dot; // Angular velocity derivative - angular acceleration
 
+    NumberT rollBias = 0.0; // adds roll bias force-  primarily for simulating wing drops
+
     NumberT clamp(NumberT value, NumberT min_val, NumberT max_val);
     NumberT safe_value(NumberT value, NumberT dflt = 0.0f);
     V3d<NumberT> sanitize_velocity(NumberT vx, NumberT vy, NumberT vz);
@@ -91,4 +93,7 @@ public:
     }
     // and height of aircraft datum off the main wheel.
     float zOffset() { return aircraft.zOffset(); }
+
+    // Sets a bias to roll in Nm
+    void setRollBias(NumberT bias) { rollBias = bias; }
 };

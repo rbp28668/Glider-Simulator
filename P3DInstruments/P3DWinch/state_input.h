@@ -64,8 +64,10 @@ class StateInput :public SimObjectData
 	bool winch_launch_pending = false;  // deferred until state is initialised
 	bool releasePulled = false;
 	bool spinKit = false;
+	
 	bool autoDisengage = true;
-	bool useDelay = false;
+	bool early = false;
+
 
 	NumberT start_lat;
 	NumberT start_lon;
@@ -79,7 +81,7 @@ class StateInput :public SimObjectData
 
 	void initialiseModel(const Data& data);
 	void tickModel(const Data& data);
-
+	void sendOutput();
 public:
 
 	virtual DataItem* items();
@@ -94,9 +96,9 @@ public:
 		autoDisengage = ad;
 	}
 
-	void setDelay(bool delay = false) {
-		useDelay = delay;
+	// if true send data to P3d at start of handler
+	void setEarly(bool early = false) {
+		this->early = early;
 	}
-
 };
 

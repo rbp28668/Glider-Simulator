@@ -46,6 +46,7 @@ bool LaunchController::launch(float time)
 
 	startTime = time;
 	stageStartTime = time;
+	powerFade = false; // if previously set
 
 	StateVector<NumberT>& state = pSimulation->get_state();
 	auto orientation = state.orientation();
@@ -143,10 +144,23 @@ void LaunchController::tick(float time)
 			std::cout << "Released" << std::endl;
 		}
 		else {
+
+			if (powerFade) {
+				NumberT fraction = 1.0 - (time - powerFadeStartTime) / powerFadeDuration;
+				if (fraction < 0) fraction = 0;
+				NumberT throttle = powerFadeStartThrottle * fraction;
+				pSimulation->set_winch_throttle(throttle);
+			}
+
 			// Reduce throttle when cable angle is steep (near top of winch launch)
 			float cable_angle = pSimulation->get_winch_cable_angle();
 			if (cable_angle > 80.0f * PI / 180.0f) {
 				pSimulation->set_winch_throttle(0.2f);
+			}
+
+			if (wingdrop) {
+				pSimulation->setRollBias(0);
+				wingdrop = false;
 			}
 		}
 		break;
@@ -160,4 +174,20 @@ void LaunchController::release()
 	inProgress = false;
 	pSimulation->release_winch();
 	showText("Released!");
+}
+
+void LaunchController::startPowerFade(NumberT startTime, NumberT seconds) {
+	powerFade = true;
+	powerFadeStartTime = startTime;
+	powerFadeDuration = seconds;
+	powerFadeStartThrottle = pSimulation->get_winch_throttle();
+}
+
+void LaunchController::dropWing(NumberT startTime, bool rollRight) {
+	wingdrop = true;
+	dropRightWing = rollRight;
+	dropStartTime = startTime;
+
+	auto rollBias = (rollRight) ? 8.5 * 50 : 8.5 * -50; // apply c. 2kg force at wingtip.
+	pSimulation->setRollBias(rollBias);
 }
