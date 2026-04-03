@@ -253,25 +253,63 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 			break;
 
 		case 'f':
-			std::cout << "Power fade" << std::endl;
 			if (launcher.isLaunching()) {
+				std::cout << "Power fade" << std::endl;
 				launcher.startPowerFade(data.time);
+			}
+			else {
+				std::cout << "No Power fade - not launching" << std::endl;
 			}
 			break;
 
+		case 'p': 
+			{
+				auto throttle = launcher.adjustPower(-0.1);
+				std::cout << "reduce power to " << throttle * 100 << "%" << std::endl;
+			}
+			break;
+
+		case 'P':
+			{
+			auto throttle = launcher.adjustPower(0.1);
+			std::cout << "increase power to" << throttle * 100 << "%" << std::endl;
+			}
+			break;
+
+
 		case 'x':
 			std::cout << "wing-drop left" << std::endl;
-			if (pFlightModel->is_on_ground()) {
-				launcher.dropWing(data.time, false);
-			}
+			launcher.dropWing(data.time, false);
 			break;
 
 		case 'c':
 			std::cout << "wing-drop right" << std::endl;
-			if (pFlightModel->is_on_ground()) {
-				launcher.dropWing(data.time, true);
+			launcher.dropWing(data.time, true);
+			break;
+
+		case 'r':
+			std::cout << "release" << std::endl;
+			launcher.release();
+			disengage();
+			break;
+
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			{
+				NumberT throttle = (ch - '0') / 10.0;
+				launcher.setPower(throttle);
+				std::cout << "set power to " << throttle * 100 << "%" << std::endl;
 			}
 			break;
+
 
 		default:
 			std::cout << "Unknown command" << std::endl;
@@ -302,7 +340,9 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 	//if (!getSim()->isStarted()) return;
 	if (getSim()->isPaused()) return;
 	if (getSim()->isCrashed()) {
+		std::cout << "Disengaging - crashed!" << std::endl;
 		disengage();
+		launcher.setPower(targetThrottle); // default for next launch
 		return;
 	}
 
@@ -311,13 +351,20 @@ void StateInput::onData(void* pData, SimObject* pObject) {
 		// In the middle of a winch launch?
 		if (launcher.isLaunching()) {
 			
+			// Manual release?
 			if (data.release > 0.5f) {
 				launcher.release();
+				launcher.setPower(targetThrottle); // default for next launch
 			}
 
 			launcher.tick(float(data.time));
-			if (!launcher.isLaunching() && autoDisengage) {
-				disengage(); // auto disengage
+
+			// Auto released?
+			if (!launcher.isLaunching()){
+				if (autoDisengage) {
+					disengage(); // auto disengage
+				}
+				launcher.setPower(targetThrottle); // default for next launch
 			}
 		}
 

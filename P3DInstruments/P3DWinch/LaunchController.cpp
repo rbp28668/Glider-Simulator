@@ -1,7 +1,11 @@
 #include "LaunchController.h"
 #include "../P3DCommon/Prepar3D.h"
 #include "simulation.h"
-#include "SimplePlayer.h"
+
+void LaunchController::setResourceFolder(const Directory& folder) {
+	resourceFolder = folder;
+}
+
 
 void LaunchController::levelWings(float stageTime) {
 	StateVector<NumberT>& state = pSimulation->get_state();
@@ -53,10 +57,10 @@ bool LaunchController::launch(float time)
 	auto euler = orientation.to_euler(); // as roll, pitch and heading
 	startingBank = euler[0];	// start value for rolling wings level
 
-	stage = Stage::WINGS_LEVEL;
+	stage = Stage::SETTLE;
 	inProgress = true;
 
-	pSimulation->setup_winch_launch(1500.0f, 10000.0f);
+	pSimulation->setup_winch_launch(1200.0f, 10000.0f); // 22 length, black link
 	pSimulation->set_winch_throttle(0);
 	std::cout << "Launching" << std::endl;
 	showText("Launching");
@@ -71,6 +75,28 @@ void LaunchController::tick(float time)
 	float dt = time - stageStartTime;
 
 	switch (stage) {
+	case Stage::SETTLE:
+		if (dt < SETTLE_TIME) {
+			// NOP
+		}
+		else {
+			stage = Stage::CABLE_ON;
+			stageStartTime = time;
+			File file = resourceFolder.file("cable_on_and_secure_black_link.m4a");
+			player.Play(file);
+		}
+		break;
+
+	case Stage::CABLE_ON:    // short delay whilst saying cable on before wings start to level.
+		if (dt < CABLE_ON_TIME) {
+			// NOP
+		}
+		else {
+			stage = Stage::WINGS_LEVEL;
+			stageStartTime = time;
+		}
+		break;
+
 	case Stage::WINGS_LEVEL:
 		if (dt < WINGS_LEVEL_TIME) {
 			levelWings(dt);
@@ -80,7 +106,12 @@ void LaunchController::tick(float time)
 			stageStartTime = time;
 			std::cout << "Take up slack" << std::endl;
 			showText("Take up slack...");
+			File file = resourceFolder.file("take_up_slack.m4a");
+			player.Play(file);
+
+
 			pSimulation->engage_winch();
+			pSimulation->set_winch_throttle(0);
 			std::cout << "Winch engaged" << std::endl;
 
 		}
@@ -102,6 +133,8 @@ void LaunchController::tick(float time)
 				stage = Stage::GROUND_RUN;
 				stageStartTime = time;
 				showText("All out...");
+				File file = resourceFolder.file("all_out.m4a");
+				player.Play(file);
 			}
 		}
 		break;
@@ -113,9 +146,9 @@ void LaunchController::tick(float time)
 		}
 		else
 		{
-			// Smoothly open the throttle
-			float throttle = dt / THROTTLE_RAMP_TIME;
-			if (throttle > 1.0f) throttle = 1.0f;
+			// Smoothly open the throttle to targetThrottle.
+			NumberT throttle = targetThrottle * dt / THROTTLE_RAMP_TIME;
+			if (throttle > targetThrottle) throttle = targetThrottle;
 			pSimulation->set_winch_throttle(throttle);
 
 			// and hold the wings.
@@ -126,7 +159,7 @@ void LaunchController::tick(float time)
 			}
 
 			// transfer to launching ?  Only if at full power & off the ground
-			if (throttle == 1.0f && !pSimulation->is_on_ground()) {
+			if (throttle == targetThrottle && !pSimulation->is_on_ground()) {
 				stage = Stage::LAUNCHING;
 				stageStartTime = time;
 				std::cout << "Airborne" << std::endl;
@@ -140,27 +173,26 @@ void LaunchController::tick(float time)
 			// TODO - release noise
 			stage = Stage::IDLE;
 			inProgress = false;
+			pSimulation->setRollBias(0);
 			showText("Released!");
 			std::cout << "Released" << std::endl;
 		}
 		else {
 
 			if (powerFade) {
-				NumberT fraction = 1.0 - (time - powerFadeStartTime) / powerFadeDuration;
+				NumberT fraction = targetThrottle - (time - powerFadeStartTime) / powerFadeDuration;
 				if (fraction < 0) fraction = 0;
 				NumberT throttle = powerFadeStartThrottle * fraction;
 				pSimulation->set_winch_throttle(throttle);
+			}
+			else {
+				pSimulation->set_winch_throttle(targetThrottle);
 			}
 
 			// Reduce throttle when cable angle is steep (near top of winch launch)
 			float cable_angle = pSimulation->get_winch_cable_angle();
 			if (cable_angle > 80.0f * PI / 180.0f) {
 				pSimulation->set_winch_throttle(0.2f);
-			}
-
-			if (wingdrop) {
-				pSimulation->setRollBias(0);
-				wingdrop = false;
 			}
 		}
 		break;
@@ -184,10 +216,24 @@ void LaunchController::startPowerFade(NumberT startTime, NumberT seconds) {
 }
 
 void LaunchController::dropWing(NumberT startTime, bool rollRight) {
-	wingdrop = true;
-	dropRightWing = rollRight;
-	dropStartTime = startTime;
-
-	auto rollBias = (rollRight) ? 8.5 * 50 : 8.5 * -50; // apply c. 2kg force at wingtip.
+	NumberT tipForce = 20; // Newtons
+	
+	auto rollBias = (rollRight) ? 8.5 * tipForce : 8.5 * -tipForce; // apply force at wingtip.
 	pSimulation->setRollBias(rollBias);
+}
+
+
+NumberT LaunchController::adjustPower(NumberT amount)
+{
+	targetThrottle += amount;
+	if (targetThrottle < 0) targetThrottle = 0;
+	else if (targetThrottle > 1.0) targetThrottle = 1.0;
+	return targetThrottle;
+}
+
+void LaunchController::setPower(NumberT amount)
+{
+	targetThrottle = amount;
+	if (targetThrottle < 0) targetThrottle = 0;
+	else if (targetThrottle > 1.0) targetThrottle = 1.0;
 }

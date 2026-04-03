@@ -82,7 +82,6 @@ class Winch {
 
     // --- Throttle state ---
     float throttle;             // Current throttle position (0.0 - 1.0)
-    bool  throttle_override;    // Is external throttle override active
     NumberT cable_angle;          // Current cable angle below horizontal (radians)
 
     // --- Drivetrain result from solver ---

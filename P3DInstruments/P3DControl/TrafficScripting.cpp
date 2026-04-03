@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "TrafficScripting.h"
 #include "TrafficMessageHandler.h"
-#include "Folder.h"
+#include "../P3DCommon/Folder.h"
 
 void TrafficScripting::registerMethods(Lua& lua)
 {

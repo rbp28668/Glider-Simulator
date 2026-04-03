@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "MessageHandler.h"
-#include "Folder.h"
+#include "../P3DCommon/Folder.h"
 #include "../P3DCommon/Metar.h"
 
 class Prepar3D;

@@ -38,6 +38,7 @@ V3d<NumberT> Simulation::sanitize_angular_velocity(NumberT p, NumberT q, NumberT
 void Simulation::reset() {
 	total_time = 0.0;
 	state = StateVector<NumberT>();
+	rollBias = 0.0;
 }
 
 
@@ -232,9 +233,7 @@ V3d<NumberT> Simulation::calculate_linear_acceleration(const StateVector<NumberT
 	auto v_dot = Fy_total / mass + p * w - r * u;
 	auto w_dot = Fz_total / mass + q * u - p * v;
 
-
 	return V3d<NumberT>(u_dot, v_dot, w_dot);
-
 }
 
 // Angular Acceleration (Body Frame)
@@ -252,10 +251,10 @@ V3d<NumberT> Simulation::calculate_angular_acceleration(const StateVector<Number
 	auto r = av[2];
 
 	// Inertia components
-	auto Ixx = aircraft.Ixx;
-	auto Iyy = aircraft.Iyy;
-	auto Izz = aircraft.Izz;
-	auto Ixz = aircraft.Ixz;
+	NumberT Ixx = aircraft.Ixx;
+	NumberT Iyy = aircraft.Iyy;
+	NumberT Izz = aircraft.Izz;
+	NumberT Ixz = aircraft.Ixz;
 
 	auto L = moments_body[0]; // roll moment, 
 	auto M = moments_body[1]; // pitch moment,
@@ -384,6 +383,7 @@ void Simulation::engage_winch() {
 //Release the winch cable.
 void Simulation::release_winch() {
 	winch.release("manual");
+	setRollBias(0); // ensure wing drop tendency removed.
 }
 
 // Winch throttle passthrough

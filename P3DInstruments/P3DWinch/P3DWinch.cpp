@@ -10,6 +10,8 @@
 
 #include "../P3DCommon/Prepar3D.h"
 #include "../P3DCommon/SimObjectDataRequest.h"
+#include "../P3DCommon/Folder.h"
+
 #include "simulation.h"
 #include "Joystick.h"
 #include "state_input.h"
@@ -27,11 +29,13 @@ int main(int argc, char* argv[])
     
                                                                                                                                                                                                         
     std::cout << "CGC Winch" << std::endl;
+    std::cout << "Copyright (c) Cambridge Gliding Centre & R Bruce Porteous (2026)" << std::endl;
     std::cout << "-nodisengage  - don't disengage model on release" << std::endl;
     std::cout << "-vf           - use visual frame rate (default is sim rate)" << std::endl;
     std::cout << "-verbose      - print verbose debugging information" << std::endl;
     std::cout << "-test         - run model tests" << std::endl;
     std::cout << "-early        - sends model state to P3d early in loop" << std::endl;
+    std::cout << "-throttle <pct> sets default throttle position for launch" << std::endl;
 
 
     bool nodisengage = false;
@@ -39,7 +43,7 @@ int main(int argc, char* argv[])
     bool verbose = false;
     bool early = false;
     bool test = false;
-
+    NumberT targetThrottle = 0.8;
 
     for (int i = 1; i < argc; ++i) {
         //std::cout << argv[i] << std::endl;
@@ -63,6 +67,28 @@ int main(int argc, char* argv[])
             early = true;
         }
 
+
+        if (strcmp(argv[i], "-throttle") == 0) {
+            int idx = i + 1;
+            if (idx < argc) {
+                targetThrottle = atof(argv[idx]);
+                if (targetThrottle < 0)
+                    targetThrottle = 0;
+                else if (targetThrottle > 1.0)
+                    targetThrottle /= 100; // Assume percentage
+
+                // Now clamp positive range
+                if (targetThrottle > 1.0)
+                    targetThrottle = 1.0;
+
+                std::cout << "Target throttle set to " << targetThrottle * 100 << "%" << std::endl;
+            }
+            else {
+                std::cout << "No throttle position percentage given" << std::endl;
+            }
+        }
+
+
     }
 
 
@@ -77,22 +103,33 @@ int main(int argc, char* argv[])
     std::cout << "e: engage flight model" << std::endl;
     std::cout << "d: disengage flight model" << std::endl;
     std::cout << "w: winch" << std::endl;
+    std::cout << "r: release" << std::endl;
     std::cout << "f: fade power" << std::endl;
     std::cout << "x: drop left wing" << std::endl;
     std::cout << "c: drop right wing" << std::endl;
-
-
+    std::cout << "p: reduce target power" << std::endl;
+    std::cout << "P: increase target power" << std::endl;
+    std::cout << "0..9: set target power" << std::endl;
 
 
     // Full path  to program e.g. D:\Projects\Glider-Simulator\P3DInstruments\x64\Debug\P3DWinch.exe
-    char* pszCommandPath = argv[0];
+    // Get the folder to allow access to sound files.
+    File commandPath(argv[0]);
+    Directory folder = commandPath.directory();
 
 
     // COM needed for sound playing
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
+
+
+    // Debug
+    //Directory resourceFolder = folder.sub("resources");
+    //File file = resourceFolder.file("cable_on_and_secure_black_link.m4a");
     //SimplePlayer player;
-    //player.Play(L"music.m4a");
+    //player.Play(file);
+
+
 
 #ifndef NDEBUG // never in production!
     if(test){
@@ -104,8 +141,6 @@ int main(int argc, char* argv[])
         //    std::cout << i << ',' << coeffs.Cl << ',' << coeffs.Cd << ',' << coeffs.Cm << std::endl;
         //}
         //std::cout << "---- NACA0010 -----" << std::endl;
-
-    
 
         TestFinEffect testFinEffect;
         testFinEffect.test_all();
@@ -131,12 +166,11 @@ int main(int argc, char* argv[])
     StateInput input(p3D, &simulation);
     input.setAutoDisengage(!nodisengage);
     input.setEarly(early);
-
-    useVisualFrame = true; // DEBUG
+    input.setTargetThrottle(targetThrottle);
+    input.setRootFolder(folder);
 
     SIMCONNECT_PERIOD rate = (useVisualFrame) ? SIMCONNECT_PERIOD_VISUAL_FRAME : SIMCONNECT_PERIOD_SIM_FRAME;
     SimObjectDataRequest request(p3D, &input, &p3D->userAircraft(), rate);
-
 
     p3D->DispatchLoop();
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "CommandInterpreter.h"
 #include "MessageHandler.h"
-#include "Folder.h"
+#include "../P3DCommon/Folder.h"
 #include <list>
 
 class File;

@@ -1,14 +1,14 @@
 #include "stdafx.h"
 #include <assert.h>
-#include "PositionMessageHandler.h"
-#include "JSONWriter.h"
-#include "APIParameters.h"
-#include "Folder.h"
-#include "P3DEventCommand.h"
-#include "json/json.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "../P3DCommon/Folder.h"
+#include "PositionMessageHandler.h"
+#include "JSONWriter.h"
+#include "APIParameters.h"
+#include "P3DEventCommand.h"
+#include "json/json.h"
 
 void PositionMessageHandler::write(const SimState::Data& data, JSONWriter& json)
 {

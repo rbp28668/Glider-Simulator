@@ -133,7 +133,6 @@ Winch::Winch(const V3d<float>& winch_position, float weak_link, float cable_leng
     , cable_out(0.0f)
     , tension(0.0f)
     , throttle(0.0f)
-    , throttle_override(false)
     , cable_angle(0.0f)
 {
     init_splines();
@@ -156,7 +155,6 @@ Winch::Winch(Winch&& other) noexcept
     , tension(other.tension)
     , release_reason(std::move(other.release_reason))
     , throttle(other.throttle)
-    , throttle_override(other.throttle_override)
     , cable_angle(other.cable_angle)
 {
 }
@@ -174,7 +172,6 @@ Winch& Winch::operator=(Winch&& other) noexcept {
         tension         = other.tension;
         release_reason  = std::move(other.release_reason);
         throttle        = other.throttle;
-        throttle_override = other.throttle_override;
         cable_angle     = other.cable_angle;
     }
     return *this;
@@ -420,6 +417,9 @@ void Winch::calculate_forces(const StateVector<NumberT>& state, const V3d<Number
 
     // No force if not engaged
     if (!engaged) return;
+
+    // Fudge so we don't move forward on idle.
+    if (throttle == 0) return;
 
     // Get hook position in earth frame
     auto orientation = state.orientation();

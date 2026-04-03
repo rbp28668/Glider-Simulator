@@ -4,8 +4,7 @@
 #include <iomanip>
 #include <assert.h>
 #include "Logger.h"
-#include "Folder.h"
-
+#include "../P3DCommon/Folder.h"
 #include "../P3DCommon/Prepar3D.h"
 
 std::string Logger::getOutputPath(Prepar3D* p3d)

@@ -5,9 +5,9 @@
 #include "Simulator.h"
 #include "SimState.h"
 #include "APIParameters.h"
-#include "Folder.h"
+#include "../P3DCommon/Folder.h"
+#include "../P3DCommon/WideConverter.h"
 #include "JSONWriter.h"
-#include "WideConverter.h"
 #include "P3DInstallationDirectory.h"
 
 

@@ -1,7 +1,9 @@
 #pragma once
+#include <Windows.h>
 #include <string>
 #include <list>
 
+class Directory;
 
 class FileException : public std::exception {
 	const char* pszReason;
@@ -15,7 +17,8 @@ public:
 
 
 class File {
-	std::string path;  
+	std::string path;
+
 public:
 	typedef std::list<File> ListT;
 
@@ -25,7 +28,10 @@ public:
 	const std::string name() const;
 	operator const std::string&() const { return path; }
 	explicit operator const char*() const { return path.c_str(); }
+
 	bool exists() const;
+
+	Directory directory() const;
 };
 
 class Directory
@@ -33,15 +39,15 @@ class Directory
 protected:
 	std::string path; // without any trailing slash.
 	char separator = '\\';
-	void trim(std::string& name);
+	void trim(std::string& name) const;
 public:
 	typedef std::list<Directory> ListT;
 
 	Directory() {}
 	Directory(const std::string& path);
 	Directory(const char* path);
-	Directory sub(const char* name);
-	Directory sub(const std::string& name) { return sub(name.c_str()); }
+	Directory sub(const char* name) const;
+	Directory sub(const std::string& name) const { return sub(name.c_str()); }
 	File file(const char* name); 
 	File file(const std::string& name) { return file(name.c_str()); }
 	File::ListT& files( File::ListT& fileList, const std::string& filter = "" );

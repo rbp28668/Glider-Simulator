@@ -1,6 +1,7 @@
 #pragma once
 
 #include "..\P3DCommon\simobjectdata.h"
+#include "..\P3DCommon\Folder.h"
 #include "P3DEvent.h"
 #include "LaunchController.h"
 
@@ -68,7 +69,11 @@ class StateInput :public SimObjectData
 	bool autoDisengage = true;
 	bool early = false;
 
+	// Target throttle used for each launch.  The launch power may be modified
+	// prior to launch but this set point isn't changed.
+	NumberT targetThrottle = 0.8; // default value - about right for 8-10 kts headwind.
 
+	// Where the aircraft was when model was engaged and resulting scale from lat/lon to metres.
 	NumberT start_lat;
 	NumberT start_lon;
 	NumberT metresPerRadianLat;
@@ -100,5 +105,14 @@ public:
 	void setEarly(bool early = false) {
 		this->early = early;
 	}
+
+	void setTargetThrottle(NumberT targetThrottle) {
+		this->targetThrottle = targetThrottle;
+	}
+
+	void setRootFolder(const Directory& folder) {
+		launcher.setResourceFolder(folder.sub("resources"));
+	}
+
 };
 

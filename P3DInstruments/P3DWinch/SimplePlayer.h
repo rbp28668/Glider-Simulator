@@ -6,6 +6,9 @@
 #include <shlwapi.h>
 #include <mfobjects.h>
 
+#include <iostream>
+#include "../P3DCommon/WideConverter.h"
+
 #pragma comment(lib, "mfplat.lib")
 #pragma comment(lib, "mf.lib")
 #pragma comment(lib, "mfuuid.lib")
@@ -16,71 +19,26 @@ class SimplePlayer {
     IMFSourceResolver* m_pResolver = nullptr;
 
 public:
-    void Play(const wchar_t* url) {
-        MFStartup(MF_VERSION);
 
-        // 1. Create the Media Session
-        MFCreateMediaSession(NULL, &m_pSession);
+    SimplePlayer();
+    ~SimplePlayer();
 
-        // 2. Create the Media Source from URL
-        IUnknown* pSourceUnk = nullptr;
-        MF_OBJECT_TYPE objType;
-        MFCreateSourceResolver(&m_pResolver);
-        m_pResolver->CreateObjectFromURL(url, MF_RESOLUTION_MEDIASOURCE, NULL, &objType, &pSourceUnk);
-
-        IMFMediaSource* pSource = nullptr;
-        pSourceUnk->QueryInterface(IID_PPV_ARGS(&pSource));
-
-        // 3. Create the Topology (Connecting Source to Audio Renderer)
-        IMFTopology* pTopology = nullptr;
-        CreatePlaybackTopology(pSource, &pTopology);
-
-        // 4. Set Topology and Start
-        m_pSession->SetTopology(0, pTopology);
-
-        PROPVARIANT varStart;
-        PropVariantInit(&varStart);
-        varStart.vt = VT_EMPTY;
-        m_pSession->Start(&GUID_NULL, &varStart);
-
-        // Clean up locals
-        pSource->Release();
-        pTopology->Release();
+    void Play(const char* uri) {
+        std::wstring str = s2ws(uri);
+        Play(str.c_str());
     }
+
+    void Play(const std::string& uri) {
+        std::cout << "Playing " << uri << std::endl;
+        std::wstring str = s2ws(uri);
+        Play(str.c_str());
+    }
+
+    HRESULT CreateMediaSource(const wchar_t* url, IMFMediaSource** ppSource);
+    void Play(const wchar_t* url);
+
 
 private:
-    void CreatePlaybackTopology(IMFMediaSource* pSource, IMFTopology** ppTopo) {
-        MFCreateTopology(ppTopo);
-        IMFPresentationDescriptor* pPD = nullptr;
-        pSource->CreatePresentationDescriptor(&pPD);
-
-        // Create a node for the audio stream and one for the audio renderer
-        IMFTopologyNode* pSourceNode = nullptr;
-        IMFTopologyNode* pOutputNode = nullptr;
-
-        MFCreateTopologyNode(MF_TOPOLOGY_SOURCESTREAM_NODE, &pSourceNode);
-        pSourceNode->SetUnknown(MF_TOPONODE_SOURCE, pSource);
-
-        MFCreateTopologyNode(MF_TOPOLOGY_OUTPUT_NODE, &pOutputNode);
-
-        // Create the standard Windows Audio Renderer (SAR)
-        // Use IMFActivate instead of IActivate
-        IMFActivate* pActivate = nullptr;
-
-        // This function returns an IMFActivate pointer
-        HRESULT hr = MFCreateAudioRendererActivate(&pActivate);
-
-        if (SUCCEEDED(hr)) {
-            pOutputNode->SetObject(pActivate);
-            pActivate->Release();
-        }
-
-        (*ppTopo)->AddNode(pSourceNode);
-        (*ppTopo)->AddNode(pOutputNode);
-        pSourceNode->ConnectOutput(0, pOutputNode, 0);
-
-        pPD->Release();
-        pSourceNode->Release();
-        pOutputNode->Release();
-    }
+   
+    void CreatePlaybackTopology(IMFMediaSource* pSource, IMFTopology** ppTopo);
 };

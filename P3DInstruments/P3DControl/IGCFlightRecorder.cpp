@@ -4,9 +4,9 @@
 #include <sstream>
 #include <iomanip>
 #include <assert.h>
-#include "Folder.h"
-#include "IGCFlightRecorder.h"
+#include "../P3DCommon/Folder.h"
 #include "..//P3DCommon/SimObjectDataRequest.h"
+#include "IGCFlightRecorder.h"
 
 
 SimObjectData::DataItem IGCFlightRecorder::dataItems[] = {

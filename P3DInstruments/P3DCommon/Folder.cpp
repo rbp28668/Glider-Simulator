@@ -25,7 +25,7 @@ DocumentDirectory::DocumentDirectory()
 }
 
 // Trim and leading or trailing separators.
-void Directory::trim(std::string& name)
+void Directory::trim(std::string& name) const
 {
 	while (name.front() == separator) name = name.substr(1);
 	while (name.back() == separator) name.pop_back();
@@ -42,7 +42,7 @@ Directory::Directory(const char* path)
 {
 }
 
-Directory Directory::sub(const char* name)
+Directory Directory::sub(const char* name) const
 {
 	std::string trimmed(name);
 	trim(trimmed);
@@ -143,4 +143,15 @@ const std::string File::name() const
 bool File::exists() const
 {
 	return ::PathFileExistsA(path.c_str()) == TRUE;
+}
+
+Directory File::directory() const {
+	size_t pos = path.find_last_of('\\');
+	if (pos != std::string::npos) {
+		return Directory(path.substr(0, pos));
+	}
+	else {
+		throw new FileException("no path component in file", 0);
+	}
+
 }

@@ -5,7 +5,7 @@
 #include "HTTPResponse.h"
 #include "CommandInterpreter.h"
 #include "APIParameters.h"
-#include "WideConverter.h"
+#include "../P3DCommon/WideConverter.h"
 
 RESTAPI::RESTAPI(CommandInterpreter* pInterpreter) 
 	: pInterpreter(pInterpreter)

@@ -93,12 +93,6 @@
     <ClInclude Include="ScenarioMessageHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Folder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WideConverter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RecordMessageHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -297,12 +291,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ScenarioMessageHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Folder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WideConverter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RecordMessageHandler.cpp">

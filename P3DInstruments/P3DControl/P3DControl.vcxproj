@@ -168,7 +168,6 @@
     <ClInclude Include="Failures.h" />
     <ClInclude Include="FailureScripting.h" />
     <ClInclude Include="FailuresMessageHandler.h" />
-    <ClInclude Include="Folder.h" />
     <ClInclude Include="http.h" />
     <ClInclude Include="HTTPException.h" />
     <ClInclude Include="HTTPRequest.h" />
@@ -221,7 +220,6 @@
     <ClInclude Include="TugScripting.h" />
     <ClInclude Include="WeatherMessageHandler.h" />
     <ClInclude Include="WeatherScripting.h" />
-    <ClInclude Include="WideConverter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\jsoncpp\json_reader.cpp" />
@@ -240,7 +238,6 @@
     <ClCompile Include="Failures.cpp" />
     <ClCompile Include="FailureScripting.cpp" />
     <ClCompile Include="FailuresMessageHandler.cpp" />
-    <ClCompile Include="Folder.cpp" />
     <ClCompile Include="HTTPException.cpp" />
     <ClCompile Include="HTTPRequest.cpp" />
     <ClCompile Include="HTTPRequestQueue.cpp" />
@@ -298,7 +295,6 @@
     <ClCompile Include="TugScripting.cpp" />
     <ClCompile Include="WeatherMessageHandler.cpp" />
     <ClCompile Include="WeatherScripting.cpp" />
-    <ClCompile Include="WideConverter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\jsoncpp\json_valueiterator.inl" />

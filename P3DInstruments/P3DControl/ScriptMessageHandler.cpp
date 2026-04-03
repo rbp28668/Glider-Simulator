@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include <sstream>
-#include "ScriptMessageHandler.h"
 #include "..//P3DCommon/Prepar3D.h"
+#include "../P3DCommon/Folder.h"
+#include "ScriptMessageHandler.h"
 #include "APIParameters.h"
-#include "Folder.h"
 #include "JSONWriter.h"
 #include "Lua.h"
 #include "LuaThread.h"

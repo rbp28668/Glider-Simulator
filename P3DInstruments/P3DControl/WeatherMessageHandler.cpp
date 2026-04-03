@@ -7,7 +7,7 @@
 #include "P3DInstallationDirectory.h"
 #include "JSONWriter.h"
 #include "../P3DCommon/WeatherStations.h"
-#include "WideConverter.h"
+#include "../P3DCommon/WideConverter.h"
 #include "APIParameters.h"
 
 WeatherMessageHandler::WeatherMessageHandler(Prepar3D* p3d)

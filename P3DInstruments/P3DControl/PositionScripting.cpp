@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include <sstream>
+#include "../P3DCommon/Folder.h"
 #include "PositionScripting.h"
 #include "PositionMessageHandler.h"
-#include "Folder.h"
 
 void PositionScripting::registerMethods(Lua& lua)
 {
