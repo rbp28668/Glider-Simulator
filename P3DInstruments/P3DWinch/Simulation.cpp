@@ -56,6 +56,9 @@ StateVector<NumberT> Simulation::update(NumberT dt, const ControlInputs& control
 	//Advance simulation by one time step
 	total_time += dt;
 
+	// Advance winch engine dynamics (once per step, before RK4)
+	winch.update(float(dt));
+
 	// Integration
 	state = rk4_step(state, dt);
 
@@ -392,3 +395,5 @@ float Simulation::get_winch_throttle() const { return winch.get_throttle(); }
 float Simulation::get_winch_cable_angle() const { return winch.get_cable_angle(); }
 bool  Simulation::is_winch_engaged() const { return winch.is_engaged(); }
 NumberT Simulation::get_winch_tension() const { return winch.get_tension(); }
+float Simulation::get_winch_engine_rpm() const { return winch.get_engine_rpm(); }
+int   Simulation::get_winch_gear() const { return winch.get_current_gear(); }

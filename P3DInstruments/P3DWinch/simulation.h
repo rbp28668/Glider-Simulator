@@ -80,6 +80,8 @@ public:
     float get_winch_cable_angle() const;
     bool  is_winch_engaged() const;
     NumberT get_winch_tension() const;
+    float get_winch_engine_rpm() const;
+    int   get_winch_gear() const;
 
     // Spin-kit
     void set_spin_kit(float kg) {

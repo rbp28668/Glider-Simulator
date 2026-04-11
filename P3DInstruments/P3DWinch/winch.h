@@ -65,6 +65,13 @@ class Winch {
 
     static constexpr float PI = 3.14159265358979f;
 
+    // Engine rotational inertia (flywheel + TC pump impeller), kg*m^2
+    static constexpr float ENGINE_INERTIA = 1.5f;
+    // Idle speed controller gain (Nm per RPM below idle)
+    static constexpr float IDLE_GOVERNOR_GAIN = 0.5f;
+    // RPM to rad/s conversion factor
+    static constexpr float RPM_TO_RADS = 2.0f * PI / 60.0f;
+
     // --- Per-instance spline objects (mutable state: klo/khi) ---
     std::unique_ptr<Spline<float>> engine_spline;
     std::unique_ptr<Spline<float>> tr_spline;
@@ -83,6 +90,11 @@ class Winch {
     // --- Throttle state ---
     float throttle;             // Current throttle position (0.0 - 1.0)
     NumberT cable_angle;          // Current cable angle below horizontal (radians)
+
+    // --- Engine dynamic state ---
+    float engine_rpm;             // Current engine RPM (persistent, integrated over time)
+    int   current_gear;           // Current transmission gear (0=neutral, 1-3)
+    float last_cable_speed;       // Cached cable speed from previous calculate_forces()
 
     // --- Drivetrain result from solver ---
     struct SolveResult {
@@ -103,8 +115,10 @@ class Winch {
     float drum_rpm(float cable_speed, float cable_out_m) const;
     float gear_ratio(int gear) const;
 
-    SolveResult solve_gear(int gear, NumberT cable_speed, float thr, NumberT cable_out_m);
-    SolveResult solve(NumberT cable_speed, float thr, NumberT cable_out_m);
+    SolveResult solve_gear(int gear, NumberT cable_speed, float thr, NumberT cable_out_m);  // DEPRECATED
+    SolveResult solve(NumberT cable_speed, float thr, NumberT cable_out_m);                // DEPRECATED
+
+    int select_gear(float cable_speed, float cable_out_m);
 
     //float default_throttle() const;
 
@@ -138,4 +152,12 @@ public:
     NumberT get_cable_angle() const { return cable_angle; }
     bool  is_engaged() const { return engaged; }
     NumberT get_tension() const { return tension; }
+
+    // Advance winch engine dynamics by one simulation timestep.
+    // Called once per sim step, before RK4 integration.
+    void update(float dt);
+
+    // Diagnostic getters
+    float get_engine_rpm() const { return engine_rpm; }
+    int   get_current_gear() const { return current_gear; }
 };

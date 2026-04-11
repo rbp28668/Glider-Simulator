@@ -134,6 +134,9 @@ Winch::Winch(const V3d<float>& winch_position, float weak_link, float cable_leng
     , tension(0.0f)
     , throttle(0.0f)
     , cable_angle(0.0f)
+    , engine_rpm(IDLE_RPM)
+    , current_gear(0)
+    , last_cable_speed(0.0f)
 {
     init_splines();
 }
@@ -156,6 +159,9 @@ Winch::Winch(Winch&& other) noexcept
     , release_reason(std::move(other.release_reason))
     , throttle(other.throttle)
     , cable_angle(other.cable_angle)
+    , engine_rpm(other.engine_rpm)
+    , current_gear(other.current_gear)
+    , last_cable_speed(other.last_cable_speed)
 {
 }
 
@@ -173,6 +179,9 @@ Winch& Winch::operator=(Winch&& other) noexcept {
         release_reason  = std::move(other.release_reason);
         throttle        = other.throttle;
         cable_angle     = other.cable_angle;
+        engine_rpm      = other.engine_rpm;
+        current_gear    = other.current_gear;
+        last_cable_speed = other.last_cable_speed;
     }
     return *this;
 }
@@ -185,6 +194,9 @@ Winch& Winch::operator=(Winch&& other) noexcept {
 void Winch::engage(float initial_cable_out_param) {
     engaged = true;
     release_reason = "";
+    engine_rpm = IDLE_RPM;
+    current_gear = 1;
+    last_cable_speed = 0.0f;
     if (initial_cable_out_param > 0)
         cable_out = initial_cable_out_param;
 }
@@ -193,6 +205,7 @@ void Winch::release(const std::string& reason) {
     engaged = false;
     tension = 0.0f;
     release_reason = reason;
+    current_gear = 0;
 }
 
 
@@ -205,6 +218,91 @@ void Winch::set_throttle(float t) {
 }
 
 
+// ---------------------------------------------------------------------------
+//  Automatic gear selection based on current engine RPM and cable speed
+// ---------------------------------------------------------------------------
+
+int Winch::select_gear(float cable_speed, float cable_out_m) {
+    if (cable_speed <= 0.01f)
+        return 1;  // Always first gear at standstill
+
+    int best_gear = 1;
+    for (int g = 1; g <= 3; g++) {
+        float r_eff = drum_effective_radius(cable_out_m);
+        float d_rpm = drum_rpm(cable_speed, cable_out_m);
+        float trans_out_rpm = d_rpm * FINAL_DRIVE_RATIO;
+        float ratio = gear_ratio(g);
+        float turbine_rpm_val = trans_out_rpm * ratio;
+
+        // Turbine must spin slower than engine (SR < 1) and engine above min operating RPM
+        if (turbine_rpm_val < engine_rpm * 0.97f && engine_rpm >= 1400.0f) {
+            best_gear = g;
+        }
+    }
+    return best_gear;
+}
+
+
+// ---------------------------------------------------------------------------
+//  Advance engine RPM by one simulation timestep.
+//  Called once per sim step from Simulation::update(), before RK4.
+// ---------------------------------------------------------------------------
+
+void Winch::update(float dt) {
+    if (!engaged) return;
+
+    // Neutral when throttle is zero - no load on drivetrain
+    if (throttle < 0.001f) {
+        current_gear = 0;
+        // Decay engine toward idle (friction, auxiliaries)
+        constexpr float NEUTRAL_DECAY_RATE = 500.0f;  // RPM/s
+        if (engine_rpm > IDLE_RPM) {
+            engine_rpm -= NEUTRAL_DECAY_RATE * dt;
+            engine_rpm = std::max(engine_rpm, IDLE_RPM);
+        }
+        return;
+    }
+
+    // Engage first gear when coming out of neutral
+    if (current_gear == 0)
+        current_gear = 1;
+
+    // Compute turbine RPM from cached cable speed
+    float turbine_rpm_val = 0.0f;
+    if (last_cable_speed > 0.01f) {
+        float r_eff = drum_effective_radius(cable_out);
+        float d_rpm_val = drum_rpm(last_cable_speed, cable_out);
+        float trans_out_rpm = d_rpm_val * FINAL_DRIVE_RATIO;
+        float ratio = gear_ratio(current_gear);
+        turbine_rpm_val = trans_out_rpm * ratio;
+    }
+
+    // Speed ratio (SR) - how fast turbine spins relative to pump (engine)
+    float sr = (engine_rpm > 1.0f) ? (turbine_rpm_val / engine_rpm) : 0.0f;
+    sr = std::max(0.0f, std::min(sr, 0.999f));
+
+    // Net torque on crankshaft = engine output - TC pump load
+    float t_engine = engine_torque(engine_rpm, throttle);
+    float t_pump = tc_pump_torque(engine_rpm, sr);
+    float net_torque = t_engine - t_pump;
+
+    // Idle governor: prevents stalling when load exceeds engine torque
+    if (engine_rpm < IDLE_RPM) {
+        net_torque += (IDLE_RPM - engine_rpm) * IDLE_GOVERNOR_GAIN;
+    }
+
+    // Integrate engine RPM:  tau = I * alpha,  alpha = tau / I  (rad/s^2)
+    // Convert rad/s^2 to RPM/s by dividing by RPM_TO_RADS
+    float rpm_dot = net_torque / (ENGINE_INERTIA * RPM_TO_RADS);
+    engine_rpm += rpm_dot * dt;
+
+    // Clamp to operating range
+    engine_rpm = std::max(engine_rpm, IDLE_RPM);   // idle governor floor
+    engine_rpm = std::min(engine_rpm, MAX_RPM);     // rev limiter
+
+    // Update gear selection
+    current_gear = select_gear(last_cable_speed, cable_out);
+}
 
 
 // ---------------------------------------------------------------------------
@@ -292,8 +390,9 @@ float Winch::gear_ratio(int gear) const {
 
 
 // ---------------------------------------------------------------------------
-//  Per-gear drivetrain solver
-//  Finds engine RPM where T_engine(RPM, throttle) = T_pump(RPM, SR)
+//  DEPRECATED - Per-gear drivetrain solver
+//  Replaced by dynamic engine RPM model in update() + calculate_forces().
+//  Retained for reference and rollback.
 // ---------------------------------------------------------------------------
 
 Winch::SolveResult Winch::solve_gear(int gear, NumberT cable_speed, float thr, NumberT cable_out_m) {
@@ -354,7 +453,8 @@ Winch::SolveResult Winch::solve_gear(int gear, NumberT cable_speed, float thr, N
 
 
 // ---------------------------------------------------------------------------
-//  Auto gear selection - prefer highest gear with RPM >= 1400
+//  DEPRECATED - Auto gear selection using equilibrium solver
+//  Replaced by select_gear() and dynamic engine RPM model.
 // ---------------------------------------------------------------------------
 
 Winch::SolveResult Winch::solve(NumberT cable_speed, float thr, NumberT cable_out_m) {
@@ -418,8 +518,8 @@ void Winch::calculate_forces(const StateVector<NumberT>& state, const V3d<Number
     // No force if not engaged
     if (!engaged) return;
 
-    // Fudge so we don't move forward on idle.
-    if (throttle == 0) return;
+    // No force when transmission is in neutral (throttle==0 handled by update())
+    if (current_gear == 0) return;
 
     // Get hook position in earth frame
     auto orientation = state.orientation();
@@ -492,15 +592,30 @@ void Winch::calculate_forces(const StateVector<NumberT>& state, const V3d<Number
         hook_vel_earth[2] * cable_unit[2]
     );
 
-    // Solve drivetrain for cable tension
+    // Cache cable speed for use by update() on the next timestep
+    last_cable_speed = std::max(0.0f, float(v_cable));
+
+    // Compute tension from persistent engine_rpm (no equilibrium solver)
     if (v_cable < 0.0f) {
         // Cable slack - glider moving away from winch
         tension = 100.0f;
     } else {
-        // Use drivetrain solver (minimum 0.5 m/s for stability near stall)
-        NumberT solver_speed = std::max(NumberT(0.5f), v_cable);
-        auto result = solve(solver_speed, throttle, cable_out);
-        tension = result.valid ? result.cable_tension_n : 100.0f;
+        // Derive turbine RPM from cable speed through drivetrain
+        float r_eff = drum_effective_radius(cable_out);
+        float d_rpm_val = drum_rpm(v_cable, cable_out);
+        float trans_out_rpm = d_rpm_val * FINAL_DRIVE_RATIO;
+        float ratio = gear_ratio(current_gear);
+        float turbine_rpm_val = trans_out_rpm * ratio;
+
+        // Speed ratio
+        float sr = (engine_rpm > 1.0f) ? (turbine_rpm_val / engine_rpm) : 0.0f;
+        sr = std::max(0.0f, std::min(sr, 0.999f));
+
+        // Turbine torque propagated through transmission and final drive
+        float t_turb = tc_turbine_torque(engine_rpm, sr);
+        float t_trans = t_turb * ratio * TRANS_EFFICIENCY;
+        float t_drum = t_trans * FINAL_DRIVE_RATIO * FINAL_DRIVE_EFFICIENCY;
+        tension = std::max(0.0f, t_drum / r_eff);
     }
 
     // Check weak link
