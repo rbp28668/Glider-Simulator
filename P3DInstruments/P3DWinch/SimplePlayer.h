@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include "../P3DCommon/WideConverter.h"
+#include "com_ptr.h"
 
 #pragma comment(lib, "mfplat.lib")
 #pragma comment(lib, "mf.lib")
@@ -15,8 +16,8 @@
 #pragma comment(lib, "shlwapi.lib")
 
 class SimplePlayer {
-    IMFMediaSession* m_pSession = nullptr;
-    IMFSourceResolver* m_pResolver = nullptr;
+    ComPtr<IMFMediaSession> m_pSession;
+    ComPtr<IMFSourceResolver>* m_pResolver;
 
 public:
 
@@ -34,11 +35,12 @@ public:
         Play(str.c_str());
     }
 
-    HRESULT CreateMediaSource(const wchar_t* url, IMFMediaSource** ppSource);
+    HRESULT CreateMediaSource(const wchar_t* url, ComPtr<IMFMediaSource>& ppSource);
     void Play(const wchar_t* url);
 
+    void SetVolume(float volume = 1.0f);
 
 private:
    
-    void CreatePlaybackTopology(IMFMediaSource* pSource, IMFTopology** ppTopo);
+    void CreatePlaybackTopology(ComPtr<IMFMediaSource> pSource, ComPtr<IMFTopology>& ppTopo);
 };

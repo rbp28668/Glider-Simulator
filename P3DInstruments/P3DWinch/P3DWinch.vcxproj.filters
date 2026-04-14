@@ -185,5 +185,8 @@
     <ClInclude Include="sim_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="com_ptr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

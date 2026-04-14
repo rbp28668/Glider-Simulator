@@ -127,8 +127,10 @@ int main(int argc, char* argv[])
     //Directory resourceFolder = folder.sub("resources");
     //File file = resourceFolder.file("cable_on_and_secure_black_link.m4a");
     //SimplePlayer player;
+    //player.SetVolume(2);
     //player.Play(file);
 
+    //player.SetVolume(2);
 
 
 #ifndef NDEBUG // never in production!

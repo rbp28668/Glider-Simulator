@@ -176,6 +176,7 @@
     <ClInclude Include="Aerofoil_NACA0010.h" />
     <ClInclude Include="aircraft_params.h" />
     <ClInclude Include="ask21.h" />
+    <ClInclude Include="com_ptr.h" />
     <ClInclude Include="contact_point.h" />
     <ClInclude Include="control_inputs.h" />
     <ClInclude Include="ground_contact.h" />
